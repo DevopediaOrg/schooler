@@ -16,9 +16,9 @@ class JConfig {
 	public $user = 'root';
 	public $password = '';
 	public $db = 'bgms';
-	public $dbprefix = 'vg0dr_';
+	public $dbprefix = 'ek5d2_';
 	public $live_site = '';
-	public $secret = 'YQxIQ6UposnwV4vi';
+	public $secret = 'UAxlOjGW2z0kCly8';
 	public $gzip = '0';
 	public $error_reporting = 'default';
 	public $helpurl = 'http://help.joomla.org/proxy/index.php?option=com_help&amp;keyref=Help{major}{minor}:{keyref}';
