@@ -1,0 +1,231 @@
+/* Copyright (C) YOOtheme GmbH, http://www.gnu.org/licenses/gpl.html GNU/GPL */
+
+//
+// Name:            Bootstrap variables
+// Description:     Setting Bootstrap variables with UIkit variables
+//
+// ========================================================================
+
+
+// Setting Bootstrap variables
+// ========================================================================
+
+// Grays
+// -------------------------
+@black:                 @offcanvas-bar-background;
+@grayDarker:            lighten(@black, 10%);
+@grayDark:              lighten(@black, 15%);
+@gray:                  lighten(@black, 20%);
+@grayLight:             @global-muted-color;
+@grayLighter:           @global-border;
+@white:                 @global-background;
+
+
+// Accent colors
+// -------------------------
+//@blue:                  #049cdb;
+//@blueDark:              #0064cd;
+@green:                 @global-success-background;
+@red:                   @global-danger-background;
+//@yellow:                #ffc40d;
+@orange:                @global-warning-background;
+//@pink:                  #c3325f;
+//@purple:                #7a43b6;
+
+
+// Scaffolding
+// -------------------------
+@bodyBackground:        @global-background;
+@textColor:             @global-color;
+
+
+// Links
+// -------------------------
+@linkColor:             @global-link-color;
+@linkColorHover:        @global-link-hover-color;
+
+
+// Typography
+// -------------------------
+@sansFontFamily:        @base-body-font-family;
+//@serifFontFamily:       Georgia, "Times New Roman", Times, serif;
+@monoFontFamily:        @base-code-font-family;
+
+@baseFontSize:          @global-font-size;
+@baseFontFamily:        @sansFontFamily;
+@baseLineHeight:        @global-line-height;
+@altFontFamily:         @sansFontFamily;
+
+@headingsFontFamily:    inherit;
+@headingsFontWeight:    normal;
+@headingsColor:         @base-heading-color;
+
+
+// Component sizing
+// -------------------------
+// Based on 14px font-size and 20px line-height
+
+@fontSizeLarge:         @baseFontSize * 1.25; // ~18px
+@fontSizeSmall:         @baseFontSize * 0.85; // ~12px
+@fontSizeMini:          @baseFontSize * 0.75; // ~11px
+
+@paddingLarge:          11px 19px; // 44px
+@paddingSmall:          2px 10px;  // 26px
+@paddingMini:           0 6px;   // 22px
+
+@baseBorderRadius:      0;
+@borderRadiusLarge:     0;
+@borderRadiusSmall:     0;
+
+
+// Tables
+// -------------------------
+@tableBackground:                   transparent; // overall background-color
+@tableBackgroundAccent:             @table-striped-background; // for striping
+@tableBackgroundHover:              @table-hover-background; // for hover
+@tableBorder:                       @global-border; // table and cell border
+
+
+// Buttons
+// -------------------------
+@btnBackgroundHighlight:            @button-active-background;
+@btnPrimaryBackgroundHighlight:     @button-primary-active-background;
+@btnSuccessBackgroundHighlight:     @button-success-active-background;
+@btnDangerBackgroundHighlight:      @button-danger-active-background;
+
+
+// Forms
+// -------------------------
+@inputBackground:               @form-background;
+@inputBorder:                   @form-border;
+@inputBorderRadius:             @baseBorderRadius;
+@inputDisabledBackground:       @form-disabled-background;
+@formActionsBackground:         @panel-box-background;
+@inputHeight:                   @baseLineHeight + 10px; // base line-height + 8px vertical padding + 2px top/bottom border
+
+
+// Dropdowns
+// -------------------------
+@dropdownBackground:            @dropdown-background;
+@dropdownBorder:                rgba(0,0,0,0);
+@dropdownDividerTop:            rgba(0,0,0,0);
+@dropdownDividerBottom:         @nav-dropdown-divider-border;
+
+@dropdownLinkColor:             @nav-dropdown-color;
+@dropdownLinkColorHover:        @nav-dropdown-hover-color;
+@dropdownLinkColorActive:       @nav-dropdown-color;
+
+@dropdownLinkBackgroundActive:  @nav-dropdown-hover-background;
+@dropdownLinkBackgroundHover:   @nav-dropdown-hover-background;
+
+
+
+// COMPONENT VARIABLES
+// --------------------------------------------------
+
+
+// Input placeholder text color
+// -------------------------
+@placeholderText:         @form-placeholder-color;
+
+
+// Hr border color
+// -------------------------
+@hrBorder:                @global-border;
+
+
+// Horizontal forms & lists
+// -------------------------
+@horizontalComponentOffset:       180px;
+
+
+// Navbar
+// -------------------------
+@navbarBackground:                @navbar-background;
+@navbarBackgroundHighlight:       lighten(@navbar-background, 10%);
+@navbarBorder:                    darken(@navbar-background, 10%);
+
+@navbarText:                      @navbar-nav-color;
+@navbarLinkColor:                 @navbar-nav-color;
+@navbarLinkColorHover:            @navbar-nav-color;
+@navbarLinkColorActive:           @navbar-nav-color;
+@navbarLinkBackgroundHover:       @navbar-nav-hover-background;
+@navbarLinkBackgroundActive:      @navbar-nav-active-background;
+
+@navbarBrandColor:                @navbar-brand-color;
+
+// Inverted navbar
+@navbarInverseBackground:                @navbar-background;
+@navbarInverseBackgroundHighlight:       lighten(@navbar-background, 10%);
+@navbarInverseBorder:                    darken(@navbar-background, 10%);
+
+@navbarInverseText:                      @navbar-nav-color;
+@navbarInverseLinkColor:                 @navbar-nav-color;
+@navbarInverseLinkColorHover:            @navbar-nav-color;
+@navbarInverseLinkColorActive:           @navbar-nav-color;
+@navbarInverseLinkBackgroundHover:       @navbar-nav-hover-background;
+@navbarInverseLinkBackgroundActive:      @navbar-nav-active-background;
+
+@navbarInverseSearchBackground:          @global-background;
+@navbarInverseSearchBackgroundFocus:     @form-focus-background;
+@navbarInverseSearchBorder:              @form-border;
+@navbarInverseSearchPlaceholderColor:    @form-placeholder-color;
+
+@navbarInverseBrandColor:                @navbar-brand-color;
+
+
+// Pagination
+// -------------------------
+@paginationBackground:                @global-background;
+@paginationBorder:                    @global-border;
+@paginationActiveBackground:          @pagination-active-background;
+
+
+// Hero unit
+// -------------------------
+@heroUnitHeadingColor:            inherit;
+@heroUnitLeadColor:               inherit;
+
+
+// Form states and alerts
+// -------------------------
+@warningText:             @alert-warning-color;
+@warningBackground:       @alert-warning-background;
+@warningBorder:           fade(@alert-warning-color, 30%);
+
+@errorText:               @alert-danger-color;
+@errorBackground:         @alert-danger-background;
+@errorBorder:             fade(@alert-danger-color, 30%);
+
+@successText:             @alert-success-color;
+@successBackground:       @alert-success-background;
+@successBorder:           fade(@alert-success-color, 30%);
+
+@infoText:                @alert-color;
+@infoBackground:          @alert-background;
+@infoBorder:              fade(@alert-color, 30%);
+
+
+// Tooltips and popovers
+// -------------------------
+@tooltipColor:            @tooltip-color;
+@tooltipBackground:       @tooltip-background;
+@tooltipArrowColor:       @tooltip-background;
+
+@popoverBackground:       @panel-box-background;
+@popoverArrowColor:       @panel-box-background;
+@popoverTitleBackground:  darken(@panel-box-background, 5%);
+
+
+// IcoMoon
+// -------------------------
+@font-face {
+    font-family: 'IcoMoon';
+    src: url('../../../../../../media/jui/fonts/IcoMoon.eot');
+    src: url('../../../../../../media/jui/fonts/IcoMoon.eot?#iefix') format('embedded-opentype'),
+         url('../../../../../../media/jui/fonts/IcoMoon.woff') format('woff'),
+         url('../../../../../../media/jui/fonts/IcoMoon.ttf') format('truetype'),
+         url('../../../../../../media/jui/fonts/IcoMoon.svg#IcoMoon') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}

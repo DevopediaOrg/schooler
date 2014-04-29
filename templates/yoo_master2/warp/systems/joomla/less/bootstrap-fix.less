@@ -1,0 +1,218 @@
+/* Copyright (C) YOOtheme GmbH, http://www.gnu.org/licenses/gpl.html GNU/GPL */
+
+/* ========================================================================
+   Name:            Bootstrap fix
+   Description:     Compatibility layer for Bootstrap
+ ========================================================================== */
+
+/* Fixes Bootstrap defacement caused by UIkit
+ ========================================================================== */
+
+body {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.nav { margin-top: 0; }
+
+ul.inline, ol.inline,
+ul.unstyled, ol.unstyled,
+.list-striped, .list-condensed,
+.nav:not(.nav-list),
+.pager, .pagination ul { padding-left: 0; }
+
+.btn-group input,
+.btn-group select { font-size: @global-font-size; }
+
+button,
+input,
+textarea {
+    -moz-box-sizing: content-box !important;
+    -webkit-box-sizing: content-box !important;
+    box-sizing: content-box !important;
+}
+
+
+/* Fixes UIkit defacement caused by Bootstrap
+ ========================================================================== */
+
+/*
+ * Re-fix
+ */
+
+.uk-form button,
+.uk-form input,
+.uk-form textarea,
+.uk-search button,
+.uk-search input,
+.uk-button,
+.uk-alert-close {
+    -moz-box-sizing: border-box !important;
+    -webkit-box-sizing: border-box !important;
+    box-sizing: border-box !important;
+}
+
+/*
+ * Base
+ */
+
+li, dt, dd { line-height: @global-line-height; }
+
+pre {
+    border: 0;
+    border-radius: 0;
+}
+
+code {
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    background: none;
+}
+
+q:before { content: open-quote; }
+q:after { content: close-quote; }
+
+blockquote p {
+    font-size: inherit;
+    font-weight: inherit;
+    line-height: inherit;
+}
+
+blockquote small { line-height: inherit; }
+blockquote small:before { content: ''; }
+
+pre code {
+    border: 0;
+    background-color: inherit;
+    padding: 0;
+}
+
+/*
+ * Form
+ */
+
+.uk-form { margin: 0; }
+
+.uk-form label {
+    display: inline-block;
+    margin: 0;
+}
+
+.uk-form legend {
+    display: inline-block;
+    margin-bottom: 0;
+    color: inherit;
+}
+
+.uk-form label,
+.uk-form input,
+.uk-form select,
+.uk-form textarea {
+    line-height: @global-line-height;
+    font-family: @base-body-font-family;
+    font-size: @global-font-size;
+    font-weight: normal;
+}
+
+.uk-form textarea { line-height: normal; }
+
+.uk-form input:not([class*='uk-form-width-']):not([class*='uk-width-']),
+.uk-form select:not([class*='uk-form-width-']):not([class*='uk-width-']),
+.uk-form textarea:not([class*='uk-form-width-']):not([class*='uk-width-']) { width: auto; }
+
+.uk-form select,
+.uk-form textarea,
+.uk-form input[type="text"],
+.uk-form input[type="password"],
+.uk-form input[type="datetime"],
+.uk-form input[type="datetime-local"],
+.uk-form input[type="date"],
+.uk-form input[type="month"],
+.uk-form input[type="time"],
+.uk-form input[type="week"],
+.uk-form input[type="number"],
+.uk-form input[type="email"],
+.uk-form input[type="url"],
+.uk-form input[type="search"],
+.uk-form input[type="tel"],
+.uk-form input[type="color"] {
+    height: auto;
+    margin: 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+
+    /* Focus state */
+    &:focus { box-shadow: none; }
+
+}
+
+.uk-form input[type="file"] { height: auto; }
+
+.uk-form input[type="radio"],
+.uk-form input[type="checkbox"] {
+    margin: 0;
+    vertical-align: baseline;
+}
+
+.uk-form input[disabled],
+.uk-form input[readonly] { background: none; }
+
+.uk-form .uk-form-small { font-size: @form-small-font-size; }
+.uk-form .uk-form-large { font-size: @form-large-font-size; }
+
+/*
+ * Search
+ */
+
+input.uk-search-field {
+    /* Reset */
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    margin: 0;
+    border-radius: 0;
+    box-shadow: none;
+    font-size: @global-font-size;
+    line-height: normal;
+    /* Override */
+    width: @search-width;
+    height: @search-height;
+    padding: 0 @search-padding;
+    border: 1px solid @search-border;
+    background: @search-background;
+    color: @search-color;
+    -webkit-transition: all linear 0.2s;
+    transition: all linear 0.2s;
+    /* Override for themes */
+    .hook-search-field;
+}
+
+input.uk-search-field:focus {
+    /* Reset */
+    border: 1px solid @search-border;
+    background: @search-background;
+    box-shadow: none;
+    /* Override */
+    outline: 0;
+    /* Override for themes */
+    .hook-search-field-focus;
+}
+
+.uk-offcanvas input.uk-search-field {
+    /* Override */
+    width: 100%;
+    border-color: @offcanvas-search-border;
+    background: @offcanvas-search-background;
+    color: @offcanvas-search-color;
+    /* Override for themes */
+    .hook-offcanvas-search-field;
+}
+
+/*
+ * Fixed off-canvas for Windows phones
+ */
+
+@-ms-viewport{
+    width: auto;
+}
