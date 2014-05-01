@@ -1,5 +1,43 @@
 <?php
 
+defined('_JEXEC') or die('Restricted access');
+
+
+/*==========================================================
+  Code for DB access.
+----------------------------------------------------------*/
+function getQueryResult($db,$resultType)
+{
+    switch ($resultType) {
+    	case 0:
+    		$result = $db->loadResult();
+    		break;
+    	case 1:
+    		$result = $db->loadRow();
+    		break;
+    	case 2:
+    	default:
+    		$result = $db->loadRowList();
+    		break;
+    }
+    return $result;
+}
+
+function executeQuery($query, $resultType=2)
+{
+	$db = JFactory::getDBO();
+    $db->setQuery( $query );
+    return getQueryResult($db,$resultType);
+}
+
+function getTableData($tablename, $fields='*', $match=1, $resultType=2)
+{
+	$db = JFactory::getDBO();
+    $query = "SELECT $fields FROM $tablename WHERE $match";
+    $db->setQuery( $query );
+    return getQueryResult($db,$resultType);
+}
+
 function takeDbBackup($dbBackupFile, $currtime)
 {
 	$config = JFactory::getConfig();
@@ -13,10 +51,12 @@ function takeDbBackup($dbBackupFile, $currtime)
 	}
 }
 
-/* Source: http://davidwalsh.name/backup-mysql-database-php
- backup the db OR just a table */
+
+/*==========================================================
+  Export DB tables to a file and FTP the file. 
+----------------------------------------------------------*/
 function backup_tables($host,$user,$pass,$name,$file,$tables = '*')
-{
+{ // Source: http://davidwalsh.name/backup-mysql-database-php
 
 	$link = mysql_connect($host,$user,$pass);
 	mysql_select_db($name,$link);
@@ -119,6 +159,43 @@ function update_backup_timestamp($currtime)
 
 	$db->setQuery($query);
 	$db->query();
+}
+
+
+/*==========================================================
+  Following code is called from ChronoForms as configured
+  via Joomla admin GUI.
+----------------------------------------------------------*/
+if (false) { // Noted here for reference only
+	// Start code to include in ChronoForms
+	require_once ( JPATH_BASE .DS.'templates'.DS.'yoo_master2'.DS.'bgms.php' );
+}
+
+function showStudentList()
+{
+
+	$columnHeadings = array('Student ID','Admission No.','Name','Class','Group','Sex','Parent','Guardian','Sponsor');
+	$students = getTableData("#__studentform",
+							 "id,studentUid,admissionNumber,name,class,`group`,sex,parent,guardian,sponsor",
+							 "1 ORDER BY name ASC"
+				);
+	echo "<table class=studentList>";
+	echo "<tr>";
+	foreach ($columnHeadings as $colHead) {
+		echo "<th>$colHead</th>";	
+	}
+	echo "</tr>";
+	foreach ($students as $student) {
+		echo "<tr>";
+		for ($i=1; $i<count($student); $i++) { // ignore id
+			if ($i==3) { // have link for name
+				echo "<td><a href='$student[0]'>".$student[$i]."</td>"; 
+			}
+			else echo "<td>".$student[$i]."</td>";	
+		}
+		echo "</tr>";
+	}
+	echo "</table>";
 }
 
 ?>

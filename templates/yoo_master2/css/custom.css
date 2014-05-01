@@ -3,3 +3,17 @@
 /* ========================================================================
    Use this file to add custom CSS easily
  ========================================================================== */
+table.studentList {
+ 	width: 100%;
+}
+
+.studentList th {
+ 	background-color: #82CAFF;
+}
+
+.studentList td, th {
+ 	border: 1px solid #777777;
+ 	padding: 5px;
+}
+ 
+ 
