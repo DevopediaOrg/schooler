@@ -12,7 +12,7 @@ defined("GCORE_SITE") or die;
 class Chronoforms extends \GCore\Libs\Controller {
 	function _finalize(){
 		$tvout = \GCore\Libs\Request::data('tvout', '');
-		if($this->_validated($this->fparams) === false AND $tvout != 'ajax'){
+		if(false && $this->_validated($this->fparams) === false AND $tvout != 'ajax'){
 			echo '<p class="chrono_credits"><a href="http://www.chronoengine.com" target="_blank">Powered by ChronoForms - ChronoEngine.com</a></p>';
 		}
 	}
