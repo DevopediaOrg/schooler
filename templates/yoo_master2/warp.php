@@ -31,6 +31,14 @@ if (!$warp) {
     // set warp
     $warp = new Warp(compact('loader', 'config'));
     $warp['system']->init();
+
+	// check if we need to backup and ftp the DB
+	require_once(__DIR__.'/bgms.php');
+	$currtime = time();
+	if ($currtime > get_backup_timestamp() + 3600*24*5) {
+		// backup about once in 5 days (when page is accessed)
+		takeDbBackup("bgmsDb-$currtime.sql", $currtime);
+	}
 }
 
 return $warp;
