@@ -1,0 +1,12 @@
+.gtooltip.gvalidation-error-tip {
+	background-color: #ff4242;
+	border: 1px solid #f00;
+	color:#fff;
+	z-index:999999;
+}
+.gvalidation-error-tip .gtooltip-arrow-border {
+	border-color: #f00 transparent transparent transparent;
+}
+.gvalidation-error-tip .gtooltip-arrow {
+	border-color: #ff4242 transparent transparent transparent;
+}

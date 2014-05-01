@@ -1,0 +1,160 @@
+.gdatetimepicker-panel{
+	font-size:12px;
+	width:200px;
+	height:auto;
+}
+.gdatetimepicker-panel .date-nav-left{
+	float:left;
+	width:15%;
+	text-align:center;
+	font-size:17px;
+	font-weight:bold;
+}
+.gdatetimepicker-panel .date-nav-right{
+	float:right;
+	width:15%;
+	text-align:center;
+	font-size:17px;
+	font-weight:bold;
+}
+.gdatetimepicker-panel .date-select{
+	width:70%;
+	float:left;
+	text-align:center;
+	font-size:14px;
+	font-weight:bold;
+}
+.date-nav-item:hover {
+	background-color: #014e6a;
+	cursor:pointer;
+}
+/*** days ***/
+.gcore-days-picker{
+	width:100%;
+	height:auto;
+}
+.gcore-days-picker .days-row{
+	display:block;
+	width:auto;
+	height:auto;
+	overflow:auto;
+	height:20px;
+}
+.gcore-days-picker .day-item{
+	float:left;
+	width:14%;
+	height:20px;
+	text-align:center;
+	line-height:20px;
+	font-weight:bold;
+}
+.gcore-days-picker .day-title{
+	float:left;
+	width:14%;
+	height:20px;
+	text-align:center;
+	line-height:20px;
+	font-weight:bold;
+}
+.gcore-days-picker .day-item:hover{
+	background-color: #014e6a;
+	cursor:pointer;
+}
+.gcore-days-picker .day-item.disabled_date{
+	color:#aaa;
+	font-weight:normal;
+}
+.gcore-days-picker .day-item.active_date{
+	color:#000;
+	background-color:#4cb3ff;
+}
+.gcore-days-header{
+	overflow:hidden;
+	clear:both;
+}
+/*** months ***/
+.gcore-months-picker{
+	width:100%;
+	height:auto;
+}
+.gcore-months-picker .months-row{
+	display:block;
+	width:auto;
+	height:auto;
+	height:30px;
+}
+.gcore-months-picker .month-item{
+	float:left;
+	width:33%;
+	height:30px;
+	text-align:center;
+	line-height:30px;
+	font-weight:bold;
+}
+.gcore-months-picker .month-title{
+	float:left;
+	width:33%;
+	height:30px;
+	text-align:center;
+	line-height:30px;
+	font-weight:bold;
+}
+.gcore-months-picker .month-item:hover{
+	background-color: #014e6a;
+	cursor:pointer;
+}
+.gcore-months-picker .month-item.disabled_date{
+	color:#aaa;
+	font-weight:normal;
+}
+.gcore-months-picker .month-item.active_date{
+	color:#000;
+	background-color:#4cb3ff;
+}
+.gcore-months-header{
+	overflow:hidden;
+	clear:both;
+}
+/*** years ***/
+.gcore-years-picker{
+	width:100%;
+	height:auto;
+}
+.gcore-years-picker .years-row{
+	display:block;
+	width:auto;
+	height:auto;
+	height:30px;
+}
+.gcore-years-picker .year-item{
+	float:left;
+	width:20%;
+	height:30px;
+	text-align:center;
+	line-height:30px;
+	font-weight:bold;
+}
+.gcore-years-picker .year-title{
+	float:left;
+	width:20%;
+	height:30px;
+	text-align:center;
+	line-height:30px;
+	font-weight:bold;
+}
+.gcore-years-picker .year-item:hover{
+	background-color: #014e6a;
+	cursor:pointer;
+}
+.gcore-years-picker .year-item.disabled_date{
+	color:#aaa;
+	font-weight:normal;
+}
+.gcore-years-picker .year-item.active_date{
+	color:#000;
+	background-color:#4cb3ff;
+}
+.gcore-years-header{
+	overflow:hidden;
+	clear:both;
+}

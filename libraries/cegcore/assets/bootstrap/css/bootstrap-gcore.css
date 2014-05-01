@@ -1,0 +1,88 @@
+.gbs3 .container{
+	width:100%;
+}
+.gbs3 .tab-content{
+	padding-top:7px;
+}
+.gbs3 .gcore-label-left{
+	float:left !important;
+	min-width:200px;
+	max-width:200px;
+	padding-right:7px;
+	text-align:left !important;
+}
+.gbs3 .gcore-label-top{
+	display:block;
+	text-align:left !important;
+	float:none !important;
+	width:auto !important;
+}
+.gbs3 .gcore-label-checkbox{
+	
+}
+.gbs3 .gcore-checkbox-item label, .gbs3 .gcore-radio-item label{
+	padding-top: 0px !important;
+	vertical-align:bottom;
+	padding-right:7px;
+}
+.gbs3 .gcore-checkbox-item label, .gbs3 .gcore-checkbox-item input, .gbs3 .gcore-radio-item label, .gbs3 .gcore-radio-item input{
+	margin:0;
+}
+.gbs3 .gcore-form-row > .gcore-label-checkbox{
+	float:left !important;
+	min-width:160px;
+	max-width:160px;
+	padding-right:7px;
+	text-align:left !important;
+}
+.gbs3 .gcore-checkbox-item .gcore-label-checkbox, .gcore-radio-item .gcore-label-checkbox{
+	float: none !important;
+	width: auto !important;
+}
+.gbs3 .gcore-form-row{
+	margin-right: 0px !important;
+	margin-left: 0px !important;
+}
+.gbs3 .gcore-form-row .gcore-input{
+	/*float:left;*/ /** forces the input to go below label when parent is not wide enough **/
+}
+.gbs3 .gcore-height-auto{
+	height: auto !important;
+}
+.gbs3 .gcore-sub-input{
+	padding-right: 5px !important;
+}
+.gbs3 .gcore-subinput-container{
+	float:left;
+}
+.gbs3 .gcore-multiple-column .gcore-checkbox-item, .gcore-multiple-column .gcore-radio-item{
+	float: left;
+}
+.gbs3 .gcore-multiple-column .gcore-checkbox-item:not(:first-child), .gcore-multiple-column .gcore-radio-item:not(:first-child){
+	padding-left: 5px;
+}
+.gbs3 .gcore-help-block{
+	white-space:normal;
+	word-wrap:break-word;
+}
+.gbs3 .gcore-black-text{
+	color:#000000;
+}
+.gbs3 .gcore-display-table{
+	display:table;
+}
+.gbs3 .SSS {width: 30px !important;}
+.gbs3 .SS {width: 70px !important;}
+.gbs3 .S {width: 110px !important;}
+.gbs3 .M {width: 230px !important;}
+.gbs3 .L {width: 350px !important;}
+.gbs3 .XL{width:430px !important;}
+.gbs3 .XXL{width:500px !important;}
+.gbs3 .A{width:auto !important;}
+.gbs3 .F{width:100% !important;}
+@media(min-width:900px){
+
+}
+@media(max-width:800px){
+
+}

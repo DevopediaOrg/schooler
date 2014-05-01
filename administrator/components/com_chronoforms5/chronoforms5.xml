@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="component" version="1.6.0" method="upgrade">
+	<name>com_chronoforms5</name>
+	<creationDate>23.March.2014</creationDate>
+	<author>Chronoman</author>
+	<copyright>ChronoEngine.com 2014</copyright>
+	<authorEmail>webmaster@chronoengine.com</authorEmail>
+	<authorUrl>www.chronoengine.com</authorUrl>
+	<version>5.0 RC5</version>
+	<license>http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL</license>
+	<description>The ChronoForms V5 component is the ultimate tool for Joomla forms creation, power and simplicity.</description>
+
+	<scriptfile>install.chronoforms5.php</scriptfile>
+	<uninstallfile>uninstall.chronoforms5.php</uninstallfile>
+	<files>
+		<filename>chronoforms5.php</filename>
+		<filename>index.html</filename>
+		<folder>views</folder>
+		<folder>chronoforms</folder>
+	</files>
+	<install>
+		<sql>
+			<file driver="mysql" charset="utf8">chronoforms/sql/initial.chronoforms.sql</file>
+		</sql>
+	</install>
+	<uninstall>
+		<sql>
+			<file driver="mysql" charset="utf8">chronoforms/sql/uninstall.chronoforms.sql</file>
+		</sql>
+	</uninstall>	
+	<administration>		
+		<menu img="components/com_chronoforms5/CF.png" link="com_chronoforms5" view="main">COM_CHRONOFORMS5</menu>
+		<submenu>
+			<menu>COM_CHRONOFORMS5</menu>
+			<menu act="validateinstall">COM_CHRONOFORMS5_VALIDATE</menu>
+		</submenu>
+		<files folder="admin">
+			<filename>chronoforms5.php</filename>
+			<filename>CF.png</filename>
+			<filename>index.html</filename>
+			<folder>chronoforms</folder>
+			<folder>language</folder>
+		</files>
+		<languages folder="admin">
+			<language tag="en-GB">language/en-GB.com_chronoforms5.sys.ini</language>
+			<language tag="en-GB">language/en-GB.com_chronoforms5.menu.ini</language>
+			<language tag="en-GB">language/en-GB.com_chronoforms5.ini</language>
+		</languages>
+	</administration>
+</extension>

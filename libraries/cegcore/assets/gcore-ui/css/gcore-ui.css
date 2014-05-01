@@ -1,0 +1,522 @@
+/* forms */
+
+.gcore-all {
+	margin: 0px auto;
+	padding-top: 0px;
+	width: auto;
+	font-family: 'Arial', 'Verdana', 'Tahoma', 'sans-serif';
+	font-size: inherit;
+}
+.gcore-section {
+	width: 100%
+}
+.gcore-line-td input,
+.gcore-line-td textarea,
+.gcore-line-td select {
+	padding: 8px 10px 7px 10px;
+	border-radius: 2px;
+	border: 1px solid rgba(0, 0, 0, 0.1);
+	box-shadow: none;
+	width: auto;
+}
+.gcore-line-td input:focus,
+.gcore-line-td textarea:focus,
+.gcore-line-td select:focus {
+	border: 1px solid rgba(0, 0, 0, 0.3);
+	box-shadow: none;
+}
+.gcore-label {
+	width: 150px !important;
+}
+.gcore-sub-label {
+	font-size: 11px;
+	margin-top: 3px;
+	display: block;
+	color: grey;
+	white-space: normal;
+	word-wrap: break-word;
+}
+.gcore-label-left {
+	min-width: 150px !important;
+	max-width: 150px !important;
+	display: inline-block;
+	white-space: normal;
+	float: left !important;
+	padding: 1px;
+	padding-right: 10px !important;
+	font-weight: bold;
+}
+.gcore-label-top {
+	display: block;
+	white-space: normal;
+	font-weight: bold;
+	margin-bottom: 9px;
+}
+.gcore-label-right {
+	width: 150px !important;
+	margin-right: 0;
+	padding-right: 15px;
+	font-weight: bold;
+}
+.gcore-textbox,
+.gcore-textarea,
+.gcore-radio-other-input,
+.gcore-captcha input {
+	padding: 5px !important;
+	border: 1px solid #ccc !important;
+	font-size: 13px !important;
+	line-height: 14px !important;
+}
+.gcore-dropdown {
+	padding: 2px;
+	font-size: 13px;
+}
+.gcore-radio,
+.gcore-checkbox {
+	margin: 0px !important;
+}
+.gcore-radio-item label,
+.gcore-checkbox-item label {
+	font-size: 13px;
+	margin: 0px !important;
+	display: inline;
+}
+.gcore-checkbox-item label, .gcore-checkbox-item input{
+	margin:0;
+}
+.gcore-input-container {
+	float: left;
+	overflow: auto;
+	display: inline-block;
+	white-space: normal;
+}
+.gcore-display-table {
+	display: table;
+}
+.gcore-line-td {
+	padding: 2px 0px 2px 0px !important;
+	margin: 6px 0;
+	width: 100% !important;
+	clear: both !important;
+	display: inline-block !important;
+	border: 0 none !important;
+	white-space: nowrap;
+}
+.gcore-line-td-error {
+	background-color: #f6cece;
+	border: 1px dashed #ff0000 !important;
+}
+.gcore-line-tr {
+	padding: 0 !important;
+	margin: 0 !important;
+	width: 100% !important;
+	clear: both !important;
+	display: inline-block;
+	border: 0 none !important;
+}
+.gcore-line-tr .gcore-input{
+	float:left;
+}
+.gcore-subinput-container {
+	margin-bottom: 3px;
+	overflow: auto;
+	float: left;
+}
+.gcore-subinput-container:not(:first-child) {
+	padding-left: 4px;
+}
+.gcore-subinput-container-wide {
+	display: inline-block;
+	margin: 0px 3px 3px 0px;
+	float: left;
+	overflow: auto;
+}
+.gcore-radio-item,
+.gcore-checkbox-item {
+	float: left;
+	margin: 0px 6px 6px 0px;
+	white-space: nowrap;
+}
+.gcore-single-column,
+.gcore-multiple-column {
+	display: inline-block;
+}
+.gcore-single-column .gcore-radio-item,
+.gcore-single-column .gcore-checkbox-item {
+	clear: left;
+}
+.gcore-checkbox,
+.gcore-radio,
+.gcore-checkbox_group {
+	margin: 0px !important;
+}
+.SSS {
+	width: 30px !important;
+}
+.SS {
+	width: 70px !important;
+}
+.S {
+	width: 110px !important;
+}
+.M {
+	width: 230px !important;
+}
+.L {
+	width: 350px !important;
+}
+.XL {
+	width: 430px !important;
+}
+.XXL {
+	width: 500px !important;
+}
+.A {
+	width: auto !important;
+}
+/* main */
+
+.gcui *,
+.gcui *:after,
+.gcui *:before,
+.gcui.container {
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+}
+.gcui.SSS {
+	width: 30px !important;
+}
+.gcui.SS {
+	width: 70px !important;
+}
+.gcui.S {
+	width: 110px !important;
+}
+.gcui.M {
+	width: 230px !important;
+}
+.gcui.L {
+	width: 350px !important;
+}
+.gcui.XL {
+	width: 430px !important;
+}
+.gcui.XXL {
+	width: 500px !important;
+}
+.gcui.A {
+	width: auto !important;
+}
+.gcui.blue.grade1 {
+	background-color: #1589FF !important;
+	color: #EEEEEE !important;
+}
+.gcui.blue.grade2 {
+	background-color: #38ACEC !important;
+	color: #EEEEEE !important;
+}
+.gcui.blue.grade3 {
+	background-color: #3BB9FF !important;
+	color: #EEEEEE !important;
+}
+.gcui.blue.grade4 {
+	background-color: #79BAEC !important;
+	color: #EEEEEE !important;
+}
+.gcui.blue.grade5 {
+	background-color: #82CAFA !important;
+	color: #EEEEEE !important;
+}
+.gcui.green.grade1 {
+	background-color: #387C44 !important;
+	color: #EEEEEE !important;
+}
+.gcui.green.grade2 {
+	background-color: #4AA02C !important;
+	color: #EEEEEE !important;
+}
+.gcui.green.grade3 {
+	background-color: #6CBB3C !important;
+	color: #EEEEEE !important;
+}
+.gcui.green.grade4 {
+	background-color: #5EFB6E !important;
+	color: #EEEEEE !important;
+}
+.gcui.green.grade5 {
+	background-color: #98FF98 !important;
+	color: #EEEEEE !important;
+}
+.gcui.teal.grade1 {
+	background-color: #008080 !important;
+	color: #EEEEEE !important;
+}
+.gcui.teal.grade2 {
+	background-color: #16A085 !important;
+	color: #EEEEEE !important;
+}
+.gcui.teal.grade3 {
+	background-color: #1ABC9C !important;
+	color: #EEEEEE !important;
+}
+.gcui.teal.grade4 {
+	background-color: #3EA99F !important;
+	color: #EEEEEE !important;
+}
+.gcui.teal.grade5 {
+	background-color: #46C7C7 !important;
+	color: #EEEEEE !important;
+}
+.gcui.aqua.grade1 {
+	background-color: #00FFFF !important;
+	color: #EEEEEE !important;
+}
+.gcui.aqua.grade2 {
+	background-color: #4EE2EC !important;
+	color: #EEEEEE !important;
+}
+.gcui.aqua.grade3 {
+	background-color: #43C6DB !important;
+	color: #EEEEEE !important;
+}
+.gcui.aqua.grade4 {
+	background-color: #48CCCD !important;
+	color: #EEEEEE !important;
+}
+.gcui.aqua.grade5 {
+	background-color: #50EBEC !important;
+	color: #EEEEEE !important;
+}
+.gcui.dark.grade1 {
+	background-color: #2C3539 !important;
+	color: #EEEEEE !important;
+}
+.gcui.dark.grade2 {
+	background-color: #151B54 !important;
+	color: #EEEEEE !important;
+}
+.gcui.dark.grade3 {
+	background-color: #2B3856 !important;
+	color: #EEEEEE !important;
+}
+.gcui.dark.grade4 {
+	background-color: #2B547E !important;
+	color: #EEEEEE !important;
+}
+.gcui.dark.grade5 {
+	background-color: #4863A0 !important;
+	color: #EEEEEE !important;
+}
+.gcui.purple.grade1 {
+	background-color: #4B0082 !important;
+	color: #EEEEEE !important;
+}
+.gcui.purple.grade2 {
+	background-color: #7D1B7E !important;
+	color: #EEEEEE !important;
+}
+.gcui.purple.grade3 {
+	background-color: #8D38C9 !important;
+	color: #EEEEEE !important;
+}
+.gcui.purple.grade4 {
+	background-color: #7A5DC7 !important;
+	color: #EEEEEE !important;
+}
+.gcui.purple.grade5 {
+	background-color: #7F38EC !important;
+	color: #EEEEEE !important;
+}
+.gcui.grey.grade1 {
+	background-color: #BCC6CC !important;
+	color: #EEEEEE !important;
+}
+.gcui.grey.grade2 {
+	background-color: #98AFC7 !important;
+	color: #EEEEEE !important;
+}
+.gcui.grey.grade3 {
+	background-color: #6D7B8D !important;
+	color: #EEEEEE !important;
+}
+.gcui.grey.grade4 {
+	background-color: #25383C !important;
+	color: #EEEEEE !important;
+}
+.gcui.grey.grade5 {
+	background-color: #ECF0F1 !important;
+	color: #EEEEEE !important;
+}
+.gcui.yellow.grade1 {
+	background-color: #FFD801 !important;
+	color: #EEEEEE !important;
+}
+.gcui.yellow.grade2 {
+	background-color: #FDD017 !important;
+	color: #EEEEEE !important;
+}
+.gcui.yellow.grade3 {
+	background-color: #FBB917 !important;
+	color: #EEEEEE !important;
+}
+.gcui.yellow.grade4 {
+	background-color: #FBB117 !important;
+	color: #EEEEEE !important;
+}
+.gcui.yellow.grade5 {
+	background-color: #FFDB58 !important;
+	color: #EEEEEE !important;
+}
+.gcui.orange.grade1 {
+	background-color: #D35400 !important;
+	color: #EEEEEE !important;
+}
+.gcui.orange.grade2 {
+	background-color: #F87217 !important;
+	color: #EEEEEE !important;
+}
+.gcui.orange.grade3 {
+	background-color: #F88017 !important;
+	color: #EEEEEE !important;
+}
+.gcui.orange.grade4 {
+	background-color: #FF7F50 !important;
+	color: #EEEEEE !important;
+}
+.gcui.orange.grade5 {
+	background-color: #F9966B !important;
+	color: #EEEEEE !important;
+}
+.gcui.red.grade1 {
+	background-color: #F62217 !important;
+	color: #EEEEEE !important;
+}
+.gcui.red.grade2 {
+	background-color: #E41B17 !important;
+	color: #EEEEEE !important;
+}
+.gcui.red.grade3 {
+	background-color: #C11B17 !important;
+	color: #EEEEEE !important;
+}
+.gcui.red.grade4 {
+	background-color: #9F000F !important;
+	color: #EEEEEE !important;
+}
+.gcui.red.grade5 {
+	background-color: #8C001A !important;
+	color: #EEEEEE !important;
+}
+/*.gcui.grad1{
+	color: #FFF;
+}
+.gcui.grad2{
+	background-color: #555555;
+	background-image: linear-gradient(rgba(255, 255, 255, 0.3) 0px, rgba(255, 255, 255, 0.3) 100%);
+	color: #F0F0F0;
+}
+.gcui.grad3{
+	background-color: #555555;
+	background-image: linear-gradient(rgba(255, 255, 255, 0.6) 0px, rgba(255, 255, 255, 0.6) 100%);
+	color: #000;
+}
+*/
+
+.gcui.float.left {
+	float: left !important;
+}
+.gcui.float.right {
+	float: right !important;
+}
+.gcui.full.width {
+	width: 100% !important;
+}
+.gcui.full.height {
+	height: 100% !important;
+}
+/* grid */
+
+[class*='col-'] {
+	float: left;
+	padding-right: 10px;
+}
+[class*='col-']:last-of-type {
+	padding-right: 0px;
+}
+.gcui.container {
+	width: 100%;
+	padding: 0 18%;
+	min-width: 755px;
+	margin: 0 auto;
+	overflow: hidden;
+}
+.gcui.container:after {
+	content: "";
+	display: block;
+	clear: both;
+	visibility: hidden;
+	height: 0;
+}
+.gcui.container-pad {
+	padding: 10px 0 0px 10px;
+}
+.gcui.container-pad >[class*='col-']:last-of-type {
+	padding-right: 10px;
+}
+.gcui.column.one {
+	width: 8.33% !important;
+}
+.gcui.column.two {
+	width: 16.667% !important;
+}
+.gcui.column.three {
+	width: 25% !important;
+}
+.gcui.column.four {
+	width: 33.33% !important;
+}
+.gcui.column.five {
+	width: 41.66% !important;
+}
+.gcui.column.six {
+	width: 50% !important;
+}
+.gcui.column.seven {
+	width: 58.33%
+}
+.gcui.column.eight {
+	width: 66.66% !important;
+}
+.gcui.column.nine {
+	width: 75% !important;
+}
+.gcui.column.ten {
+	width: 83.333% !important;
+}
+.gcui.column.eleven {
+	width: 91.66% !important;
+}
+.gcui.column.twelve {
+	width: 100% !important;
+}
+@media handheld,
+only screen and (max-width: 767px) {
+	.gcui.container {
+		width: 100%;
+		min-width: 0;
+		margin-left: 0px;
+		margin-right: 0px;
+		padding: 0 8%;
+	}
+	[class*='col-'] {
+		width: auto;
+		float: none;
+		margin-left: 0px;
+		margin-right: 0px;
+		margin-top: 10px;
+		margin-bottom: 10px;
+		padding-left: 10px;
+		padding-right: 10px;
+	}
+}

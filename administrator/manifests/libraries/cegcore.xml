@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="library" method="upgrade" version="1.7.0">
+	<name>CEGCore</name>
+	<libraryname>cegcore</libraryname>
+	<author>ChronoEngine.com</author>
+	<creationDate>01.2014</creationDate>
+	<copyright>Copyright (C) 2013</copyright>
+	<license>http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL</license>
+	<authorEmail>webmaster@chronoengine.com</authorEmail>
+	<authorUrl>www.chronoengine.com</authorUrl>
+	<version>1.0</version>
+	<description>The GCore framework classes!</description>
+	
+	<files>
+		<filename>bootstrap.php</filename>
+		<filename>config.php</filename>
+		<filename>gcloader.php</filename>
+		<filename>joomla_gcloader.php</filename>
+		<folder>admin</folder>
+		<folder>assets</folder>
+		<folder>extensions</folder>
+		<folder>cache</folder>
+		<folder>helpers</folder>
+		<folder>libs</folder>
+		<folder>locales</folder>
+		<folder>vendors</folder>
+	</files>
+</extension>

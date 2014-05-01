@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<metadata>
+	<layout title="ChronoForms5 form" option="Display Form">
+		<help key = "Display Form" />
+		<message>
+			Display Form
+		</message>
+	</layout>
+
+	<!-- Add fields to the parameters object for the layout. -->
+	<fields name="params">
+		<!-- Basic options. -->
+		<fieldset name="basic" label="COM_MENUS_BASIC_FIELDSET_LABEL">
+			<field name="chronoform" type="text" description="Enter your form name" label="Form Name"></field>
+			<field name="event" type="text" description="Enter your form's event to be loaded, if left empty then the 'load' event will be loaded, enter the event name without 'On', e.g: for 'OnSubmit' please enter 'submit'" label="Event"></field>
+		</fieldset>
+	</fields>
+</metadata>

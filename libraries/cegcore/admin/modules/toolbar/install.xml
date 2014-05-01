@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<addon type="module" site="admin">
+	<name>toolbar</name>
+	<title>Admin Toolbar</title>
+	<creationDate>31.Sep.2012</creationDate>
+	<author>ChronoMan</author>
+	<copyright>ChronoCMS.com</copyright>
+	<authorUrl>www.ChronoCMS.com</authorUrl>
+	<version>1.0</version>
+	<license>GPL</license>
+	<description>Admin Toolbar.</description>
+</addon>
