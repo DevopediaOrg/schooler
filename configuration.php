@@ -5,7 +5,7 @@ class JConfig {
 	public $display_offline_message = '1';
 	public $offline_image = '';
 	public $sitename = 'BGMS-Shishukunj School Management Software';
-	public $editor = 'tinymce';
+	public $editor = 'none';
 	public $captcha = '0';
 	public $list_limit = '20';
 	public $access = '1';
@@ -20,17 +20,17 @@ class JConfig {
 	public $live_site = '';
 	public $secret = 'UAxlOjGW2z0kCly8';
 	public $gzip = '0';
-	public $error_reporting = 'default';
-	public $helpurl = 'http://help.joomla.org/proxy/index.php?option=com_help&amp;keyref=Help{major}{minor}:{keyref}';
+	public $error_reporting = 'none';
+	public $helpurl = 'http://help.joomla.org/proxy/index.php?option=com_help&keyref=Help{major}{minor}:{keyref}';
 	public $ftp_host = '';
 	public $ftp_port = '';
 	public $ftp_user = '';
 	public $ftp_pass = '';
 	public $ftp_root = '';
-	public $ftp_enable = '';
-	public $offset = 'UTC';
-	public $mailonline = '1';
-	public $mailer = 'mail';
+	public $ftp_enable = '0';
+	public $offset = 'Asia/Kolkata';
+	public $mailonline = '0';
+	public $mailer = 'smtp';
 	public $mailfrom = 'arvindpdmn@gmail.com';
 	public $fromname = 'BGMS-Shishukunj School Management Software';
 	public $sendmail = '/usr/sbin/sendmail';
@@ -56,6 +56,14 @@ class JConfig {
 	public $feed_limit = '10';
 	public $log_path = 'C:\\wamp\\www\\bgms/logs';
 	public $tmp_path = 'C:\\wamp\\www\\bgms/tmp';
-	public $lifetime = '15';
+	public $lifetime = '60';
 	public $session_handler = 'database';
+	public $MetaRights = '';
+	public $sitename_pagetitles = '0';
+	public $force_ssl = '0';
+	public $frontediting = '1';
+	public $feed_email = 'author';
+	public $cookie_domain = '';
+	public $cookie_path = '';
+	public $asset_id = '1';
 }
