@@ -498,8 +498,10 @@ class UsersModelRegistration extends JModelForm
 		}
 
 		// Send the registration email.
-		$return = JFactory::getMailer()->sendMail($data['mailfrom'], $data['fromname'], $data['email'], $emailSubject, $emailBody);
-
+		// HACK: since we are not going to send mails on localhost
+		// $return = JFactory::getMailer()->sendMail($data['mailfrom'], $data['fromname'], $data['email'], $emailSubject, $emailBody);
+		$return = true;
+		
 		// Send Notification mail to administrators
 		if (($params->get('useractivation') < 2) && ($params->get('mail_to_admin') == 1))
 		{
