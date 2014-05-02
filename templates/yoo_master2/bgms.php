@@ -173,7 +173,14 @@ if (false) { // Noted here for reference only
 
 function showStudentList()
 {
+$uri= JFactory::getURI();
+$query_string=$uri->getQuery();
+echo "$query_string<br>";
+if (isset($_REQUEST['name'])) echo $_REQUEST['name']."<br>";
+if (isset($_REQUEST['sex'])) echo $_REQUEST['sex']."<br>";
+echo $_SERVER['REQUEST_URI']."<br>";
 
+	$itemLink = preg_replace("/view-list/","add-student",$_SERVER['REQUEST_URI']);
 	$columnHeadings = array('Student ID','Admission No.','Name','Class','Group','Sex','Parent','Guardian','Sponsor');
 	$students = getTableData("#__studentform",
 							 "id,studentUid,admissionNumber,name,class,`group`,sex,parent,guardian,sponsor",
@@ -189,7 +196,7 @@ function showStudentList()
 		echo "<tr>";
 		for ($i=1; $i<count($student); $i++) { // ignore id
 			if ($i==3) { // have link for name
-				echo "<td><a href='$student[0]'>".$student[$i]."</td>"; 
+				echo "<td><a href='$itemLink?id=$student[0]'>".$student[$i]."</td>"; 
 			}
 			else echo "<td>".$student[$i]."</td>";	
 		}

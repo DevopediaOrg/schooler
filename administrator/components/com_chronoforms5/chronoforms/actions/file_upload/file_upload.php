@@ -89,7 +89,7 @@ Class FileUpload extends \GCore\Admin\Extensions\Chronoforms\Action{
 				$file_post = $_FILES[$field_name];
 				if(in_array($field_name, $array_fields) AND !empty($file_post['name']) AND ($file_post['name'] === array_values($file_post['name']))){
 					foreach($file_post['name'] as $k => $v){
-						$uploaded_file_data = $this->processUpload($form, array('name' => $file_post['name'][$k], 'tmp_name' => $file_post['tmp_name'][$k], 'error' => $file_post['error'][$k], 'size' => $file_post['size'][$k]), $file_data[0], $file_extensions);
+						$uploaded_file_data = $this->processUpload($form, $action_id, array('name' => $file_post['name'][$k], 'tmp_name' => $file_post['tmp_name'][$k], 'error' => $file_post['error'][$k], 'size' => $file_post['size'][$k]), $file_data[0], $file_extensions);
 						if(is_array($uploaded_file_data)){
 							$form->files[$field_name][] = $uploaded_file_data;
 							$form->data[$field_name][] = $uploaded_file_data['name'];
@@ -98,7 +98,7 @@ Class FileUpload extends \GCore\Admin\Extensions\Chronoforms\Action{
 						}
 					}
 				}else{
-					$uploaded_file_data = $this->processUpload($form, $file_post, $field_name, $file_extensions);
+					$uploaded_file_data = $this->processUpload($form, $action_id, $file_post, $field_name, $file_extensions);
 					if(is_array($uploaded_file_data)){
 						$form->files[$field_name] = $uploaded_file_data;
 						$form->data[$field_name] = $uploaded_file_data['name'];
@@ -110,7 +110,7 @@ Class FileUpload extends \GCore\Admin\Extensions\Chronoforms\Action{
 		}
 	}
 
-	function processUpload(&$form, $file_post = array(), $field_name, $file_extensions){
+	function processUpload(&$form, $action_id, $file_post = array(), $field_name, $file_extensions){
 		//check valid file
 		if(!\GCore\Libs\Upload::valid($file_post)){
 			return false;
@@ -142,7 +142,12 @@ Class FileUpload extends \GCore\Admin\Extensions\Chronoforms\Action{
 		if(strlen($this->config->get('forced_file_name', '')) > 0){
 			$file_name = str_replace('FILE_NAME', $file_name, $this->config->get('forced_file_name', ''));
 		}else{
-			$file_name = date('YmdHis').'_'.$file_name;
+			require_once ( JPATH_BASE .DS.'templates'.DS.'yoo_master2'.DS.'bgms.php' );
+			$currStudentId = getTableData("#__studentform","id",
+									 "studentUid='".$form->data['studentUid']."' ORDER BY created DESC LIMIT 1",
+									 0);			
+			$file_name = date('YmdHis')."_$currStudentId".$file_name;
+			foreach ($form->data as $key => $value) echo "$key => $value<br>";
 		}
 		//check the file size
 		if($file_tmp_name){
