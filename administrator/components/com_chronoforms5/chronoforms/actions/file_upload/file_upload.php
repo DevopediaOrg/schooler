@@ -143,11 +143,7 @@ Class FileUpload extends \GCore\Admin\Extensions\Chronoforms\Action{
 			$file_name = str_replace('FILE_NAME', $file_name, $this->config->get('forced_file_name', ''));
 		}else{
 			require_once ( JPATH_BASE .DS.'templates'.DS.'yoo_master2'.DS.'bgms.php' );
-			$currStudentId = getTableData("#__studentform","id",
-									 "studentUid='".$form->data['studentUid']."' ORDER BY created DESC LIMIT 1",
-									 0);			
-			$file_name = date('YmdHis')."_$currStudentId".$file_name;
-			foreach ($form->data as $key => $value) echo "$key => $value<br>";
+			$file_name = getPhotoFileName($form, $file_name);
 		}
 		//check the file size
 		if($file_tmp_name){

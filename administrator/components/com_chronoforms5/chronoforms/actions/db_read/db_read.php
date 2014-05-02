@@ -74,7 +74,8 @@ Class DbRead extends \GCore\Admin\Extensions\Chronoforms\Action{
 			if((bool)$config->get('load_under_modelid', 0) === true){
 				$form->data[$model_id] = $data;
 			}else{
-				$form->data = array_merge($form->data, $data);
+				if (is_array($data))
+					$form->data = array_merge($form->data, $data);
 			}
 		}
 		//pr($form->data);

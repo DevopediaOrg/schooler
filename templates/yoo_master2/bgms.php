@@ -167,20 +167,120 @@ function update_backup_timestamp($currtime)
   via Joomla admin GUI.
 ----------------------------------------------------------*/
 if (false) { // Noted here for reference only
-	// Start code to include in ChronoForms
-	require_once ( JPATH_BASE .DS.'templates'.DS.'yoo_master2'.DS.'bgms.php' );
+	// Start code to include in ChronoForms to call these functions
+	require_once ( JPATH_BASE.DS.'templates'.DS.'yoo_master2'.DS.'bgms.php' );
+}
+
+function getRecordId($formname)
+{
+	if (isset($_REQUEST['id'])) { // editing a record
+		$id = $_REQUEST['id'];
+	}
+	else { // adding a new record
+		$id = getTableData("#__$formname", "id", "1 ORDER BY created DESC LIMIT 1", 0);
+	}
+	
+	return $id;
+}
+
+function getPhotoFileName($form, $file_name)
+{
+	$id = getRecordId('studentform');
+	$suffix = preg_replace("/.*\.(png|gif|jpg|jpeg)/","$1",strtolower($file_name));
+	return "Photo-$id.$suffix";
+}
+
+function findPhoto($id)
+{ // we need to search the folder to know the extension: use latest if multiple extensions exist
+	$urlpath = 'components'.DS.'com_chronoforms5'.DS.'chronoforms'.DS.'uploads'.DS.'studentForm';
+	$storePath = JPATH_BASE.DS.$urlpath;
+	$photos = scandir($storePath);
+	$currPhotos = array(); // only for debugging
+	$latestModTime = 0; $latestPhoto = '';
+	foreach ($photos as $photo) {
+		if (preg_match("/^Photo-$id\./",$photo)) {
+			$modTime = filemtime($storePath.DS.$photo);
+			if ($modTime > $latestModTime) {
+				$latestModTime = $modTime;
+				$latestPhoto = $urlpath.DS.$photo;
+			}
+			array_push($currPhotos, $photo); // only for debugging
+		}
+	}
+	// return implode("/",$currPhotos); // only for debugging
+	
+	if ($latestPhoto=='') { // if not found, use default.
+		$sex = getTableData("#__studentform", "sex", "id=$id", 0);
+		if ($sex=='Male') {
+			$latestPhoto = $urlpath.DS."boy.jpg";
+		}
+		else {
+			$latestPhoto = $urlpath.DS."girl.jpg";
+		}
+	}
+	
+	return $latestPhoto;
+}
+
+function msgPostFormSubmit($linkType)
+{ // To be called only after the form is saved in DB
+	if ($linkType=='grades') {
+		$aliasname = 'view-grades';
+		$formname = 'gradesform';
+	}
+	else {
+		$aliasname = 'view-list';
+		$formname = 'studentform';
+	}
+	
+	$id = getRecordId($formname);
+	$itemLink = preg_replace("/(view-list|view-grades|add-student|add-grades)[?]?.*$/","$aliasname?id=$id",$_SERVER['REQUEST_URI'],1);
+	
+	echo "<div style='font-size:1.5em;line-height:1.5em'>Details have been saved.<br>";
+	echo "You may wish to <a href='$itemLink'>review them</a>.</div>";
+}
+
+function showStudent($id)
+{
+	echo "<table class=studentViewTitle><tr>";
+	echo "<td><h2>Viewing Student Details</h2></td>";
+	$user = JFactory::getUser();
+	if (!$user->guest) echo "<td style='text-align:right'><b><a href='".
+	                        preg_replace("/view-list/","add-student",$_SERVER['REQUEST_URI']).
+	                        "'>Edit</a></b></td>";
+	else "<td>&nbsp;</td>";
+	echo "</tr></table>";
+
+	$result = getTableData("#__studentform",
+							 "name,dateOfBirth,age,sex,admissionNumber,studentUid,class,`group`,parent,guardian,sponsor",
+							 "id='$id'",
+							 1);
+
+	$headings = array('Name','Date of Birth','Sex','Admission No.','Student ID','Class','Group','Parent','Guardian','Sponsor');
+	echo "<table class=studentView>";
+	for ($i=0; $i<count($headings); $i++) {
+		if ($i==0) { // first cell is for photo
+			$photo = preg_replace("/index\.php.*/","",$_SERVER['REQUEST_URI']).findPhoto($id);
+			echo "<tr><td style='border:0px; vertical-align:top; width:256px' rowspan='".count($headings)."'><img width=256 src='$photo' alt='Photo'/></td><th>".$headings[$i]."</th><td>$result[$i]</td></tr>";	
+		}
+		else {
+			echo "<tr><th>".$headings[$i]."</th><td>$result[$i]</td></tr>";	
+		}
+	}
+	echo "</table>";
 }
 
 function showStudentList()
 {
-$uri= JFactory::getURI();
-$query_string=$uri->getQuery();
-echo "$query_string<br>";
-if (isset($_REQUEST['name'])) echo $_REQUEST['name']."<br>";
-if (isset($_REQUEST['sex'])) echo $_REQUEST['sex']."<br>";
-echo $_SERVER['REQUEST_URI']."<br>";
+	if (isset($_REQUEST['id'])) {
+		showStudent($_REQUEST['id']);
+		return;
+	}
 
-	$itemLink = preg_replace("/view-list/","add-student",$_SERVER['REQUEST_URI']);
+
+	echo "<h2>Listing All Students</h2>";
+	
+	$itemLink = preg_replace("/view-list\??.*/","view-list",$_SERVER['REQUEST_URI']);
 	$columnHeadings = array('Student ID','Admission No.','Name','Class','Group','Sex','Parent','Guardian','Sponsor');
 	$students = getTableData("#__studentform",
 							 "id,studentUid,admissionNumber,name,class,`group`,sex,parent,guardian,sponsor",

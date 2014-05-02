@@ -11,9 +11,29 @@ table.studentList {
  	background-color: #82CAFF;
 }
 
-.studentList td, th {
+.studentList td, .studentList th {
  	border: 1px solid #777777;
  	padding: 5px;
 }
  
- 
+table.studentView {
+ 	width: 80%;
+}
+
+.studentView th {
+ 	background-color: #82CAFF;
+ 	width: 200px;
+}
+
+.studentView td, .studentView th {
+ 	border: 1px solid #777777;
+ 	padding: 5px;
+}
+
+table.studentViewTitle {
+ 	width: 80%;
+}
+
+.studentViewTitle td, .studentViewTitle th {
+ 	border: 0px solid #777777;
+}
