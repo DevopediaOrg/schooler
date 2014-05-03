@@ -30,10 +30,14 @@ table.studentView {
  	padding: 5px;
 }
 
-table.studentViewTitle {
- 	width: 80%;
+table.studentPageTitle {
+	width: 80%;
 }
 
-.studentViewTitle td, .studentViewTitle th {
- 	border: 0px solid #777777;
+.studentPageTitle td, .studentPageTitle th {
+	border: 0px solid #777777;
+}
+
+.studentPhoto img {
+	max-width: 256px;
 }
