@@ -225,7 +225,7 @@ function findPhoto($id)
 	// return implode("/",$currPhotos); // only for debugging
 	
 	if ($latestPhoto=='') { // if not found, use default.
-		$sex = getTableData("#__studentform", "sex", "id=$id", 0);
+		$sex = getTableData("#__studentform", "sex", "id='$id'", 0);
 		if ($sex=='Male') {
 			$latestPhoto = $urlpath.DS."boy.jpg";
 		}
@@ -255,10 +255,10 @@ function msgPostFormSubmit($linkType)
 	echo "You may wish to <a href='$itemLink'>review them</a>.</div>";
 }
 
-function getPhotoCode($id)
+function getPhotoCode($id, $attr='')
 {
 	$photo = preg_replace("/index\.php.*/","",$_SERVER['REQUEST_URI']).findPhoto($id);
-	return "<img class=studentPhoto src='$photo' alt='Photo'/>";
+	return "<img class=studentPhoto $attr src='$photo' alt='Photo'/>";
 }
 
 function getGrade($percentage)
@@ -286,7 +286,6 @@ function showStudent($id)
 	if (!$user->guest) echo "<td style='text-align:right'><b><a href='".
 	                        preg_replace("/view-list/","add-student",$_SERVER['REQUEST_URI']).
 	                        "'>Edit</a></b></td>";
-	else "<td>&nbsp;</td>";
 	echo "</tr></table>";
 
 	$result = getTableData("#__studentform",
@@ -313,19 +312,129 @@ function showStudent($id)
 	echo "</table>";
 }
 
-function showStudentGrades($id)
+function printAllGradesTable($data, $year)
 {
+	$rows = array('Kannada','English','Hindi','Mathematics','General Science','Social Studies','Total','Physical Education','Computer Science','Attendance','Conduct','Remarks','Date');
+	$cols = array('Subject','Test 1 (25 marks)','Test 2 (25 marks)','Midterm Exam (100 marks)','Test 3 (25 marks)','Test 4 (25 marks)','Final Exam (100 marks)');
+	echo "<h3 style='margin-top:40px'>$year</h3>";
+	echo "<table class=studentAllGrades>";
+	
+	echo "<tr rowspan=2><th>$cols[0]</th>";
+	for ($i=1; $i<count($cols); $i++) {
+		if ($data[$cols[$i]]['link']) echo "<th colspan=3><a href='".$data[$cols[$i]]['link']."'>".preg_replace("/ \(/","<br>(",$cols[$i])."</a></th>";
+		else echo "<th colspan=3>".preg_replace("/ \(/","<br>(",$cols[$i])."</th>";
+	}
+	echo "</tr>";
+
+	echo "<tr><td>&nbsp;</td>".str_repeat("<td class=gradeHead>Grade</td><td class=gradeHead>%</td><td class=gradeHead>Marks</td>",count($cols)-1)."</tr>";
+	for ($i=0; $i<count($rows); $i++) {
+		if ($rows[$i]=='Total') echo "<tr><td><b>".$rows[$i]."</b></td>";
+		else echo "<tr><td>".$rows[$i]."</td>";
+		for ($j=1; $j<count($cols); $j++) {
+			$cell = $data[$rows[$i]][$cols[$j]];
+			if ($i<=6) {
+				if ($rows[$i]=='Total') {
+					echo "<td><b>".$cell['grade']."</b></td>";
+					echo "<td class=marks><b>".$cell['%']."</b></td>";
+					echo "<td class=marks><b>".$cell['marks']."</b></td>";
+				}
+				else {
+					echo "<td>".$cell['grade']."</td>";
+					echo "<td class=marks>".$cell['%']."</td>";
+					echo "<td class=marks>".$cell['marks']."</td>";
+				}
+			}
+			else {
+				echo "<td colspan=3>".$cell."</td>";
+			}
+		}
+		echo "</tr>";
+	}
+	echo "</table>";
+}
+
+function showStudentAllGrades($id)
+{ // $id is with reference to studentsform
+	echo "<table class=studentPageTitle><tr>";
+	echo "<td><h2>Viewing Student Grades (All Exams)</h2></td>";
+	echo "</tr></table>";
+
+	$studentDetails = getTableData("#__studentform","name,studentUid,class,`group`","id=$id", 1);	
+	echo "<table class=studentView>";
+	echo "<tr><td rowspan=4 width=120px>".getPhotoCode($id, "style='width:100px'")."</td>";
+	$studentLink = preg_replace("/\/grades\/.*/","/students/view-list?id=".$id,$_SERVER['REQUEST_URI']);
+	echo "  <th>Student Name</th><td><a href='".$studentLink."'>".$studentDetails[0]."</a></td></tr>";
+	echo "<tr><th>Student ID</th><td>".$studentDetails[1]."</td></tr>";
+	echo "<tr><th>Class</th><td>".getClassDisplayText($studentDetails[2])."</td></tr>";
+	echo "<tr><th>Group</th><td>".$studentDetails[3]."</td></tr>";
+	echo "</table>";
+
+	$examTypeOrdering = "'Final Exam (100 marks)','Test 4 (25 marks)','Test 3 (25 marks)','Midterm Exam (100 marks)','Test 2 (25 marks)','Test 1 (25 marks)'";
+	$results = getTableData("#__studentform,#__gradesForm",
+							 "studentId,year,examType,DATE_FORMAT(#__gradesForm.created,'%d %M %Y'),DATE_FORMAT(#__gradesForm.modified,'%d %M %Y'),kannadaMarks,englishMarks,hindiMarks,mathMarks,generalScienceMarks,socialStudiesMarks,computerScience,physicalEducation,conduct,attendance,remarks,#__gradesForm.id",
+							 "#__studentform.id=studentId AND studentId=$id ORDER BY year DESC, FIELD(examType,$examTypeOrdering)");
+	
+	$year = ''; $data = array();
+	for ($i=0; $i<count($results); $i++) {
+		$res = $results[$i];
+		if ($year!='' && $res[1]!=$year) {
+			printAllGradesTable($data, $year);
+			$data = array();
+		}
+		$year = $res[1];
+		$examType = $res[2];
+		$maxMarks = preg_replace("/.*\((\d+) marks.*/","$1",$examType);
+		$numSubjects = 0;
+		if (setGrade($data['Kannada'][$examType], $res[5], $maxMarks)) $numSubjects++;
+		if (setGrade($data['English'][$examType], $res[6], $maxMarks)) $numSubjects++;
+		if (setGrade($data['Hindi'][$examType], $res[7], $maxMarks)) $numSubjects++;
+		if (setGrade($data['Mathematics'][$examType], $res[8], $maxMarks)) $numSubjects++;
+		if (setGrade($data['General Science'][$examType], $res[9], $maxMarks)) $numSubjects++;
+		if (setGrade($data['Social Studies'][$examType], $res[10], $maxMarks)) $numSubjects++;
+		setGrade($data['Total'][$examType], $res[5]+$res[6]+$res[7]+$res[8]+$res[9]+$res[10], $numSubjects*$maxMarks);
+		$data['Physical Education'][$examType] = $res[11];
+		$data['Computer Science'][$examType] = $res[12];
+		$attendanceFields = explode('/',preg_replace("/ /","",$res[14]));
+		if ($attendanceFields[1]) {
+			$percentage = floor(0.5+100*$attendanceFields[0]/$attendanceFields[1]);
+			$data['Attendance'][$examType] = $res[14]." ($percentage %)";
+		}
+		else {
+			$data['Attendance'][$examType] = $res[14];
+		}
+		$data['Conduct'][$examType] = $res[13];
+		$data['Remarks'][$examType] = $res[15];
+		if (preg_match("/[1-9]/",$res[4])) $data['Date'][$examType] = $res[4];
+		else $data['Date'][$examType] = $res[3];
+		$gradesLink = preg_replace("/\/grades\/.*/","/grades/view-grades?id=".$res[16],$_SERVER['REQUEST_URI']);
+		$data[$examType]['link'] = $gradesLink; // we will have id per exam
+	}
+	if ($year!='') printAllGradesTable($data, $year);
+}
+
+function setGrade(&$data, $marks, $maxMarks)
+{
+	if ($marks) {
+		$data['%'] = floor(0.5+100*$marks/$maxMarks);
+		$data['grade'] = getGrade($data['%']);
+		$data['marks'] = $marks;
+		return true;
+	}
+	return false;
+}
+
+function showStudentGrades($id)
+{ // $id is with reference to gradesForm
 	echo "<table class=studentPageTitle><tr>";
 	echo "<td><h2>Viewing Student Grades</h2></td>";
 	$user = JFactory::getUser();
 	if (!$user->guest) echo "<td style='text-align:right'><b><a href='".
 	                        preg_replace("/view-grades/","add-grades",$_SERVER['REQUEST_URI']).
 	                        "'>Edit</a></b></td>";
-	else "<td>&nbsp;</td>";
 	echo "</tr></table>";
 
 	$result = getTableData("#__studentform,#__gradesForm",
-							 "studentId,name,class,year,examType,DATE_FORMAT(#__gradesForm.created,'%d %M %Y'),DATE_FORMAT(#__gradesForm.modified,'%d %M %Y'),kannadaMarks,englishMarks,hindiMarks,mathMarks,generalScienceMarks,socialStudiesMarks,computerScience,physicalEducation,conduct,attendance,remarks",
+							"studentId,name,class,year,examType,DATE_FORMAT(#__gradesForm.created,'%d %M %Y'),DATE_FORMAT(#__gradesForm.modified,'%d %M %Y'),kannadaMarks,englishMarks,hindiMarks,mathMarks,generalScienceMarks,socialStudiesMarks,computerScience,physicalEducation,conduct,attendance,remarks",
 							 "#__studentform.id=studentId AND #__gradesForm.id='$id'",
 							 1);
 
@@ -579,8 +688,7 @@ function showStudentList()
 		$id = $student[0];
 		echo "<tr>";
 		if (preg_match("/\/Photo-$id\.(png|gif|jpg|jpeg)\//",$allPhotoStr)) {
-			$imgHtml = preg_replace("/<img /","<img style='width:64px' ",getPhotoCode($id));
-			echo "<td>$imgHtml</td>";
+			echo "<td>".getPhotoCode($id, "style='width:64px'")."</td>";
 		}
 		else echo "<td>&nbsp;</td>";
 		for ($i=1; $i<count($student); $i++) { // ignore id
