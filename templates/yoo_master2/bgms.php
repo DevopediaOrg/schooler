@@ -171,13 +171,22 @@ if (false) { // Noted here for reference only
 	require_once ( JPATH_BASE.DS.'templates'.DS.'yoo_master2'.DS.'bgms.php' );
 }
 
-function getRecordId($formname)
+function getStudentRecordId($formname)
 {
+	$user = JFactory::getUser();
+	$userId = $user->get('id');
+
+	$id = -1;
 	if (isset($_REQUEST['id'])) { // editing a record
 		$id = $_REQUEST['id'];
 	}
 	else { // adding a new record
-		$id = getTableData("#__$formname", "id", "1 ORDER BY created DESC LIMIT 1", 0);
+		if ($formname=='studentform') {
+			$id = getTableData("#__studentform", "id", "user_id='$userId' ORDER BY created DESC LIMIT 1", 0);
+		}
+		else if ($formname=='gradesForm') {
+			$id = getTableData("#__gradesForm,#__studentform", "#__studentform.id", "user_id='$userId' AND studentId=#__studentform.id ORDER BY created DESC LIMIT 1", 0);
+		}
 	}
 	
 	return $id;
@@ -185,7 +194,7 @@ function getRecordId($formname)
 
 function getPhotoFileName($form, $file_name)
 {
-	$id = getRecordId('studentform');
+	$id = getStudentRecordId('studentform');
 	$suffix = preg_replace("/.*\.(png|gif|jpg|jpeg)/","$1",strtolower($file_name));
 	return "Photo-$id.$suffix";
 }
@@ -232,14 +241,14 @@ function msgPostFormSubmit($linkType)
 { // To be called only after the form is saved in DB
 	if ($linkType=='grades') {
 		$aliasname = 'view-grades';
-		$formname = 'gradesform';
+		$formname = 'gradesForm';
 	}
 	else {
 		$aliasname = 'view-list';
 		$formname = 'studentform';
 	}
 	
-	$id = getRecordId($formname);
+	$id = getStudentRecordId($formname);
 	$itemLink = preg_replace("/(view-list|view-grades|add-student|add-grades)[?]?.*$/","$aliasname?id=$id",$_SERVER['REQUEST_URI'],1);
 	
 	echo "<div style='font-size:1.5em;line-height:1.5em'>Details have been saved.<br>";
@@ -250,6 +259,23 @@ function getPhotoCode($id)
 {
 	$photo = preg_replace("/index\.php.*/","",$_SERVER['REQUEST_URI']).findPhoto($id);
 	return "<img class=studentPhoto src='$photo' alt='Photo'/>";
+}
+
+function getGrade($percentage)
+{
+	if ($percentage>=90) return 'A+';
+	if ($percentage>=75) return 'A';
+	if ($percentage>=65) return 'B+';
+	if ($percentage>=50) return 'B';
+	if ($percentage>=35) return 'C+';
+	return 'C';
+}
+
+function getClassDisplayText($myclass)
+{
+	if ($myclass<1 || $myclass>10) return '-';
+	$romans = array('-','I','II','III','IV','V','VI','VII','VIII','IX','X');
+	return $romans[$myclass];
 }
 
 function showStudent($id)
@@ -277,10 +303,218 @@ function showStudent($id)
 				.$headings[$i]."</th><td>$result[$i]</td></tr>";	
 		}
 		else {
-			echo "<tr><th>".$headings[$i]."</th><td>$result[$i]</td></tr>";	
+			if ($i==6) { // class: convert to Roman numerals for display
+				$currRes = getClassDisplayText($result[$i]);
+			}
+			else $currRes = $result[$i];
+			echo "<tr><th>".$headings[$i]."</th><td>$currRes</td></tr>";	
 		}
 	}
 	echo "</table>";
+}
+
+function showStudentGrades($id)
+{
+	echo "<table class=studentPageTitle><tr>";
+	echo "<td><h2>Viewing Student Grades</h2></td>";
+	$user = JFactory::getUser();
+	if (!$user->guest) echo "<td style='text-align:right'><b><a href='".
+	                        preg_replace("/view-grades/","add-grades",$_SERVER['REQUEST_URI']).
+	                        "'>Edit</a></b></td>";
+	else "<td>&nbsp;</td>";
+	echo "</tr></table>";
+
+	$result = getTableData("#__studentform,#__gradesForm",
+							 "studentId,name,class,year,examType,DATE_FORMAT(#__gradesForm.created,'%d %M %Y'),DATE_FORMAT(#__gradesForm.modified,'%d %M %Y'),kannadaMarks,englishMarks,hindiMarks,mathMarks,generalScienceMarks,socialStudiesMarks,computerScience,physicalEducation,conduct,attendance,remarks",
+							 "#__studentform.id=studentId AND #__gradesForm.id='$id'",
+							 1);
+
+	$headings = array('Student Name','Class','Year','Assessment','Date','Kannada','English','Hindi','Mathematics','General Science','Social Studies','Computer Science','Physical Education','Conduct','Attendance','Remarks');
+	$maxMarks = preg_replace("/.*\((\d+) marks.*/","$1",$result[4]);
+	$totalMarks = 0; $numSubjects = 0;
+	echo "<table class=studentView>";
+	for ($i=$j=0; $i<count($headings); $i++, $j++) {
+		$fieldVal = $result[$j+1];
+		if ($i==0) { // first cell is for photo
+			echo "<tr><td style='border:0px; vertical-align:top; width:256px' rowspan='"
+				.strval(count($headings)+4) . "'>" . getPhotoCode($id)."</td><th>" // 4 rows are added for separation and total marks
+				. $headings[$i]."</th><td colspan=3>$fieldVal</td></tr>";	
+		}
+		else if ($i==1)  {
+			echo "<tr><th>".$headings[$i]."</th><td colspan=3>".getClassDisplayText($fieldVal)."</td></tr>";
+		}
+		else if ($i==4) {
+			if (preg_match("/[1-9]/",$result[6])) $fieldVal = $result[6]; // use modified datetime
+			echo "<tr><th>".$headings[$i]."</th><td colspan=3>$fieldVal</td></tr>";
+			$j++;
+		}
+		else if ($i>=5 && $i<=10) {
+			if ($fieldVal>0) {
+				$totalMarks += $fieldVal;
+				$numSubjects++;
+				$percentage = floor(0.5+100*$fieldVal/$maxMarks);
+				echo "<tr class=marks><th>".$headings[$i]."</th>";
+				echo "<td style='text-align:left'>".getGrade($percentage)."</td>";
+				echo "<td>$percentage %</td>";
+				echo "<td>$fieldVal</td>";
+				echo "</tr>";
+			}
+			else { // we assume that student did not take this subject: no one will get zero!
+				echo "<tr class=marks><th>".$headings[$i]."</th>";
+				echo "<td style='text-align:left'>&nbsp;</td>";
+				echo "<td>&nbsp;</td>";
+				echo "<td>&nbsp;</td>";
+				echo "</tr>";
+			}
+		}
+		else if ($i==14) {
+			$attendanceFields = explode('/',preg_replace("/ /","",$fieldVal));
+			if ($attendanceFields[1]) {
+				$percentage = floor(0.5+100*$attendanceFields[0]/$attendanceFields[1]);
+				echo "<tr><th>".$headings[$i]."</th><td colspan=3>$fieldVal ($percentage %)</td></tr>";
+			}
+			else {
+				echo "<tr><th>".$headings[$i]."</th><td colspan=3>$fieldVal</td></tr>";
+			}
+		}
+		else echo "<tr><th>".$headings[$i]."</th><td colspan=3>$fieldVal</td></tr>";
+
+		if ($i==4) {
+			echo "<tr><td colspan=4 style='border:0px'>&nbsp;</td></tr>";
+			echo "<tr><td style='border:0px'>&nbsp;</td><td class=gradeHead style='text-align:left'>Grade</td><td class=gradeHead>Percentage</td><td class=gradeHead>Marks</td></tr>";
+		}
+		else if ($i==10) {
+			if ($numSubjects*$maxMarks) {
+				$percentage = floor(0.5+100*$totalMarks/($numSubjects*$maxMarks)); // count only subjects taken for overall percentage
+				echo "<tr class=marks><td style='text-align:left'><b>Total</b></td><td style='text-align:left'><b>".getGrade($percentage)."</b></td><td><b>$percentage %</b></td><td><b>$totalMarks</b></td></tr>";
+			}
+			else echo "<tr class=marks><td style='text-align:left'><b>Total</b></td><td style='text-align:left'><b>&nbsp;</b></td><td><b>&nbsp;</b></td><td><b>&nbsp;</b></td></tr>";
+			echo "<tr><td colspan=4 style='border:0px'>&nbsp;</td></tr>";
+		}
+	}
+	echo "</table>";	
+}
+
+function validateGradesForm($form)
+{
+	$studentId = $form->data['studentId'];
+	$year = $form->data['year'];
+	$examType = $form->data['examType'];
+	
+	$id = getTableData("#__gradesForm", "id",
+					"studentId='$studentId' AND year='$year' AND examType='$examType' ORDER BY modified DESC, created DESC LIMIT 1", 0);
+
+	if ($id!=0 && $id!=$_REQUEST['id']) { // new combination and not the same entry being edited
+		$itemLink = preg_replace("/(view-list|view-grades|add-student|add-grades)[?]?.*$/","add-grades?id=$id",$_SERVER['REQUEST_URI'],1);
+		echo "<div class=error style='font-size:1.5em;line-height:1.5em'>Grades for this student were already entered earlier.<br>";
+		echo "You may wish to <a href='$itemLink'>edit them</a>.</div>";
+		return 'fail';
+	}
+	return 'success';
+}
+
+function printCustomCodeGradesForm()
+{
+	$options = array();
+	$results = getTableData("#__studentform", "class,id,name", "1 ORDER BY class+0, name");
+	foreach ($results as $result) {
+		array_push($options, "$result[0]:$result[1]:$result[2]");
+	}
+	insertGradesFormJS();
+	echo "<div id=classStudentMap style='display:none'>".implode('/',$options)."</div>";
+	echo "<img src='".preg_replace("/index\.php.*/","images/blank.gif",$_SERVER['REQUEST_URI'])."' onload='loadStudentNames(\"init\")' />";
+}
+
+function insertGradesFormJS()
+{
+?>
+<script type='text/javascript'>
+//<![CDATA[
+
+window.addEvent('domready', function() {
+  $('class').addEvent('change', function() {
+    loadStudentNames('onchange');
+  });
+
+  $('studentName').addEvent('change', function() {
+    setStudentId();
+  });
+
+  $('gradesSubmit').addEvent('click', function() {
+    return validateForm();
+  });
+});
+
+function validateForm()
+{
+	elem = document.getElementById('attendance');
+	var str = elem.value;
+	fields = str.replace(/ /g,'').split('/');
+	re = new RegExp('[0-9]+');
+	if (fields.length!=2 ||
+		fields[0].match(re)==null || 
+		fields[1].match(re)==null || 
+		parseInt(fields[0]) > parseInt(fields[1])) {
+		alert("INPUT ERROR. Attendance input format: attended days / total days. Example, 24/30.");
+		elem.value = '';
+		return false;
+	}
+	return true;
+}
+
+function setStudentId()
+{
+	studentIdElem = document.getElementById('studentId');
+	studentNameElem = document.getElementById('studentName');
+	studentIdElem.value = studentName.options[studentName.selectedIndex].value;
+}
+
+function loadStudentNames(context)
+{
+	studentNameElem = document.getElementById('studentName');
+	while(studentNameElem.options.length > 0) studentNameElem.remove(0);
+
+	classElem = document.getElementById('class');
+	mapElem = document.getElementById('classStudentMap');
+
+	studentIdElem = document.getElementById('studentId');
+	if (context=='init' && studentIdElem.value!=-1) { // editing a record
+		re = new RegExp('([0-9]+):'+studentIdElem.value+':([A-Za-z ]+)');
+    	found = mapElem.innerHTML.match(re);
+		if (found.length) {
+			for (var i=0; i<classElem.length; i++) {
+				if (classElem.options[i].value==found[1]) {
+					classElem.selectedIndex = i;
+					break;
+				}
+			}
+		}
+	}
+	
+	students = mapElem.innerHTML.split('/');
+	selectIndex = -1;
+	for (var i=0; i<students.length; i++) {
+		fields = students[i].split(':');
+		if (classElem.value == fields[0]) { // applicable class
+			var option = document.createElement("option");
+			option.value = fields[1];
+			option.text = fields[2];
+			studentNameElem.add(option);
+			
+			if (studentIdElem.value==fields[1]) selectIndex = studentNameElem.length-1;
+		}
+	}
+	
+	if (selectIndex!=-1) {
+		studentNameElem.selectedIndex = selectIndex;
+		//classElem.disabled=true;
+		//studentNameElem.disabled=true;
+	}
+	else setStudentId();
+}
+//]]>
+</script>
+<?php
 }
 
 function showStudentFormTitle()
@@ -300,6 +534,22 @@ function showStudentFormTitle()
 	return array('id' => '99999999');
 }
 
+function showGradesFormTitle()
+{
+	if (isset($_REQUEST['id'])) {
+		$id = $_REQUEST['id'];
+		echo "<table class=studentPageTitle><tr>";
+		echo "<td><h2>Editing Student Grades</h2></td>";
+		echo "</tr></table>";
+		return array('id' => $id);
+	}
+
+	echo "<table class=studentPageTitle><tr>";
+	echo "<td><h2>Adding New Grades</h2></td>";
+	echo "</tr></table>";
+	return array('id' => '99999999');
+}
+
 function showStudentList()
 {
 	if (isset($_REQUEST['id'])) {
@@ -310,6 +560,56 @@ function showStudentList()
 
 	echo "<table class=studentPageTitle><tr>";
 	echo "<td><h2>Listing All Students</h2></td>";
+	echo "</tr></table>";
+	
+	$allPhotoStr = '/'.implode('/',readPhotoDir()).'/';
+	$itemLink = preg_replace("/view-list\??.*/","view-list",$_SERVER['REQUEST_URI']);
+	$columnHeadings = array('Photo','Student ID','Admission No.','Name','Class','Group','Sex','Parent','Guardian','Sponsor');
+	$students = getTableData("#__studentform",
+							 "id,studentUid,admissionNumber,name,class,`group`,sex,parent,guardian,sponsor",
+							 "1 ORDER BY name ASC"
+				);
+	echo "<table class=studentList>";
+	echo "<tr>";
+	foreach ($columnHeadings as $colHead) {
+		echo "<th>$colHead</th>";	
+	}
+	echo "</tr>";
+	foreach ($students as $student) {
+		$id = $student[0];
+		echo "<tr>";
+		if (preg_match("/\/Photo-$id\.(png|gif|jpg|jpeg)\//",$allPhotoStr)) {
+			$imgHtml = preg_replace("/<img /","<img style='width:64px' ",getPhotoCode($id));
+			echo "<td>$imgHtml</td>";
+		}
+		else echo "<td>&nbsp;</td>";
+		for ($i=1; $i<count($student); $i++) { // ignore id
+			if ($i==3) { // have link for name
+				echo "<td><a href='$itemLink?id=$id'>".$student[$i]."</td>"; 
+			}
+			else if ($i==4) { // conversion for class
+				echo "<td>".getClassDisplayText($student[$i])."</td>";	
+			}
+			else echo "<td>".$student[$i]."</td>";	
+		}
+		echo "</tr>";
+	}
+	echo "</table>";
+}
+
+function showGradesList()
+{
+	if (isset($_REQUEST['id'])) {
+		showStudentGrades($_REQUEST['id']);
+		return;
+	}
+	else if (isset($_REQUEST['studentId'])) {
+		showStudentAllGrades($_REQUEST['studentId']);
+		return;
+	}
+	
+	echo "<table class=studentPageTitle><tr>";
+	echo "<td><h2>Viewing Recent Grades</h2></td>";
 	echo "</tr></table>";
 	
 	$allPhotoStr = '/'.implode('/',readPhotoDir()).'/';

@@ -5,6 +5,7 @@
  ========================================================================== */
 table.studentList {
  	width: 100%;
+ 	border: 0px solid white;
 }
 
 .studentList th {
@@ -12,7 +13,7 @@ table.studentList {
 }
 
 .studentList td, .studentList th {
- 	border: 1px solid #777777;
+ 	border: 1px solid #AAAAAA;
  	padding: 5px;
 }
  
@@ -25,8 +26,13 @@ table.studentView {
  	width: 200px;
 }
 
-.studentView td, .studentView th {
- 	border: 1px solid #777777;
+.studentView th {
+ 	border: 1px solid white;
+ 	padding: 5px;
+}
+
+.studentView td {
+ 	border: 1px solid white;
  	padding: 5px;
 }
 
@@ -35,9 +41,24 @@ table.studentPageTitle {
 }
 
 .studentPageTitle td, .studentPageTitle th {
-	border: 0px solid #777777;
+	border: 0px solid #AAAAAA;
 }
 
 .studentPhoto img {
 	max-width: 256px;
+}
+
+tr.marks {
+	text-align:right;
+}
+	
+td.gradeHead {
+	background-color:#DDDDDD;
+	font-weight:bold;
+	font-size:0.9em;
+	text-align:right;
+}
+	
+.error {
+	color: #FF4500;
 }
