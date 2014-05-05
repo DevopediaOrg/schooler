@@ -172,7 +172,7 @@ if (false) { // Noted here for reference only
 	require_once ( JPATH_BASE.DS.'templates'.DS.'yoo_master2'.DS.'bgms.php' );
 }
 
-function getStudentRecordId($formname)
+function getRecordId($formname)
 {
 	$user = JFactory::getUser();
 	$userId = $user->get('id');
@@ -182,12 +182,8 @@ function getStudentRecordId($formname)
 		$id = $_REQUEST['id'];
 	}
 	else { // adding a new record
-		if ($formname=='studentform') {
-			$id = getTableData("#__studentform", "id", "user_id='$userId' ORDER BY created DESC LIMIT 1", 0);
-		}
-		else if ($formname=='gradesForm') {
-			$id = getTableData("#__gradesForm,#__studentform", "#__studentform.id", "user_id='$userId' AND studentId=#__studentform.id ORDER BY created DESC LIMIT 1", 0);
-		}
+		$id = getTableData("#__$formname", "id", "user_id='$userId' ORDER BY created DESC LIMIT 1", 0);
+		//$id = getTableData("#__gradesForm,#__studentform", "#__studentform.id", "#__gradesForm.user_id='$userId' AND studentId=#__studentform.id ORDER BY #__gradesForm.created DESC LIMIT 1", 0);
 	}
 	
 	return $id;
@@ -195,7 +191,7 @@ function getStudentRecordId($formname)
 
 function getPhotoFileName($form, $file_name)
 {
-	$id = getStudentRecordId('studentform');
+	$id = getRecordId('studentform');
 	$suffix = preg_replace("/.*\.(png|gif|jpg|jpeg)/","$1",strtolower($file_name));
 	return "Photo-$id.$suffix";
 }
@@ -242,14 +238,13 @@ function msgPostFormSubmit($linkType)
 { // To be called only after the form is saved in DB
 	if ($linkType=='grades') {
 		$aliasname = 'view-grades';
-		$formname = 'gradesForm';
+		$id = getRecordId('gradesForm');
 	}
 	else {
 		$aliasname = 'view-list';
-		$formname = 'studentform';
+		$id = getRecordId('studentform');
 	}
 	
-	$id = getStudentRecordId($formname);
 	$itemLink = preg_replace("/(view-list|view-grades|add-student|add-grades)[?]?.*$/","$aliasname?id=$id",$_SERVER['REQUEST_URI'],1);
 	
 	echo "<div class=message>Details have been saved.<br>";
