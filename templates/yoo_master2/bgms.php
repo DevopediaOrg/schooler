@@ -198,23 +198,23 @@ function getPhotoFileName($form, $file_name)
 
 function readPhotoDir()
 {
-	$urlpath = 'components'.DS.'com_chronoforms5'.DS.'chronoforms'.DS.'uploads'.DS.'studentForm';
+	$urlpath = 'components/com_chronoforms5/chronoforms/uploads/studentForm';
 	$photos = scandir(JPATH_BASE.DS.$urlpath);
 	return $photos;
 }
 
 function findPhoto($id)
 { // we need to search the folder to know the extension: use latest if multiple extensions exist
-	$urlpath = 'components'.DS.'com_chronoforms5'.DS.'chronoforms'.DS.'uploads'.DS.'studentForm';
+	$urlpath = 'components/com_chronoforms5/chronoforms/uploads/studentForm';
 	$photos = readPhotoDir();
 	$currPhotos = array(); // only for debugging
 	$latestModTime = 0; $latestPhoto = '';
 	foreach ($photos as $photo) {
 		if (preg_match("/^Photo-$id\./",$photo)) {
-			$modTime = filemtime(JPATH_BASE.DS.$urlpath.DS.$photo);
+			$modTime = filemtime(JPATH_BASE."/$urlpath/$photo");
 			if ($modTime > $latestModTime) {
 				$latestModTime = $modTime;
-				$latestPhoto = $urlpath.DS.$photo;
+				$latestPhoto = "$urlpath/$photo";
 			}
 			array_push($currPhotos, $photo); // only for debugging
 		}
@@ -224,14 +224,21 @@ function findPhoto($id)
 	if ($latestPhoto=='') { // if not found, use default.
 		$sex = getTableData("#__studentform", "sex", "id='$id'", 0);
 		if ($sex=='Male') {
-			$latestPhoto = $urlpath.DS."boy.jpg";
+			$latestPhoto = "$urlpath/boy.jpg";
 		}
 		else {
-			$latestPhoto = $urlpath.DS."girl.jpg";
+			$latestPhoto = "$urlpath/girl.jpg";
 		}
 	}
 	
 	return $latestPhoto;
+}
+
+function getExamOptions($order='ASC')
+{
+	$exams = array('Test 1 (25 marks)','Test 2 (25 marks)','Midterm Exam (100 marks)','Test 3 (25 marks)','Test 4 (25 marks)','Final Exam (100 marks)');
+	if ($order=='ASC') return $exams;
+	else return array_reverse($exams);
 }
 
 function msgPostFormSubmit($linkType)
@@ -311,13 +318,13 @@ function showStudent($id)
 function printAllGradesTable($data, $year, $class)
 {
 	$rows = array('Kannada','English','Hindi','Mathematics','General Science','Social Studies','Total','Physical Education','Computer Science','Attendance','Conduct','Remarks','Date');
-	$cols = array('Subject','Test 1 (25 marks)','Test 2 (25 marks)','Midterm Exam (100 marks)','Test 3 (25 marks)','Test 4 (25 marks)','Final Exam (100 marks)');
+	$cols = array_merge(array('Subject'),getExamOptions('ASC'));
 	echo "<h3 style='margin-top:40px'>$year / Class $class</h3>";
 	echo "<table class=studentAllGrades>";
 	
 	echo "<tr rowspan=2><th>$cols[0]</th>";
 	for ($i=1; $i<count($cols); $i++) {
-		if ($data[$cols[$i]]['link']) echo "<th colspan=3><a href='".$data[$cols[$i]]['link']."'>".preg_replace("/ \(/","<br>(",$cols[$i])."</a></th>";
+		if (isset($data[$cols[$i]]['link']) && $data[$cols[$i]]['link']) echo "<th colspan=3><a href='".$data[$cols[$i]]['link']."'>".preg_replace("/ \(/","<br>(",$cols[$i])."</a></th>";
 		else echo "<th colspan=3>".preg_replace("/ \(/","<br>(",$cols[$i])."</th>";
 	}
 	echo "</tr>";
@@ -327,7 +334,11 @@ function printAllGradesTable($data, $year, $class)
 		if ($rows[$i]=='Total') echo "<tr><td><b>".$rows[$i]."</b></td>";
 		else echo "<tr><td>".$rows[$i]."</td>";
 		for ($j=1; $j<count($cols); $j++) {
-			$cell = $data[$rows[$i]][$cols[$j]];
+			if (!isset($data[$rows[$i]][$cols[$j]])) {
+				if ($i<=6) $cell = array('grade'=>'','%'=>'','marks'=>'');
+				else $cell = '';
+			}
+			else $cell = $data[$rows[$i]][$cols[$j]];
 			if ($i<=6) {
 				if ($rows[$i]=='Total') {
 					echo "<td><b>".$cell['grade']."</b></td>";
@@ -365,10 +376,10 @@ function showStudentAllGrades($id)
 	echo "<tr><th>Group</th><td>".$studentDetails[3]."</td></tr>";
 	echo "</table>";
 	
-	$examTypeOrdering = "'Final Exam (100 marks)','Test 4 (25 marks)','Test 3 (25 marks)','Midterm Exam (100 marks)','Test 2 (25 marks)','Test 1 (25 marks)'";
+	$examOptStr = "'".implode("','",getExamOptions('DESC'))."'";
 	$results = getTableData("#__studentform,#__gradesform",
 							 "studentId,year,examType,DATE_FORMAT(#__gradesform.created,'%d %M %Y'),DATE_FORMAT(#__gradesform.modified,'%d %M %Y'),kannadaMarks,englishMarks,hindiMarks,mathMarks,generalScienceMarks,socialStudiesMarks,computerScience,physicalEducation,conduct,attendance,remarks,#__gradesform.id,#__gradesform.class",
-							 "#__studentform.id=studentId AND studentId=$id ORDER BY year DESC, FIELD(examType,$examTypeOrdering)");
+							 "#__studentform.id=studentId AND studentId=$id ORDER BY year DESC, FIELD(examType,$examOptStr)");
 
 	if (count($results)==0) {
 		echo "<table class=studentView>";
@@ -399,7 +410,7 @@ function showStudentAllGrades($id)
 		$data['Physical Education'][$examType] = $res[11];
 		$data['Computer Science'][$examType] = $res[12];
 		$attendanceFields = explode('/',preg_replace("/ /","",$res[14]));
-		if ($attendanceFields[1]) {
+		if (count($attendanceFields)==2 && $attendanceFields[1]) {
 			$percentage = floor(0.5+100*$attendanceFields[0]/$attendanceFields[1]);
 			$data['Attendance'][$examType] = $res[14]." ($percentage %)";
 		}
@@ -427,12 +438,16 @@ function setGrade(&$data, $marks, $maxMarks)
 	return false;
 }
 
-function getOptStr($opts,$sel)
+function getOptStr($opts, $autoVal=true, $startVal=0, $sel='')
 {
-	$str = '';
+	$str = ''; $i=$startVal;
 	foreach ($opts as $opt) {
-		if ($sel==$opt) $str .= "<option selected=selected value='$opt'>$opt</option>";
-		else $str .= "<option value='$opt'>$opt</option>";
+		if ($autoVal) $val = $i;
+		else $val = $opt;
+		$i++;
+		
+		if ($sel==$opt) $str .= "<option selected=selected value='$val'>$opt</option>";
+		else $str .= "<option value='$val'>$opt</option>";
 	}
 	return $str;
 }
@@ -492,7 +507,7 @@ function showStudentGrades($id)
 		}
 		else if ($i==15) {
 			$attendanceFields = explode('/',preg_replace("/ /","",$fieldVal));
-			if ($attendanceFields[1]) {
+			if (count($attendanceFields)==2 && $attendanceFields[1]) {
 				$percentage = floor(0.5+100*$attendanceFields[0]/$attendanceFields[1]);
 				echo "<tr><th>".$headings[$i]."</th><td colspan=3>$fieldVal ($percentage %)</td></tr>";
 			}
@@ -524,10 +539,13 @@ function validateGradesForm($form)
 	$year = $form->data['year'];
 	$examType = $form->data['examType'];
 	
+	$user = JFactory::getUser();
+	$userId = $user->get('id');
 	$id = getTableData("#__gradesform", "id",
-					"studentId='$studentId' AND year='$year' AND examType='$examType' ORDER BY modified DESC, created DESC LIMIT 1", 0);
+					"user_id='$userId' AND studentId='$studentId' AND year='$year' AND examType='$examType' ORDER BY modified DESC, created DESC LIMIT 1", 0);
 
-	if ($id!=0 && $id!=$_REQUEST['id']) { // new combination and not the same entry being edited
+	if ($id!=0 && (!isset($_REQUEST['id']) || $id!=$_REQUEST['id'])) {
+		// either adding a new record or editing an existing one: clash with record in table ($id)
 		$itemLink = preg_replace("/(view-list|view-grades|add-student|add-grades)[?]?.*$/","add-grades?id=$id",$_SERVER['REQUEST_URI'],1);
 		echo "<div class='error message'>Grades for this student were already entered earlier.<br>";
 		echo "You may wish to <a href='$itemLink'>edit them</a>.</div>";
@@ -536,16 +554,38 @@ function validateGradesForm($form)
 	return 'success';
 }
 
+function isGradesFormToBeShown()
+{
+	$numStudents = getTableData("#__studentform", "COUNT(id)", "1", 0);
+	if ($numStudents) return 'success';
+	else {
+		echo "<div class=message>Can't add grades because no students have been entered into the system.<br>";
+		return 'fail';
+	}
+}
+
 function printCustomCodeGradesForm()
+{
+	$options = array();
+	$results = getTableData("#__studentform", "class,id,name", "1 ORDER BY class+0, name");
+	foreach ($results as $result) { // presence of $results checked in isGradesFormToBeShown()
+		array_push($options, "$result[0]:$result[1]:$result[2]");
+	}
+	insertGradesFormJS();
+	echo "<div id=classStudentMap style='display:none'>".implode('/',$options)."</div>";
+	echo "<img src='".preg_replace("/index\.php.*/","images/blank.gif",$_SERVER['REQUEST_URI'])."' onload='loadStudentNames(\"init\")' />";
+}
+
+function printCustomCodeReportsForm()
 {
 	$options = array();
 	$results = getTableData("#__studentform", "class,id,name", "1 ORDER BY class+0, name");
 	foreach ($results as $result) {
 		array_push($options, "$result[0]:$result[1]:$result[2]");
 	}
-	insertGradesFormJS();
+	insertReportsFormJS();
 	echo "<div id=classStudentMap style='display:none'>".implode('/',$options)."</div>";
-	echo "<img src='".preg_replace("/index\.php.*/","images/blank.gif",$_SERVER['REQUEST_URI'])."' onload='loadStudentNames(\"init\")' />";
+	echo "<img src='".preg_replace("/index\.php.*/","images/blank.gif",$_SERVER['REQUEST_URI'])."' onload='onLoadReportsForm()' />";
 }
 
 function insertGradesFormJS()
@@ -640,6 +680,90 @@ function loadStudentNames(context)
 <?php
 }
 
+function insertReportsFormJS()
+{
+?>
+<script type='text/javascript'>
+//<![CDATA[
+
+window.addEvent('domready', function() {
+  $('class').addEvent('change', function() {
+    loadStudentNames('onchange');
+  });
+  
+  $('reportTypeId').addEvent('change', function() {
+    processFilters();
+  });
+});
+
+function onLoadReportsForm()
+{
+	loadStudentNames('init');
+ 	processFilters();
+}
+
+function processFilters()
+{
+	// Filters: reportTypeId reportYearId reportExamTypeId class studentName
+	// reportTypeId: 'View student sex ratio','View student sponsorship','View grades from an assessment','View top students from an assessment','View a student\'s performance over time'
+	
+	reportTypeElem = document.getElementById('reportTypeId');
+	reportYearElem = document.getElementById('reportYearId');
+	reportExamTypeElem = document.getElementById('reportExamTypeId');
+	classElem = document.getElementById('class');
+	studentNameElem = document.getElementById('studentName');
+	
+	switch (parseInt(reportTypeElem.value)) {
+		case 2:
+		case 3:
+			reportYearElem.style.display = 'block';
+			reportExamTypeElem.style.display = 'block';
+			classElem.style.display = 'none';
+			studentNameElem.style.display = 'none';
+			break;
+		case 4:
+			reportYearElem.style.display = 'none';
+			reportExamTypeElem.style.display = 'none';
+			classElem.style.display = 'block';
+			studentNameElem.style.display = 'block';
+			break;
+		default: // includes 0 and 1
+			reportYearElem.style.display = 'none';
+			reportExamTypeElem.style.display = 'none';
+			classElem.style.display = 'none';
+			studentNameElem.style.display = 'none';
+			break;
+	}
+}
+
+function loadStudentNames(context)
+{
+	studentNameLoadElem = document.getElementById('studentNameLoad');
+
+	studentNameElem = document.getElementById('studentName');
+	while(studentNameElem.options.length > 0) studentNameElem.remove(0);
+
+	classElem = document.getElementById('class');
+	mapElem = document.getElementById('classStudentMap');
+
+	students = mapElem.innerHTML.split('/');
+	for (var i=0; i<students.length; i++) {
+		fields = students[i].split(':');
+		if (classElem.value == fields[0]) { // applicable class
+			var option = document.createElement("option");
+			option.value = fields[1];
+			option.text = fields[2];
+			studentNameElem.add(option);
+			if (studentNameLoadElem.value==fields[1])
+				studentNameElem.selectedIndex = studentNameElem.options.length-1;
+		}
+	}
+}
+//]]>
+</script>
+<?php
+}
+
 function showStudentFormTitle()
 {
 	if (isset($_REQUEST['id'])) {
@@ -679,7 +803,6 @@ function showStudentList()
 		showStudent($_REQUEST['id']);
 		return;
 	}
-
 
 	echo "<table class=studentPageTitle><tr>";
 	echo "<td><h2>Listing All Students</h2></td>";
@@ -762,8 +885,8 @@ function showGradesList()
 		$examType = $_REQUEST['examType'];
 	}
 	else {
-		$examTypeOrdering = "'Final Exam (100 marks)','Test 4 (25 marks)','Test 3 (25 marks)','Midterm Exam (100 marks)','Test 2 (25 marks)','Test 1 (25 marks)'";
-		$examType = getTableData("#__gradesform","examType","1 ORDER BY FIELD(examType,$examTypeOrdering) LIMIT 1",0);
+		$examOptStr = "'".implode("','",getExamOptions('DESC'))."'";
+		$examType = getTableData("#__gradesform","examType","1 ORDER BY FIELD(examType,$examOptStr) LIMIT 1",0);
 	}
 	$maxMarks = preg_replace("/.*\((\d+) marks.*/","$1",$examType);
 	
@@ -787,11 +910,11 @@ function showGradesList()
 	echo "<tr style='border:0px'><td colspan=".count($columnHeadings)." style='text-align:right;border:0px'>";
 	$actionUrl = preg_replace("/[?].*/","",$_SERVER['REQUEST_URI']);
 	echo "<form id=gradeSelForm method=get onsubmit='return true;' action='$actionUrl'>";
-	$years = getTableData("#__gradesform","DISTINCT(year)","1 ORDER BY year DESC");
-	$yrsArr = array();
-	foreach ($years as $yr) array_push($yrsArr,$yr[0]);
-	echo "<select style='margin-right:5px' name=year>".getOptStr($yrsArr,$year)."</select>";
-	echo "<select style='margin-right:5px' name=examType>".getOptStr(array('Final Exam (100 marks)','Test 4 (25 marks)','Test 3 (25 marks)','Midterm Exam (100 marks)','Test 2 (25 marks)','Test 1 (25 marks)'),$examType)."</select>";
+	#$years = getTableData("#__gradesform","DISTINCT(year)","1 ORDER BY year DESC");
+	$yrsArr = array('2014-15','2013-14');
+	#foreach ($years as $yr) array_push($yrsArr,$yr[0]);
+	echo "<select style='width:100px;margin-right:5px' name=year>".getOptStr($yrsArr,false,0,$year)."</select>";
+	echo "<select style='margin-right:5px' name=examType>".getOptStr(getExamOptions('DESC'),false,0,$examType)."</select>";
 	echo "<input type=submit value='Get Grades' />";
 	echo "</form>";
 	echo "</td></tr>";
@@ -861,5 +984,71 @@ function showGradesList()
 	echo "</table>";
 }
 
+function showReports()
+{
+	$numStudents = getTableData("#__studentform", "COUNT(id)", "1", 0);
+	if ($numStudents==0) {
+		echo "<div class=message>There are no reports to view because no students have been entered into the system.<br>";
+		return;
+	}
+	
+	echo "<table class=studentPageTitle><tr>";
+	echo "<td><h2>Viewing School Reports</h2></td>";
+	echo "</tr></table>";
+
+	$graphs = array('View student sex ratio','View student sponsorship','View grades from an assessment','View top students from an assessment','View a student\'s performance over time');
+	
+	if (isset($_REQUEST['reportType'])) {
+		$reportType = $graphs[$_REQUEST['reportType']];
+	}
+	else {
+		$reportType = $graphs[0];
+	}
+
+	if (isset($_REQUEST['year'])) {
+		$year = $_REQUEST['year'];
+	}
+	else {
+		$year = getTableData("#__gradesform","year","1 ORDER BY year DESC LIMIT 1",0);
+	}
+
+	if (isset($_REQUEST['examType'])) {
+		$examType = $_REQUEST['examType'];
+	}
+	else {
+		$examOptStr = "'".implode("','",getExamOptions('DESC'))."'";
+		$examType = getTableData("#__gradesform","examType","1 ORDER BY FIELD(examType,$examOptStr) LIMIT 1",0);
+	}
+	$maxMarks = preg_replace("/.*\((\d+) marks.*/","$1",$examType);
+
+	$classes = array('I','II','III','IV','V','VI','VII','VIII','IX','X');
+	if (isset($_REQUEST['class'])) {
+		$class = $classes[$_REQUEST['class']-1];
+		$studentName = $_REQUEST['studentName'];
+	}
+	else {
+		$class = 'I';
+		$studentName = -1; # leave it to JS: select first name in given class
+	}
+	
+	// Display form for user selection
+	echo "<table class=studentList>";
+	echo "<tr style='border:0px'><td style='border:0px'>";
+	$actionUrl = preg_replace("/[?].*/","",$_SERVER['REQUEST_URI']);
+	echo "<form id=reportSelForm method=get onsubmit='return true;' action='$actionUrl'>";
+	echo "<select id=reportTypeId style='width:320px;margin-right:5px;float:left' name=reportType>".getOptStr($graphs,true,0,$reportType)."</select>";
+	echo "<select id=class style='margin-right:5px;display:none;float:left' name=class>".getOptStr($classes,true,1,$class)."</select>";
+	echo "<input id=studentNameLoad type=hidden disabled=disabled value='$studentName' />";
+	echo "<select id=studentName style='margin-right:5px;display:none;float:left' name=studentName></select>"; # leave options to JS
+	#$years = getTableData("#__gradesform","DISTINCT(year)","1 ORDER BY year DESC");
+	$yrsArr = array('2014-15','2013-14');
+	#foreach ($years as $yr) array_push($yrsArr,$yr[0]);
+	echo "<select id=reportYearId style='width:100px;margin-right:5px;display:none;float:left' name=year>".getOptStr($yrsArr,false,0,$year)."</select>";
+	echo "<select id=reportExamTypeId style='margin-right:5px;display:none;float:left' name=examType>".getOptStr(getExamOptions('DESC'),false,0,$examType)."</select>";
+	echo "<input type=submit value='View Report' />";
+	echo "</form>";
+	echo "</td></tr>";
+	echo "</table>";
+}
 
 ?>

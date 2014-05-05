@@ -68,7 +68,7 @@ Class DbRead extends \GCore\Admin\Extensions\Chronoforms\Action{
 					$data[$k] = $row[$model_id];
 				}
 			}else{
-				$data = $rows[$model_id];
+				if (isset($rows[$model_id])) $data = $rows[$model_id];
 			}
 			
 			if((bool)$config->get('load_under_modelid', 0) === true){
