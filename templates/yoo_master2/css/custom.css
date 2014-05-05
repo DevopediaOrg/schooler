@@ -9,7 +9,7 @@ table.studentList {
 }
 
 .studentList th {
- 	background-color: #82CAFF;
+ 	background-color: #ADD8E6;
 }
 
 .studentList td, .studentList th {
@@ -22,7 +22,7 @@ table.studentView {
 }
 
 .studentView th {
- 	background-color: #82CAFF;
+ 	background-color: #ADD8E6;
  	width: 200px;
 }
 
@@ -41,7 +41,7 @@ table.studentAllGrades {
 }
 
 .studentAllGrades th {
- 	background-color: #82CAFF;
+ 	background-color: #ADD8E6;
  	width: 200px;
 }
 
@@ -80,4 +80,9 @@ td.gradeHead {
 	
 .error {
 	color: #FF4500;
+}
+
+.message {
+	font-size:1.5em;
+	line-height:1.5em	
 }

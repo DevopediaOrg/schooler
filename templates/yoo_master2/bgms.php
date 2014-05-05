@@ -34,6 +34,7 @@ function getTableData($tablename, $fields='*', $match=1, $resultType=2)
 {
 	$db = JFactory::getDBO();
     $query = "SELECT $fields FROM $tablename WHERE $match";
+    //echo "$query<br>";
     $db->setQuery( $query );
     return getQueryResult($db,$resultType);
 }
@@ -251,7 +252,7 @@ function msgPostFormSubmit($linkType)
 	$id = getStudentRecordId($formname);
 	$itemLink = preg_replace("/(view-list|view-grades|add-student|add-grades)[?]?.*$/","$aliasname?id=$id",$_SERVER['REQUEST_URI'],1);
 	
-	echo "<div style='font-size:1.5em;line-height:1.5em'>Details have been saved.<br>";
+	echo "<div class=message>Details have been saved.<br>";
 	echo "You may wish to <a href='$itemLink'>review them</a>.</div>";
 }
 
@@ -423,6 +424,16 @@ function setGrade(&$data, $marks, $maxMarks)
 	return false;
 }
 
+function getOptStr($opts,$sel)
+{
+	$str = '';
+	foreach ($opts as $opt) {
+		if ($sel==$opt) $str .= "<option selected=selected value='$opt'>$opt</option>";
+		else $str .= "<option value='$opt'>$opt</option>";
+	}
+	return $str;
+}
+
 function showStudentGrades($id)
 { // $id is with reference to gradesForm
 	echo "<table class=studentPageTitle><tr>";
@@ -515,7 +526,7 @@ function validateGradesForm($form)
 
 	if ($id!=0 && $id!=$_REQUEST['id']) { // new combination and not the same entry being edited
 		$itemLink = preg_replace("/(view-list|view-grades|add-student|add-grades)[?]?.*$/","add-grades?id=$id",$_SERVER['REQUEST_URI'],1);
-		echo "<div class=error style='font-size:1.5em;line-height:1.5em'>Grades for this student were already entered earlier.<br>";
+		echo "<div class='error message'>Grades for this student were already entered earlier.<br>";
 		echo "You may wish to <a href='$itemLink'>edit them</a>.</div>";
 		return 'fail';
 	}
@@ -716,36 +727,93 @@ function showGradesList()
 		return;
 	}
 	
+	if (isset($_REQUEST['year'])) {
+		$year = $_REQUEST['year'];
+	}
+	else {
+		$year = getTableData("#__gradesForm","year","1 ORDER BY year DESC LIMIT 1",0);
+	}
+
+	if (isset($_REQUEST['examType'])) {
+		$examType = $_REQUEST['examType'];
+	}
+	else {
+		$examTypeOrdering = "'Final Exam (100 marks)','Test 4 (25 marks)','Test 3 (25 marks)','Midterm Exam (100 marks)','Test 2 (25 marks)','Test 1 (25 marks)'";
+		$examType = getTableData("#__gradesForm","examType","1 ORDER BY FIELD(examType,$examTypeOrdering) LIMIT 1",0);
+	}
+	$maxMarks = preg_replace("/.*\((\d+) marks.*/","$1",$examType);
+	
 	echo "<table class=studentPageTitle><tr>";
 	echo "<td><h2>Viewing Recent Grades</h2></td>";
 	echo "</tr></table>";
 	
 	$allPhotoStr = '/'.implode('/',readPhotoDir()).'/';
-	$itemLink = preg_replace("/view-list\??.*/","view-list",$_SERVER['REQUEST_URI']);
-	$columnHeadings = array('Photo','Student ID','Admission No.','Name','Class','Group','Sex','Parent','Guardian','Sponsor');
-	$students = getTableData("#__studentform",
-							 "id,studentUid,admissionNumber,name,class,`group`,sex,parent,guardian,sponsor",
-							 "1 ORDER BY name ASC"
+	$columnHeadings = array('Photo','Class','Student ID','Name','Kannada','English','Hindi','Mathematics','General Science','Social Studies','Total','Details');
+	$students = getTableData("#__studentform,#__gradesForm",
+							 "studentId,class,studentUid,name,kannadaMarks,englishMarks,hindiMarks,mathMarks,generalScienceMarks,socialStudiesMarks",
+							 "#__studentform.id=studentId AND year='$year' AND examType='$examType' ORDER BY class+0, name"
 				);
 	echo "<table class=studentList>";
+	
+	// Display form for user selection
+	echo "<tr style='border:0px'><td colspan=".count($columnHeadings)." style='text-align:right;border:0px'>";
+	$actionUrl = preg_replace("/[?].*/","",$_SERVER['REQUEST_URI']);
+	echo "<form id=gradeSelForm method=get onsubmit='return true;' action='$actionUrl'>";
+	$years = getTableData("#__gradesForm","DISTINCT(year)","1 ORDER BY year DESC");
+	$yrsArr = array();
+	foreach ($years as $yr) array_push($yrsArr,$yr[0]);
+	echo "<select style='margin-right:5px' name=year>".getOptStr($yrsArr,$year)."</select>";
+	echo "<select style='margin-right:5px' name=examType>".getOptStr(array('Final Exam (100 marks)','Test 4 (25 marks)','Test 3 (25 marks)','Midterm Exam (100 marks)','Test 2 (25 marks)','Test 1 (25 marks)'),$examType)."</select>";
+	echo "<input type=submit value='Get Grades' />";
+	echo "</form>";
+	echo "</td></tr>";
+
 	echo "<tr>";
 	foreach ($columnHeadings as $colHead) {
 		echo "<th>$colHead</th>";	
 	}
 	echo "</tr>";
+	
+	if (count($students)==0) {
+		echo "<tr><td colspan=".count($columnHeadings)."><div class=message>No grades have been entered for this combination of year and assessment type.</div></td></tr></table>";
+		return;
+	}
+	
 	foreach ($students as $student) {
-		$id = $student[0];
+		$totalMarks = $numSubjects = 0;
+		$studentId = $student[0];
+		$data = array();
 		echo "<tr>";
-		if (preg_match("/\/Photo-$id\.(png|gif|jpg|jpeg)\//",$allPhotoStr)) {
-			$imgHtml = preg_replace("/<img /","<img style='width:64px' ",getPhotoCode($id));
-			echo "<td>$imgHtml</td>";
+		$itemLink = preg_replace("/view-grades\??.*/","view-grades",$_SERVER['REQUEST_URI']);
+		if (preg_match("/\/Photo-$studentId\.(png|gif|jpg|jpeg)\//",$allPhotoStr)) {
+			echo "<td>".getPhotoCode($studentId,"style='width:64px'")."</td>";
 		}
 		else echo "<td>&nbsp;</td>";
 		for ($i=1; $i<count($student); $i++) { // ignore id
-			if ($i==3) { // have link for name
-				echo "<td><a href='$itemLink?id=$id'>".$student[$i]."</td>"; 
+			if ($i==1) {
+				echo "<td>".getClassDisplayText($student[$i])."</td>";
 			}
-			else echo "<td>".$student[$i]."</td>";	
+			else if ($i==3) { // have link for name
+				$itemLink = preg_replace("/\/grades\/.*/","/students/view-list",$_SERVER['REQUEST_URI']);
+				echo "<td><a href='$itemLink?id=$studentId'>".$student[$i]."</td>"; 
+			}
+			else if ($i>=4 && $i<=9) {
+				if (setGrade($data,$student[$i],$maxMarks)) {
+					$totalMarks += $student[$i];
+					$numSubjects++;
+				}
+				echo "<td>".$data['grade']."</td>";
+			}
+			else echo "<td>".$student[$i]."</td>";
+			if ($i==count($student)-1) {
+				// Total
+				setGrade($data,$totalMarks,$numSubjects*$maxMarks);
+				echo "<td>".$data['grade']."</td>";
+				
+				// link to student all grades
+				$itemLink = preg_replace("/\/grades\/.*/","/grades/view-grades",$_SERVER['REQUEST_URI']);
+				echo "<td><a href='$itemLink?studentId=$studentId'>Details</td>"; 
+			}
 		}
 		echo "</tr>";
 	}
