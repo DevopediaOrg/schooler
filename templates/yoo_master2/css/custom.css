@@ -82,6 +82,11 @@ td.gradeHead {
 	color: #FF4500;
 }
 
+.duplicateErr {
+	color: red;
+	font-size:1.5em;
+}
+
 .message {
 	font-size:1.5em;
 	line-height:1.5em	

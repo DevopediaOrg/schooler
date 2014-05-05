@@ -183,7 +183,7 @@ function getRecordId($formname)
 	}
 	else { // adding a new record
 		$id = getTableData("#__$formname", "id", "user_id='$userId' ORDER BY created DESC LIMIT 1", 0);
-		//$id = getTableData("#__gradesForm,#__studentform", "#__studentform.id", "#__gradesForm.user_id='$userId' AND studentId=#__studentform.id ORDER BY #__gradesForm.created DESC LIMIT 1", 0);
+		//$id = getTableData("#__gradesform,#__studentform", "#__studentform.id", "#__gradesform.user_id='$userId' AND studentId=#__studentform.id ORDER BY #__gradesform.created DESC LIMIT 1", 0);
 	}
 	
 	return $id;
@@ -238,7 +238,7 @@ function msgPostFormSubmit($linkType)
 { // To be called only after the form is saved in DB
 	if ($linkType=='grades') {
 		$aliasname = 'view-grades';
-		$id = getRecordId('gradesForm');
+		$id = getRecordId('gradesform');
 	}
 	else {
 		$aliasname = 'view-list';
@@ -308,11 +308,11 @@ function showStudent($id)
 	echo "</table>";
 }
 
-function printAllGradesTable($data, $year)
+function printAllGradesTable($data, $year, $class)
 {
 	$rows = array('Kannada','English','Hindi','Mathematics','General Science','Social Studies','Total','Physical Education','Computer Science','Attendance','Conduct','Remarks','Date');
 	$cols = array('Subject','Test 1 (25 marks)','Test 2 (25 marks)','Midterm Exam (100 marks)','Test 3 (25 marks)','Test 4 (25 marks)','Final Exam (100 marks)');
-	echo "<h3 style='margin-top:40px'>$year</h3>";
+	echo "<h3 style='margin-top:40px'>$year / Class $class</h3>";
 	echo "<table class=studentAllGrades>";
 	
 	echo "<tr rowspan=2><th>$cols[0]</th>";
@@ -364,20 +364,28 @@ function showStudentAllGrades($id)
 	echo "<tr><th>Class</th><td>".getClassDisplayText($studentDetails[2])."</td></tr>";
 	echo "<tr><th>Group</th><td>".$studentDetails[3]."</td></tr>";
 	echo "</table>";
-
-	$examTypeOrdering = "'Final Exam (100 marks)','Test 4 (25 marks)','Test 3 (25 marks)','Midterm Exam (100 marks)','Test 2 (25 marks)','Test 1 (25 marks)'";
-	$results = getTableData("#__studentform,#__gradesForm",
-							 "studentId,year,examType,DATE_FORMAT(#__gradesForm.created,'%d %M %Y'),DATE_FORMAT(#__gradesForm.modified,'%d %M %Y'),kannadaMarks,englishMarks,hindiMarks,mathMarks,generalScienceMarks,socialStudiesMarks,computerScience,physicalEducation,conduct,attendance,remarks,#__gradesForm.id",
-							 "#__studentform.id=studentId AND studentId=$id ORDER BY year DESC, FIELD(examType,$examTypeOrdering)");
 	
-	$year = ''; $data = array();
+	$examTypeOrdering = "'Final Exam (100 marks)','Test 4 (25 marks)','Test 3 (25 marks)','Midterm Exam (100 marks)','Test 2 (25 marks)','Test 1 (25 marks)'";
+	$results = getTableData("#__studentform,#__gradesform",
+							 "studentId,year,examType,DATE_FORMAT(#__gradesform.created,'%d %M %Y'),DATE_FORMAT(#__gradesform.modified,'%d %M %Y'),kannadaMarks,englishMarks,hindiMarks,mathMarks,generalScienceMarks,socialStudiesMarks,computerScience,physicalEducation,conduct,attendance,remarks,#__gradesform.id,#__gradesform.class",
+							 "#__studentform.id=studentId AND studentId=$id ORDER BY year DESC, FIELD(examType,$examTypeOrdering)");
+
+	if (count($results)==0) {
+		echo "<table class=studentView>";
+		echo "<tr><td><div class=message style='margin-top:50px'>No grades have been recorded for this student.</div></td></tr></table>";
+		echo "</table>";
+		return;
+	}
+	
+	$year = ''; $gradesId=-1; $data = array();
 	for ($i=0; $i<count($results); $i++) {
 		$res = $results[$i];
-		if ($year!='' && $res[1]!=$year) {
-			printAllGradesTable($data, $year);
+		if ($year!='' && $res[1]!=$year) { // start of a new year, print processed one
+			printAllGradesTable($data, $year, $class);
 			$data = array();
 		}
 		$year = $res[1];
+		$class = getClassDisplayText($res[17]);
 		$examType = $res[2];
 		$maxMarks = preg_replace("/.*\((\d+) marks.*/","$1",$examType);
 		$numSubjects = 0;
@@ -405,7 +413,7 @@ function showStudentAllGrades($id)
 		$gradesLink = preg_replace("/\/grades\/.*/","/grades/view-grades?id=".$res[16],$_SERVER['REQUEST_URI']);
 		$data[$examType]['link'] = $gradesLink; // we will have id per exam
 	}
-	if ($year!='') printAllGradesTable($data, $year);
+	if ($year!='') printAllGradesTable($data, $year, $class);
 }
 
 function setGrade(&$data, $marks, $maxMarks)
@@ -430,7 +438,7 @@ function getOptStr($opts,$sel)
 }
 
 function showStudentGrades($id)
-{ // $id is with reference to gradesForm
+{ // $id is with reference to gradesform
 	echo "<table class=studentPageTitle><tr>";
 	echo "<td><h2>Viewing Student Grades</h2></td>";
 	$user = JFactory::getUser();
@@ -439,13 +447,13 @@ function showStudentGrades($id)
 	                        "'>Edit</a></b></td>";
 	echo "</tr></table>";
 
-	$result = getTableData("#__studentform,#__gradesForm",
-							"studentId,name,class,year,examType,DATE_FORMAT(#__gradesForm.created,'%d %M %Y'),DATE_FORMAT(#__gradesForm.modified,'%d %M %Y'),kannadaMarks,englishMarks,hindiMarks,mathMarks,generalScienceMarks,socialStudiesMarks,computerScience,physicalEducation,conduct,attendance,remarks",
-							 "#__studentform.id=studentId AND #__gradesForm.id='$id'",
+	$result = getTableData("#__studentform,#__gradesform",
+							"studentId,name,#__studentform.class,#__gradesform.class,year,examType,DATE_FORMAT(#__gradesform.created,'%d %M %Y'),DATE_FORMAT(#__gradesform.modified,'%d %M %Y'),kannadaMarks,englishMarks,hindiMarks,mathMarks,generalScienceMarks,socialStudiesMarks,computerScience,physicalEducation,conduct,attendance,remarks",
+							 "#__studentform.id=studentId AND #__gradesform.id='$id'",
 							 1);
 
-	$headings = array('Student Name','Class','Year','Assessment','Date','Kannada','English','Hindi','Mathematics','General Science','Social Studies','Computer Science','Physical Education','Conduct','Attendance','Remarks');
-	$maxMarks = preg_replace("/.*\((\d+) marks.*/","$1",$result[4]);
+	$headings = array('Student Name','Current','This Grade For','Year','Assessment','Date','Kannada','English','Hindi','Mathematics','General Science','Social Studies','Computer Science','Physical Education','Conduct','Attendance','Remarks');
+	$maxMarks = preg_replace("/.*\((\d+) marks.*/","$1",$result[5]);
 	$totalMarks = 0; $numSubjects = 0;
 	echo "<table class=studentView>";
 	for ($i=$j=0; $i<count($headings); $i++, $j++) {
@@ -455,15 +463,15 @@ function showStudentGrades($id)
 				.strval(count($headings)+4) . "'>" . getPhotoCode($id)."</td><th>" // 4 rows are added for separation and total marks
 				. $headings[$i]."</th><td colspan=3>$fieldVal</td></tr>";	
 		}
-		else if ($i==1)  {
-			echo "<tr><th>".$headings[$i]."</th><td colspan=3>".getClassDisplayText($fieldVal)."</td></tr>";
+		else if ($i==1 || $i==2)  {
+			echo "<tr><th>".$headings[$i]."</th><td colspan=3>Class ".getClassDisplayText($fieldVal)."</td></tr>";
 		}
-		else if ($i==4) {
-			if (preg_match("/[1-9]/",$result[6])) $fieldVal = $result[6]; // use modified datetime
+		else if ($i==5) {
+			if (preg_match("/[1-9]/",$result[7])) $fieldVal = $result[7]; // use modified datetime
 			echo "<tr><th>".$headings[$i]."</th><td colspan=3>$fieldVal</td></tr>";
 			$j++;
 		}
-		else if ($i>=5 && $i<=10) {
+		else if ($i>=6 && $i<=11) {
 			if ($fieldVal>0) {
 				$totalMarks += $fieldVal;
 				$numSubjects++;
@@ -482,7 +490,7 @@ function showStudentGrades($id)
 				echo "</tr>";
 			}
 		}
-		else if ($i==14) {
+		else if ($i==15) {
 			$attendanceFields = explode('/',preg_replace("/ /","",$fieldVal));
 			if ($attendanceFields[1]) {
 				$percentage = floor(0.5+100*$attendanceFields[0]/$attendanceFields[1]);
@@ -494,11 +502,11 @@ function showStudentGrades($id)
 		}
 		else echo "<tr><th>".$headings[$i]."</th><td colspan=3>$fieldVal</td></tr>";
 
-		if ($i==4) {
+		if ($i==5) {
 			echo "<tr><td colspan=4 style='border:0px'>&nbsp;</td></tr>";
 			echo "<tr><td style='border:0px'>&nbsp;</td><td class=gradeHead style='text-align:left'>Grade</td><td class=gradeHead>Percentage</td><td class=gradeHead>Marks</td></tr>";
 		}
-		else if ($i==10) {
+		else if ($i==11) {
 			if ($numSubjects*$maxMarks) {
 				$percentage = floor(0.5+100*$totalMarks/($numSubjects*$maxMarks)); // count only subjects taken for overall percentage
 				echo "<tr class=marks><td style='text-align:left'><b>Total</b></td><td style='text-align:left'><b>".getGrade($percentage)."</b></td><td><b>$percentage %</b></td><td><b>$totalMarks</b></td></tr>";
@@ -516,7 +524,7 @@ function validateGradesForm($form)
 	$year = $form->data['year'];
 	$examType = $form->data['examType'];
 	
-	$id = getTableData("#__gradesForm", "id",
+	$id = getTableData("#__gradesform", "id",
 					"studentId='$studentId' AND year='$year' AND examType='$examType' ORDER BY modified DESC, created DESC LIMIT 1", 0);
 
 	if ($id!=0 && $id!=$_REQUEST['id']) { // new combination and not the same entry being edited
@@ -684,12 +692,29 @@ function showStudentList()
 							 "id,studentUid,admissionNumber,name,class,`group`,sex,parent,guardian,sponsor",
 							 "1 ORDER BY name ASC"
 				);
+				
+	# Find duplicates in studentUid
+	$dups = array(); $uids = array();
+	foreach ($students as $student) array_push($uids, $student[1]);
+	foreach(array_count_values($uids) as $val => $c) {
+	    if($c > 1) $dups[] = $val;
+	}
+	
 	echo "<table class=studentList>";
+	if (count($dups)>0) {
+		echo "<tr><td colspan='".count($columnHeadings)."' style='border:0px;text-align:right'><span class=duplicateErr>*</span> Please correct duplicate student IDs.</td></tr>";
+	}
 	echo "<tr>";
 	foreach ($columnHeadings as $colHead) {
 		echo "<th>$colHead</th>";	
 	}
 	echo "</tr>";
+	
+	if (count($students)==0) {
+		echo "<tr><td colspan=".count($columnHeadings)."><div class=message>No students have been entered into the system.</div></td></tr></table>";
+		return;
+	}
+
 	foreach ($students as $student) {
 		$id = $student[0];
 		echo "<tr>";
@@ -698,7 +723,11 @@ function showStudentList()
 		}
 		else echo "<td>&nbsp;</td>";
 		for ($i=1; $i<count($student); $i++) { // ignore id
-			if ($i==3) { // have link for name
+			if ($i==1) { // indicate duplicates
+				if (in_array($student[$i],$dups)) echo "<td>".$student[$i]." <span class=duplicateErr>*</span></td>";
+				else echo "<td>".$student[$i]."</td>";
+			}
+			else if ($i==3) { // have link for name
 				echo "<td><a href='$itemLink?id=$id'>".$student[$i]."</td>"; 
 			}
 			else if ($i==4) { // conversion for class
@@ -726,7 +755,7 @@ function showGradesList()
 		$year = $_REQUEST['year'];
 	}
 	else {
-		$year = getTableData("#__gradesForm","year","1 ORDER BY year DESC LIMIT 1",0);
+		$year = getTableData("#__gradesform","year","1 ORDER BY year DESC LIMIT 1",0);
 	}
 
 	if (isset($_REQUEST['examType'])) {
@@ -734,7 +763,7 @@ function showGradesList()
 	}
 	else {
 		$examTypeOrdering = "'Final Exam (100 marks)','Test 4 (25 marks)','Test 3 (25 marks)','Midterm Exam (100 marks)','Test 2 (25 marks)','Test 1 (25 marks)'";
-		$examType = getTableData("#__gradesForm","examType","1 ORDER BY FIELD(examType,$examTypeOrdering) LIMIT 1",0);
+		$examType = getTableData("#__gradesform","examType","1 ORDER BY FIELD(examType,$examTypeOrdering) LIMIT 1",0);
 	}
 	$maxMarks = preg_replace("/.*\((\d+) marks.*/","$1",$examType);
 	
@@ -743,18 +772,22 @@ function showGradesList()
 	echo "</tr></table>";
 	
 	$allPhotoStr = '/'.implode('/',readPhotoDir()).'/';
-	$columnHeadings = array('Photo','Class','Student ID','Name','Kannada','English','Hindi','Mathematics','General Science','Social Studies','Total','Details');
-	$students = getTableData("#__studentform,#__gradesForm",
-							 "studentId,class,studentUid,name,kannadaMarks,englishMarks,hindiMarks,mathMarks,generalScienceMarks,socialStudiesMarks",
-							 "#__studentform.id=studentId AND year='$year' AND examType='$examType' ORDER BY class+0, name"
+	$columnHeadings = array('Photo','Current Class','Student ID','Name','Kannada','English','Hindi','Mathematics','General Science','Social Studies','Total','Details');
+	
+	# Get only current class, not the class where the student was in the past
+	# If there are no grades for a combination of year and examType, the student will not be displayed
+	$students = getTableData("#__studentform,#__gradesform",
+							 "studentId,#__studentform.class,studentUid,name,kannadaMarks,englishMarks,hindiMarks,mathMarks,generalScienceMarks,socialStudiesMarks",
+							 "#__studentform.id=studentId AND year='$year' AND examType='$examType' ORDER BY #__studentform.class+0, name"
 				);
+
 	echo "<table class=studentList>";
 	
 	// Display form for user selection
 	echo "<tr style='border:0px'><td colspan=".count($columnHeadings)." style='text-align:right;border:0px'>";
 	$actionUrl = preg_replace("/[?].*/","",$_SERVER['REQUEST_URI']);
 	echo "<form id=gradeSelForm method=get onsubmit='return true;' action='$actionUrl'>";
-	$years = getTableData("#__gradesForm","DISTINCT(year)","1 ORDER BY year DESC");
+	$years = getTableData("#__gradesform","DISTINCT(year)","1 ORDER BY year DESC");
 	$yrsArr = array();
 	foreach ($years as $yr) array_push($yrsArr,$yr[0]);
 	echo "<select style='margin-right:5px' name=year>".getOptStr($yrsArr,$year)."</select>";
@@ -763,6 +796,17 @@ function showGradesList()
 	echo "</form>";
 	echo "</td></tr>";
 
+	# Find duplicates in combination of student, year, examType: already filtered for the last two
+	$dups = array(); $studentIds = array();
+	foreach ($students as $student) array_push($studentIds, $student[0]);
+	foreach(array_count_values($studentIds) as $val => $c) {
+	    if($c > 1) $dups[] = $val;
+	}
+
+	if (count($dups)>0) {
+		echo "<tr><td colspan='".count($columnHeadings)."' style='border:0px;text-align:right'><span class=duplicateErr>*</span> Please correct duplicate entries for the same student.</td></tr>";
+	}
+	
 	echo "<tr>";
 	foreach ($columnHeadings as $colHead) {
 		echo "<th>$colHead</th>";	
@@ -770,7 +814,7 @@ function showGradesList()
 	echo "</tr>";
 	
 	if (count($students)==0) {
-		echo "<tr><td colspan=".count($columnHeadings)."><div class=message>No grades have been entered for this combination of year and assessment type.</div></td></tr></table>";
+		echo "<tr><td colspan=".count($columnHeadings)."><div class=message>No grades have been recorded for this combination of year and assessment type.</div></td></tr></table>";
 		return;
 	}
 	
@@ -788,22 +832,24 @@ function showGradesList()
 			if ($i==1) {
 				echo "<td>".getClassDisplayText($student[$i])."</td>";
 			}
-			else if ($i==3) { // have link for name
+			else if ($i==3) { // have link for name and indicate duplicates
 				$itemLink = preg_replace("/\/grades\/.*/","/students/view-list",$_SERVER['REQUEST_URI']);
-				echo "<td><a href='$itemLink?id=$studentId'>".$student[$i]."</td>"; 
+				if (in_array($studentId,$dups)) echo "<td><a href='$itemLink?id=$studentId'>".$student[$i]." <span class=duplicateErr>*</span></td>";
+				else echo "<td><a href='$itemLink?id=$studentId'>".$student[$i]."</td>";
 			}
 			else if ($i>=4 && $i<=9) {
 				if (setGrade($data,$student[$i],$maxMarks)) {
 					$totalMarks += $student[$i];
 					$numSubjects++;
+					echo "<td>".$data['grade']."</td>";
 				}
-				echo "<td>".$data['grade']."</td>";
+				else echo "<td>&nbsp;</td>";
 			}
 			else echo "<td>".$student[$i]."</td>";
 			if ($i==count($student)-1) {
 				// Total
-				setGrade($data,$totalMarks,$numSubjects*$maxMarks);
-				echo "<td>".$data['grade']."</td>";
+				if (setGrade($data,$totalMarks,$numSubjects*$maxMarks)) echo "<td>".$data['grade']."</td>";
+				else echo "<td>&nbsp;</td>";
 				
 				// link to student all grades
 				$itemLink = preg_replace("/\/grades\/.*/","/grades/view-grades",$_SERVER['REQUEST_URI']);
