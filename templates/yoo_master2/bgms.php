@@ -27,8 +27,11 @@ function executeQuery($query, $resultType=2)
 {
 	$db = JFactory::getDBO();
     $db->setQuery( $query );
-    return getQueryResult($db,$resultType);
+    if (preg_match("/^SELECT/",$query))
+    	return getQueryResult($db,$resultType);
+    else $db->query();
 }
+
 
 function getTableData($tablename, $fields='*', $match=1, $resultType=2)
 {
@@ -38,6 +41,7 @@ function getTableData($tablename, $fields='*', $match=1, $resultType=2)
     $db->setQuery( $query );
     return getQueryResult($db,$resultType);
 }
+
 
 function takeDbBackup($dbBackupFile, $currtime)
 {
@@ -281,20 +285,36 @@ function getClassDisplayText($myclass)
 	return $romans[$myclass];
 }
 
+function deleteStudent($id)
+{	// Do not delete the grades of this student.
+	executeQuery("DELETE FROM #__studentform WHERE id=$id", 0);
+	echo "<div class=message>Entry has been deleted.<br>";
+}
+
 function showStudent($id)
 {
 	echo "<table class=studentPageTitle><tr>";
 	echo "<td><h2>Viewing Student Details</h2></td>";
-	$user = JFactory::getUser();
-	if (!$user->guest) echo "<td style='text-align:right'><b><a href='".
-	                        preg_replace("/view-list/","add-student",$_SERVER['REQUEST_URI']).
-	                        "'>Edit</a></b></td>";
-	echo "</tr></table>";
 
 	$result = getTableData("#__studentform",
 							 "name,dateOfBirth,age,sex,admissionNumber,studentUid,class,`group`,parent,guardian,sponsor",
 							 "id='$id'",
 							 1);
+
+	if (count($result)==0) {
+		echo "</tr><tr><td><div class='error message'>The requested entry does not exist.</td></tr></table>";
+		return;
+	}
+
+	$user = JFactory::getUser();
+	if (!$user->guest) {
+		echo "<td style='text-align:right'>";
+		echo "<b><a href='".preg_replace("/view-list/","add-student",$_SERVER['REQUEST_URI'])."'>Edit</a></b>";
+		echo " | <b><a onclick='return confirm(\"Are you sure you want to delete this entry?\")' href='".preg_replace("/view-list\?.*/","view-list?action=delete&id=$id",$_SERVER['REQUEST_URI'])."'>Delete</a></b>";
+		echo "</td>";
+	}
+
+	echo "</tr></table>";
 
 	$headings = array('Name','Date of Birth','Age','Sex','Admission No.','Student ID','Class','Group','Parent','Guardian','Sponsor');
 	echo "<table class=studentView>";
@@ -366,12 +386,17 @@ function printAllGradesTable($data, $year, $class)
 }
 
 function showStudentAllGrades($id)
-{ // $id is with reference to studentsform
+{	// $id is with reference to studentsform
 	echo "<table class=studentPageTitle><tr>";
 	echo "<td><h2>Viewing Student Grades (All Exams)</h2></td>";
 	echo "</tr></table>";
 
 	$studentDetails = getTableData("#__studentform","name,studentUid,class,`group`","id=$id", 1);
+	if (count($studentDetails)==0) {
+		echo "<div class='error message'>The requested student does not exist. Grades cannot be displayed.</div>";
+		return;
+	}
+	
 	echo "<table class=studentView>";
 	echo "<tr><td rowspan=4 width=120px>".getPhotoCode($id, "style='width:100px'")."</td>";
 	$studentLink = preg_replace("/\/grades\/.*/","/students/view-list?id=".$id,$_SERVER['REQUEST_URI']);
@@ -457,20 +482,41 @@ function getOptStr($opts, $autoVal=true, $startVal=0, $sel='')
 	return $str;
 }
 
+function deleteStudentGrades($id)
+{
+	executeQuery("DELETE FROM #__gradesform WHERE id=$id", 0);
+	echo "<div class=message>Entry has been deleted.<br>";
+}
+
 function showStudentGrades($id)
 { // $id is with reference to gradesform
 	echo "<table class=studentPageTitle><tr>";
 	echo "<td><h2>Viewing Student Grades</h2></td>";
-	$user = JFactory::getUser();
-	if (!$user->guest) echo "<td style='text-align:right'><b><a href='".
-	                        preg_replace("/view-grades/","add-grades",$_SERVER['REQUEST_URI']).
-	                        "'>Edit</a></b></td>";
-	echo "</tr></table>";
+
+	$gradesEntryExists = getTableData("#__gradesform","COUNT(*)","id=$id", 0);
+	if ($gradesEntryExists==0) {
+		echo "</tr><tr><td><div class='error message'>The requested entry does not exist.</td></tr></table>";
+		return;
+	}
 
 	$result = getTableData("#__studentform,#__gradesform",
 							"studentId,name,#__studentform.class,#__gradesform.class,year,examType,DATE_FORMAT(#__gradesform.created,'%d %M %Y'),DATE_FORMAT(#__gradesform.modified,'%d %M %Y'),kannadaMarks,englishMarks,hindiMarks,mathMarks,generalScienceMarks,socialStudiesMarks,computerScience,physicalEducation,conduct,attendance,remarks",
 							 "#__studentform.id=studentId AND #__gradesform.id='$id'",
 							 1);
+	if (count($result)==0) {
+		echo "</tr><tr><td><div class='error message'>The requested student does not exist. Grades cannot be displayed.</td></tr></table>";
+		return;
+	}
+
+	$user = JFactory::getUser();
+	if (!$user->guest) {
+		echo "<td style='text-align:right'>";
+		echo "<b><a href='".preg_replace("/view-grades/","add-grades",$_SERVER['REQUEST_URI'])."'>Edit</a></b>";
+		echo " | <b><a onclick='return confirm(\"Are you sure you want to delete this entry?\")' href='".preg_replace("/view-grades\?.*/","view-grades?action=delete&id=$id",$_SERVER['REQUEST_URI'])."'>Delete</a></b>";
+		echo "</td>";
+	}
+	echo "</tr></table>";
+	
 	$studentLink = preg_replace("/\/grades[?]?.*$/","/students/view-list?id=$result[0]",$_SERVER['REQUEST_URI'],1);
 	$studentGradesLink = preg_replace("/\/grades[?]?.*$/","/grades/view-grades?studentId=$result[0]",$_SERVER['REQUEST_URI'],1);
 							 
@@ -811,7 +857,8 @@ function showGradesFormTitle()
 function showStudentList()
 {
 	if (isset($_REQUEST['id'])) {
-		showStudent($_REQUEST['id']);
+		if (isset($_REQUEST['action']) && $_REQUEST['action']=='delete') deleteStudent($_REQUEST['id']);
+		else showStudent($_REQUEST['id']);
 		return;
 	}
 
@@ -877,7 +924,8 @@ function showStudentList()
 function showGradesList()
 {
 	if (isset($_REQUEST['id'])) {
-		showStudentGrades($_REQUEST['id']);
+		if (isset($_REQUEST['action']) && $_REQUEST['action']=='delete') deleteStudentGrades($_REQUEST['id']);
+		else showStudentGrades($_REQUEST['id']);
 		return;
 	}
 	else if (isset($_REQUEST['studentId'])) {
@@ -1235,7 +1283,6 @@ function reportGrades($currtime, $pathPrefix, $year, $examType)
 	return;
 }
 
-
 function reportTopStudents($currtime, $pathPrefix, $year, $examType)
 {
 	echo "<h3>Class Toppers by Group</h3>";
@@ -1284,7 +1331,6 @@ function reportTopStudents($currtime, $pathPrefix, $year, $examType)
 	
 	return;
 }
-
 
 function reportStudentPerformance($currtime, $pathPrefix)
 {	// TODO NOT COMPLETED: TBD
