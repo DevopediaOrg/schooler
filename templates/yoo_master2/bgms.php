@@ -54,7 +54,7 @@ function takeDbBackup($dbBackupFile, $currtime)
 
 
 /*==========================================================
-  Export DB tables to a file and FTP the file. 
+  Export DB tables to a file and FTP the file.
 ----------------------------------------------------------*/
 function backup_tables($host,$user,$pass,$name,$file,$tables = '*')
 { // Source: http://davidwalsh.name/backup-mysql-database-php
@@ -132,7 +132,7 @@ function get_backup_timestamp()
 	$query = $db->getQuery(true);
 
 	$conditions = array(
-	    $db->quoteName('title') . ' = ' . $db->quote('Home'), 
+	    $db->quoteName('title') . ' = ' . $db->quote('Home'),
 	    $db->quoteName('alias') . ' = ' . $db->quote('home')
 	);
 	$query->select($db->quoteName(array('fulltext')));
@@ -153,7 +153,7 @@ function update_backup_timestamp($currtime)
 	    $db->quoteName('fulltext') . ' = ' . $db->quote($currtime)
 	);
 	$conditions = array(
-	    $db->quoteName('title') . ' = ' . $db->quote('Home'), 
+	    $db->quoteName('title') . ' = ' . $db->quote('Home'),
 	    $db->quoteName('alias') . ' = ' . $db->quote('home')
 	);
 	$query->update($db->quoteName('#__content'))->set($fields)->where($conditions);
@@ -185,7 +185,7 @@ function getRecordId($formname)
 		$id = getTableData("#__$formname", "id", "user_id='$userId' ORDER BY created DESC LIMIT 1", 0);
 		//$id = getTableData("#__gradesform,#__studentform", "#__studentform.id", "#__gradesform.user_id='$userId' AND studentId=#__studentform.id ORDER BY #__gradesform.created DESC LIMIT 1", 0);
 	}
-	
+
 	return $id;
 }
 
@@ -220,7 +220,7 @@ function findPhoto($id)
 		}
 	}
 	// return implode("/",$currPhotos); // only for debugging
-	
+
 	if ($latestPhoto=='') { // if not found, use default.
 		$sex = getTableData("#__studentform", "sex", "id='$id'", 0);
 		if ($sex=='Male') {
@@ -230,7 +230,7 @@ function findPhoto($id)
 			$latestPhoto = "$urlpath/girl.jpg";
 		}
 	}
-	
+
 	return $latestPhoto;
 }
 
@@ -251,9 +251,9 @@ function msgPostFormSubmit($linkType)
 		$aliasname = 'view-list';
 		$id = getRecordId('studentform');
 	}
-	
+
 	$itemLink = preg_replace("/(view-list|view-grades|add-student|add-grades)[?]?.*$/","$aliasname?id=$id",$_SERVER['REQUEST_URI'],1);
-	
+
 	echo "<div class=message>Details have been saved.<br>";
 	echo "You may wish to <a href='$itemLink'>review them</a>.</div>";
 }
@@ -301,15 +301,20 @@ function showStudent($id)
 	for ($i=0; $i<count($headings); $i++) {
 		if ($i==0) { // first cell is for photo
 			echo "<tr><td style='border:0px; vertical-align:top; width:256px' rowspan='"
-				.count($headings)."'>".getPhotoCode($id)."</td><th>"
-				.$headings[$i]."</th><td>$result[$i]</td></tr>";	
+				.strval(count($headings)+2) . "'>".getPhotoCode($id)."</td><th>" // 2 rows added at the end
+				.$headings[$i]."</th><td>$result[$i]</td></tr>";
 		}
 		else {
 			if ($i==6) { // class: convert to Roman numerals for display
 				$currRes = getClassDisplayText($result[$i]);
 			}
 			else $currRes = $result[$i];
-			echo "<tr><th>".$headings[$i]."</th><td>$currRes</td></tr>";	
+			echo "<tr><th>".$headings[$i]."</th><td>$currRes</td></tr>";
+		}
+		if ($i==count($headings)-1){ // end of processing
+			$studentGradesLink = preg_replace("/\/students[?]?.*$/","/grades/view-grades?studentId=$id",$_SERVER['REQUEST_URI'],1);
+			echo "<tr><td colspan=2 style='border:0px'>&nbsp;</td></tr>";
+			echo "<tr><td></td><td style='border:0px'><a href='$studentGradesLink'>View grades</a></td></tr>";			
 		}
 	}
 	echo "</table>";
@@ -321,7 +326,7 @@ function printAllGradesTable($data, $year, $class)
 	$cols = array_merge(array('Subject'),getExamOptions('ASC'));
 	echo "<h3 style='margin-top:40px'>$year / Class $class</h3>";
 	echo "<table class=studentAllGrades>";
-	
+
 	echo "<tr rowspan=2><th>$cols[0]</th>";
 	for ($i=1; $i<count($cols); $i++) {
 		if (isset($data[$cols[$i]]['link']) && $data[$cols[$i]]['link']) echo "<th colspan=3><a href='".$data[$cols[$i]]['link']."'>".preg_replace("/ \(/","<br>(",$cols[$i])."</a></th>";
@@ -366,7 +371,7 @@ function showStudentAllGrades($id)
 	echo "<td><h2>Viewing Student Grades (All Exams)</h2></td>";
 	echo "</tr></table>";
 
-	$studentDetails = getTableData("#__studentform","name,studentUid,class,`group`","id=$id", 1);	
+	$studentDetails = getTableData("#__studentform","name,studentUid,class,`group`","id=$id", 1);
 	echo "<table class=studentView>";
 	echo "<tr><td rowspan=4 width=120px>".getPhotoCode($id, "style='width:100px'")."</td>";
 	$studentLink = preg_replace("/\/grades\/.*/","/students/view-list?id=".$id,$_SERVER['REQUEST_URI']);
@@ -375,7 +380,7 @@ function showStudentAllGrades($id)
 	echo "<tr><th>Class</th><td>".getClassDisplayText($studentDetails[2])."</td></tr>";
 	echo "<tr><th>Group</th><td>".$studentDetails[3]."</td></tr>";
 	echo "</table>";
-	
+
 	$examOptStr = "'".implode("','",getExamOptions('DESC'))."'";
 	$results = getTableData("#__studentform,#__gradesform",
 							 "studentId,year,examType,DATE_FORMAT(#__gradesform.created,'%d %M %Y'),DATE_FORMAT(#__gradesform.modified,'%d %M %Y'),kannadaMarks,englishMarks,hindiMarks,mathMarks,generalScienceMarks,socialStudiesMarks,computerScience,physicalEducation,conduct,attendance,remarks,#__gradesform.id,#__gradesform.class",
@@ -387,7 +392,7 @@ function showStudentAllGrades($id)
 		echo "</table>";
 		return;
 	}
-	
+
 	$year = ''; $gradesId=-1; $data = array();
 	for ($i=0; $i<count($results); $i++) {
 		$res = $results[$i];
@@ -445,7 +450,7 @@ function getOptStr($opts, $autoVal=true, $startVal=0, $sel='')
 		if ($autoVal) $val = $i;
 		else $val = $opt;
 		$i++;
-		
+
 		if ($sel==$opt) $str .= "<option selected=selected value='$val'>$opt</option>";
 		else $str .= "<option value='$val'>$opt</option>";
 	}
@@ -466,7 +471,9 @@ function showStudentGrades($id)
 							"studentId,name,#__studentform.class,#__gradesform.class,year,examType,DATE_FORMAT(#__gradesform.created,'%d %M %Y'),DATE_FORMAT(#__gradesform.modified,'%d %M %Y'),kannadaMarks,englishMarks,hindiMarks,mathMarks,generalScienceMarks,socialStudiesMarks,computerScience,physicalEducation,conduct,attendance,remarks",
 							 "#__studentform.id=studentId AND #__gradesform.id='$id'",
 							 1);
-
+	$studentLink = preg_replace("/\/grades[?]?.*$/","/students/view-list?id=$result[0]",$_SERVER['REQUEST_URI'],1);
+	$studentGradesLink = preg_replace("/\/grades[?]?.*$/","/grades/view-grades?studentId=$result[0]",$_SERVER['REQUEST_URI'],1);
+							 
 	$headings = array('Student Name','Current','This Grade For','Year','Assessment','Date','Kannada','English','Hindi','Mathematics','General Science','Social Studies','Computer Science','Physical Education','Conduct','Attendance','Remarks');
 	$maxMarks = preg_replace("/.*\((\d+) marks.*/","$1",$result[5]);
 	$totalMarks = 0; $numSubjects = 0;
@@ -475,8 +482,8 @@ function showStudentGrades($id)
 		$fieldVal = $result[$j+1];
 		if ($i==0) { // first cell is for photo
 			echo "<tr><td style='border:0px; vertical-align:top; width:256px' rowspan='"
-				.strval(count($headings)+4) . "'>" . getPhotoCode($id)."</td><th>" // 4 rows are added for separation and total marks
-				. $headings[$i]."</th><td colspan=3>$fieldVal</td></tr>";	
+				.strval(count($headings)+6) . "'>" . getPhotoCode($id)."</td><th>" // 6 rows are added for separation and total marks
+				. $headings[$i]."</th><td colspan=3><a href='$studentLink'>$fieldVal</a></td></tr>";
 		}
 		else if ($i==1 || $i==2)  {
 			echo "<tr><th>".$headings[$i]."</th><td colspan=3>Class ".getClassDisplayText($fieldVal)."</td></tr>";
@@ -529,8 +536,12 @@ function showStudentGrades($id)
 			else echo "<tr class=marks><td style='text-align:left'><b>Total</b></td><td style='text-align:left'><b>&nbsp;</b></td><td><b>&nbsp;</b></td><td><b>&nbsp;</b></td></tr>";
 			echo "<tr><td colspan=4 style='border:0px'>&nbsp;</td></tr>";
 		}
+		else if ($i==count($headings)-1){ // end of processing
+			echo "<tr><td colspan=4 style='border:0px'>&nbsp;</td></tr>";
+			echo "<tr><td></td><td colspan=3 style='border:0px'><a href='$studentGradesLink'>View all grades</a> of this student.</td></tr>";			
+		}
 	}
-	echo "</table>";	
+	echo "</table>";
 }
 
 function validateGradesForm($form)
@@ -538,7 +549,7 @@ function validateGradesForm($form)
 	$studentId = $form->data['studentId'];
 	$year = $form->data['year'];
 	$examType = $form->data['examType'];
-	
+
 	$user = JFactory::getUser();
 	$userId = $user->get('id');
 	$id = getTableData("#__gradesform", "id",
@@ -572,8 +583,8 @@ function printCustomCodeGradesForm()
 		array_push($options, "$result[0]:$result[1]:$result[2]");
 	}
 	insertGradesFormJS();
-	echo "<div id=classStudentMap style='display:none'>".implode('/',$options)."</div>";
-	echo "<img src='".preg_replace("/index\.php.*/","images/blank.gif",$_SERVER['REQUEST_URI'])."' onload='loadStudentNames(\"init\")' />";
+	echo "<div id=classStudentMap style='display:none'>".implode('/',$options)."</div>\n";
+	echo "<img src='".preg_replace("/index\.php.*/","images/blank.gif",$_SERVER['REQUEST_URI'])."' onload='loadStudentNames(\"init\")' />\n";
 }
 
 function printCustomCodeReportsForm()
@@ -584,8 +595,8 @@ function printCustomCodeReportsForm()
 		array_push($options, "$result[0]:$result[1]:$result[2]");
 	}
 	insertReportsFormJS();
-	echo "<div id=classStudentMap style='display:none'>".implode('/',$options)."</div>";
-	echo "<img src='".preg_replace("/index\.php.*/","images/blank.gif",$_SERVER['REQUEST_URI'])."' onload='onLoadReportsForm()' />";
+	echo "<div id=classStudentMap style='display:none'>".implode('/',$options)."</div>\n";
+	echo "<img src='".preg_replace("/index\.php.*/","images/blank.gif",$_SERVER['REQUEST_URI'])."' onload='onLoadReportsForm()' />\n";
 }
 
 function insertGradesFormJS()
@@ -615,8 +626,8 @@ function validateForm()
 	fields = str.replace(/ /g,'').split('/');
 	re = new RegExp('[0-9]+');
 	if (fields.length!=2 ||
-		fields[0].match(re)==null || 
-		fields[1].match(re)==null || 
+		fields[0].match(re)==null ||
+		fields[1].match(re)==null ||
 		parseInt(fields[0]) > parseInt(fields[1])) {
 		alert("INPUT ERROR. Attendance input format: attended days / total days. Example, 24/30.");
 		elem.value = '';
@@ -653,7 +664,7 @@ function loadStudentNames(context)
 			}
 		}
 	}
-	
+
 	students = mapElem.innerHTML.split('/');
 	selectIndex = -1;
 	for (var i=0; i<students.length; i++) {
@@ -663,11 +674,11 @@ function loadStudentNames(context)
 			option.value = fields[1];
 			option.text = fields[2];
 			studentNameElem.add(option);
-			
+
 			if (studentIdElem.value==fields[1]) selectIndex = studentNameElem.length-1;
 		}
 	}
-	
+
 	if (selectIndex!=-1) {
 		studentNameElem.selectedIndex = selectIndex;
 		//classElem.disabled=true;
@@ -690,7 +701,7 @@ window.addEvent('domready', function() {
   $('class').addEvent('change', function() {
     loadStudentNames('onchange');
   });
-  
+
   $('reportTypeId').addEvent('change', function() {
     processFilters();
   });
@@ -706,13 +717,13 @@ function processFilters()
 {
 	// Filters: reportTypeId reportYearId reportExamTypeId class studentName
 	// reportTypeId: 'View student sex ratio','View student sponsorship','View grades from an assessment','View top students from an assessment','View a student\'s performance over time'
-	
+
 	reportTypeElem = document.getElementById('reportTypeId');
 	reportYearElem = document.getElementById('reportYearId');
 	reportExamTypeElem = document.getElementById('reportExamTypeId');
 	classElem = document.getElementById('class');
 	studentNameElem = document.getElementById('studentName');
-	
+
 	switch (parseInt(reportTypeElem.value)) {
 		case 2:
 		case 3:
@@ -807,7 +818,7 @@ function showStudentList()
 	echo "<table class=studentPageTitle><tr>";
 	echo "<td><h2>Listing All Students</h2></td>";
 	echo "</tr></table>";
-	
+
 	$allPhotoStr = '/'.implode('/',readPhotoDir()).'/';
 	$itemLink = preg_replace("/view-list\??.*/","view-list",$_SERVER['REQUEST_URI']);
 	$columnHeadings = array('Photo','Student ID','Admission No.','Name','Class','Group','Sex','Parent','Guardian','Sponsor');
@@ -815,24 +826,24 @@ function showStudentList()
 							 "id,studentUid,admissionNumber,name,class,`group`,sex,parent,guardian,sponsor",
 							 "1 ORDER BY name ASC"
 				);
-				
+
 	# Find duplicates in studentUid
 	$dups = array(); $uids = array();
 	foreach ($students as $student) array_push($uids, $student[1]);
 	foreach(array_count_values($uids) as $val => $c) {
 	    if($c > 1) $dups[] = $val;
 	}
-	
+
 	echo "<table class=studentList>";
 	if (count($dups)>0) {
 		echo "<tr><td colspan='".count($columnHeadings)."' style='border:0px;text-align:right'><span class=duplicateErr>*</span> Please correct duplicate student IDs.</td></tr>";
 	}
 	echo "<tr>";
 	foreach ($columnHeadings as $colHead) {
-		echo "<th>$colHead</th>";	
+		echo "<th>$colHead</th>";
 	}
 	echo "</tr>";
-	
+
 	if (count($students)==0) {
 		echo "<tr><td colspan=".count($columnHeadings)."><div class=message>No students have been entered into the system.</div></td></tr></table>";
 		return;
@@ -851,12 +862,12 @@ function showStudentList()
 				else echo "<td>".$student[$i]."</td>";
 			}
 			else if ($i==3) { // have link for name
-				echo "<td><a href='$itemLink?id=$id'>".$student[$i]."</td>"; 
+				echo "<td><a href='$itemLink?id=$id'>".$student[$i]."</td>";
 			}
 			else if ($i==4) { // conversion for class
-				echo "<td>".getClassDisplayText($student[$i])."</td>";	
+				echo "<td>".getClassDisplayText($student[$i])."</td>";
 			}
-			else echo "<td>".$student[$i]."</td>";	
+			else echo "<td>".$student[$i]."</td>";
 		}
 		echo "</tr>";
 	}
@@ -873,7 +884,7 @@ function showGradesList()
 		showStudentAllGrades($_REQUEST['studentId']);
 		return;
 	}
-	
+
 	if (isset($_REQUEST['year'])) {
 		$year = $_REQUEST['year'];
 	}
@@ -889,14 +900,14 @@ function showGradesList()
 		$examType = getTableData("#__gradesform","examType","1 ORDER BY FIELD(examType,$examOptStr) LIMIT 1",0);
 	}
 	$maxMarks = preg_replace("/.*\((\d+) marks.*/","$1",$examType);
-	
+
 	echo "<table class=studentPageTitle><tr>";
 	echo "<td><h2>Viewing Recent Grades</h2></td>";
 	echo "</tr></table>";
-	
+
 	$allPhotoStr = '/'.implode('/',readPhotoDir()).'/';
 	$columnHeadings = array('Photo','Current Class','Student ID','Name','Kannada','English','Hindi','Mathematics','General Science','Social Studies','Total','Details');
-	
+
 	# Get only current class, not the class where the student was in the past
 	# If there are no grades for a combination of year and examType, the student will not be displayed
 	$students = getTableData("#__studentform,#__gradesform",
@@ -905,7 +916,7 @@ function showGradesList()
 				);
 
 	echo "<table class=studentList>";
-	
+
 	// Display form for user selection
 	echo "<tr style='border:0px'><td colspan=".count($columnHeadings)." style='text-align:right;border:0px'>";
 	$actionUrl = preg_replace("/[?].*/","",$_SERVER['REQUEST_URI']);
@@ -929,18 +940,18 @@ function showGradesList()
 	if (count($dups)>0) {
 		echo "<tr><td colspan='".count($columnHeadings)."' style='border:0px;text-align:right'><span class=duplicateErr>*</span> Please correct duplicate entries for the same student.</td></tr>";
 	}
-	
+
 	echo "<tr>";
 	foreach ($columnHeadings as $colHead) {
-		echo "<th>$colHead</th>";	
+		echo "<th>$colHead</th>";
 	}
 	echo "</tr>";
-	
+
 	if (count($students)==0) {
 		echo "<tr><td colspan=".count($columnHeadings)."><div class=message>No grades have been recorded for this combination of year and assessment type.</div></td></tr></table>";
 		return;
 	}
-	
+
 	foreach ($students as $student) {
 		$totalMarks = $numSubjects = 0;
 		$studentId = $student[0];
@@ -973,10 +984,10 @@ function showGradesList()
 				// Total
 				if (setGrade($data,$totalMarks,$numSubjects*$maxMarks)) echo "<td>".$data['grade']."</td>";
 				else echo "<td>&nbsp;</td>";
-				
+
 				// link to student all grades
 				$itemLink = preg_replace("/\/grades\/.*/","/grades/view-grades",$_SERVER['REQUEST_URI']);
-				echo "<td><a href='$itemLink?studentId=$studentId'>Details</td>"; 
+				echo "<td><a href='$itemLink?studentId=$studentId'>Details</td>";
 			}
 		}
 		echo "</tr>";
@@ -991,19 +1002,20 @@ function showReports()
 		echo "<div class=message>There are no reports to view because no students have been entered into the system.<br>";
 		return;
 	}
-	
+
 	echo "<table class=studentPageTitle><tr>";
 	echo "<td><h2>Viewing School Reports</h2></td>";
 	echo "</tr></table>";
 
-	$graphs = array('View student sex ratio','View student sponsorship','View grades from an assessment','View top students from an assessment','View a student\'s performance over time');
-	
+	$graphs = array('View student profile','View student sponsorship','View grades from an assessment','View top students from an assessment','View a student\'s performance over time');
+
 	if (isset($_REQUEST['reportType'])) {
-		$reportType = $graphs[$_REQUEST['reportType']];
+		$reportTypeKey = $_REQUEST['reportType'];
 	}
 	else {
-		$reportType = $graphs[0];
+		$reportTypeKey = 0;
 	}
+	$reportType = $graphs[$reportTypeKey];
 
 	if (isset($_REQUEST['year'])) {
 		$year = $_REQUEST['year'];
@@ -1019,7 +1031,6 @@ function showReports()
 		$examOptStr = "'".implode("','",getExamOptions('DESC'))."'";
 		$examType = getTableData("#__gradesform","examType","1 ORDER BY FIELD(examType,$examOptStr) LIMIT 1",0);
 	}
-	$maxMarks = preg_replace("/.*\((\d+) marks.*/","$1",$examType);
 
 	$classes = array('I','II','III','IV','V','VI','VII','VIII','IX','X');
 	if (isset($_REQUEST['class'])) {
@@ -1030,7 +1041,7 @@ function showReports()
 		$class = 'I';
 		$studentName = -1; # leave it to JS: select first name in given class
 	}
-	
+
 	// Display form for user selection
 	echo "<table class=studentList>";
 	echo "<tr style='border:0px'><td style='border:0px'>";
@@ -1049,6 +1060,243 @@ function showReports()
 	echo "</form>";
 	echo "</td></tr>";
 	echo "</table>";
+
+	$currtime = time();
+	$pathPrefix = JURI::root();
+	echo "<script src='$pathPrefix/media/d3/d3.v3.min.js'></script>\n";
+
+	// Delete old files: 10 minutes
+	$datafiles = scandir(JPATH_BASE);
+	foreach($datafiles as $file) {
+		if(preg_match("/^data.*\.(csv)$/",$file) && is_file($file) 
+			&& $currtime - filemtime($file) >= 10*60) {
+			unlink($file);
+		}
+	}
+	
+	switch ($reportTypeKey) {
+		default:
+			reportStudentProfile($currtime,$pathPrefix);
+			break;
+		case 1:
+			reportSponsorship($currtime,$pathPrefix);
+			break;
+		case 2:
+			reportGrades($currtime,$pathPrefix,$year,$examType);
+			break;
+		case 3:
+			reportTopStudents($currtime,$pathPrefix,$year,$examType);
+			break;
+		case 4:
+			reportStudentPerformance($currtime,$pathPrefix);
+			break;
+	}
+}
+
+function getCsvFormat($arr, $fillZeros=false)
+{
+	$retStr = ''; $prevVal = -1;
+	foreach ($arr as $row) { // can't use indices since they can be any type
+		if ($fillZeros && $prevVal!=-1 && $prevVal+1<$row[0]) {
+			for ($k=$prevVal+1; $k<$row[0]; $k++) {
+				$retStr .= "$k".str_repeat(',0',count($row)-1)."\n";
+			}
+		}
+		$prevVal = $row[0];
+		for ($j=0; $j<count($row); $j++) {
+			if ($j==count($row)-1) $retStr .= $row[$j]."\n";
+			else $retStr .= $row[$j].",";
+		}
+	}
+	return $retStr;
+}
+
+function printToFile($filename, $header, $str)
+{
+	$basePath = "/home/iedf/www/bgms"; // "C:\wamp\www"; // /var/www /home/iedf/www/bgms
+	$fh = fopen("$basePath/$filename", 'w') or die("Can't open file for saving data into CSV file.");
+	fwrite($fh, "$header\n$str");
+	fclose($fh);
+}
+
+function reorderByAge($results)
+{
+	$arr = array(); $minAge = $maxAge = -1;
+	foreach ($results as $result) {
+		if ($minAge==-1) { // first age
+			$minAge = $result[0];
+			$arr[$minAge] = array($minAge, 0, 0);
+		}
+		if ($maxAge<$result[0]) { // first or next age
+			for ($j=$maxAge+1; $maxAge!=-1 && $j<=$result[0]; $j++) {
+				$arr[$j] = array($j, 0, 0);
+			}
+			$maxAge = $result[0];
+		}
+		if ($result[1]=='Female') $arr[$result[0]][1] = $result[2];
+		else $arr[$result[0]][2] = $result[2];
+	}
+	return $arr;
+}
+
+function reportStudentProfile($currtime, $pathPrefix)
+{
+	echo "<h3>Sex Ratio</h3>";
+	$csvFile = "dataSexRatio-$currtime.csv";
+	$results = getTableData("#__studentform", "sex,COUNT(*)", "1 GROUP BY sex");
+	printToFile($csvFile, "sex,count", getCsvFormat($results, false));
+	echo "<sexRatio src='/$csvFile'></sexRatio>\n";
+
+	echo "<div class=graphTitle><h3>Age Profile</h3></div>";
+	$csvFile = "dataAgeHist-$currtime.csv";
+	$results = getTableData("#__studentform", "age,SUM(CASE WHEN sex='Female' THEN 1 ELSE 0 END),SUM(CASE WHEN sex='Male' THEN 1 ELSE 0 END)", "1 GROUP BY age ORDER BY age+0");
+	printToFile($csvFile, "Age,Female,Male", getCsvFormat($results, true));
+	echo "<ageHist src='/$csvFile'></ageHist>\n";
+
+	echo "<div class=graphTitle><h3>Group Profile</h3></div>";
+	$csvFile = "dataGroupProfile-$currtime.csv";
+	$results = getTableData("#__studentform", "`group`,SUM(CASE WHEN sex='Female' THEN 1 ELSE 0 END),SUM(CASE WHEN sex='Male' THEN 1 ELSE 0 END)", "1 GROUP BY `group` ORDER BY `group`");
+	printToFile($csvFile, "Group,Female,Male", getCsvFormat($results, true));
+	echo "<groupProfile src='/$csvFile'></groupProfile>\n";
+
+	echo "<div class=graphTitle><h3>Class Profile</h3></div>";
+	$csvFile = "dataClassProfile-$currtime.csv";
+	$results = getTableData("#__studentform", "class,SUM(CASE WHEN sex='Female' THEN 1 ELSE 0 END),SUM(CASE WHEN sex='Male' THEN 1 ELSE 0 END)", "1 GROUP BY class ORDER BY class+0");
+	$arr = array();
+	for($i=0; $i<count($results); $i++) {
+		$arr[$i] = $results[$i];
+		$arr[$i][0] = getClassDisplayText($arr[$i][0]);
+	}
+	printToFile($csvFile, "Class,Female,Male", getCsvFormat($arr, false));
+	echo "<classProfile src='/$csvFile'></classProfile>\n";
+
+	echo "<script src='$pathPrefix/media/d3/studentProfile.js'></script>";
+
+	return;
+}
+
+function reportSponsorship($currtime, $pathPrefix)
+{
+	echo "<h3>Sponsorship Summary</h3>";
+	$csvFile = "dataSponsorhip-$currtime.csv";
+	$results = array();
+	array_push($results, getTableData("#__studentform", "'Sponsored-Female',COUNT(*)", "sex='Female' AND sponsor REGEXP '[a-zA-Z]'", 1));
+	array_push($results, getTableData("#__studentform", "'Sponsored-Male',COUNT(*)", "sex='Male' AND sponsor REGEXP '[a-zA-Z]'", 1));
+	array_push($results, getTableData("#__studentform", "'Unsponsored-Female',COUNT(*)", "sex='Female' AND sponsor NOT REGEXP '[a-zA-Z]'", 1));
+	array_push($results, getTableData("#__studentform", "'Unsponsored-Male',COUNT(*)", "sex='Male' AND sponsor NOT REGEXP '[a-zA-Z]'", 1));
+	printToFile($csvFile, "group,count", getCsvFormat($results, false));
+	echo "<sponsorship src='/$csvFile'></sponsorship>\n";
+
+	echo "<div class=graphTitle><h3>Age Profile of Sponsored Students</h3></div>";
+	$csvFile = "dataSponsoredAgeHist-$currtime.csv";
+	$results = getTableData("#__studentform", "age,SUM(CASE WHEN sex='Female' AND sponsor REGEXP '[a-zA-Z]' THEN 1 ELSE 0 END),SUM(CASE WHEN sex='Male' AND sponsor REGEXP '[a-zA-Z]' THEN 1 ELSE 0 END)", "1 GROUP BY age ORDER BY age+0");
+	printToFile($csvFile, "Age,Female,Male", getCsvFormat($results, true));
+	echo "<sponsored src='/$csvFile'></sponsored>\n";
+
+	echo "<div class=graphTitle><h3>Age Profile of Students Waiting Sponsorship</h3></div>";
+	$csvFile = "dataUnsponsoredAgeHist-$currtime.csv";
+	$results = getTableData("#__studentform", "age,SUM(CASE WHEN sex='Female' AND sponsor NOT REGEXP '[a-zA-Z]' THEN 1 ELSE 0 END),SUM(CASE WHEN sex='Male' AND sponsor NOT REGEXP '[a-zA-Z]' THEN 1 ELSE 0 END)", "1 GROUP BY age ORDER BY age+0");
+	printToFile($csvFile, "Age,Female,Male", getCsvFormat($results, true));
+	echo "<unsponsored src='/$csvFile'></unsponsored>\n";
+
+	echo "<script src='$pathPrefix/media/d3/sponsorship.js'></script>";
+	
+	return;
+}
+
+function reportGrades($currtime, $pathPrefix, $year, $examType)
+{	// TODO NOT COMPLETED: TBD
+	echo "<h3>School Performance</h3>";
+	$csvFile = "dataSchoolPerf-$currtime.csv";
+	$results = getTableData("#__studentform", "sex,COUNT(*)", "year='$year' AND  GROUP BY sex");
+	printToFile($csvFile, "grade,count", getCsvFormat($results, false));
+	echo "<schoolPerf src='/$csvFile'></schoolPerf>\n";
+
+	echo "<div class=graphTitle><h3>Grades by Class</h3></div>";
+	$csvFile = "dataAgeHist-$currtime.csv";
+	$results = getTableData("#__studentform", "age,SUM(CASE WHEN sex='Female' THEN 1 ELSE 0 END),SUM(CASE WHEN sex='Male' THEN 1 ELSE 0 END)", "1 GROUP BY age ORDER BY age+0");
+	printToFile($csvFile, "Age,Female,Male", getCsvFormat($results, true));
+	echo "<ageHist src='/$csvFile'></ageHist>\n";
+
+	echo "<div class=graphTitle><h3>Grades by Group</h3></div>";
+	$csvFile = "dataGroupProfile-$currtime.csv";
+	$results = getTableData("#__studentform", "`group`,SUM(CASE WHEN sex='Female' THEN 1 ELSE 0 END),SUM(CASE WHEN sex='Male' THEN 1 ELSE 0 END)", "1 GROUP BY `group` ORDER BY `group`");
+	printToFile($csvFile, "Group,Female,Male", getCsvFormat($results, true));
+	echo "<groupProfile src='/$csvFile'></groupProfile>\n";
+	
+	echo "<div class=graphTitle><h3>Comparing Grades of Girls and Boys</h3></div>";
+	$csvFile = "dataGroupProfile-$currtime.csv";
+	$results = getTableData("#__studentform", "`group`,SUM(CASE WHEN sex='Female' THEN 1 ELSE 0 END),SUM(CASE WHEN sex='Male' THEN 1 ELSE 0 END)", "1 GROUP BY `group` ORDER BY `group`");
+	printToFile($csvFile, "Group,Female,Male", getCsvFormat($results, true));
+	echo "<groupProfile src='/$csvFile'></groupProfile>\n";
+	
+	echo "<script src='$pathPrefix/media/d3/grades.js'></script>";
+
+	return;
+}
+
+
+function reportTopStudents($currtime, $pathPrefix, $year, $examType)
+{
+	echo "<h3>Class Toppers by Group</h3>";
+	$csvFile = "dataTopStudents-$currtime.csv";
+	echo "<topStudents src='/$csvFile'></topStudents>\n";
+	
+	$maxMarks = preg_replace("/.*\((\d+) marks.*/","$1",$examType);
+	$results = getTableData("#__studentform,#__gradesform", "#__studentform.class,name,`group`,sex,(kannadaMarks+englishMarks+hindiMarks+mathMarks+generalScienceMarks+socialStudiesMarks) AS total,#__gradesform.id,studentId", "#__studentform.id=studentId AND year='$year' AND examType='$examType' ORDER BY #__studentform.class+0, total DESC");
+	$prevClass = -1; $rank = $males = $females = 0; $groupmap = array();
+	foreach ($results as $result) {
+		if ($prevClass!=$result[0]) {
+			if ($prevClass!=-1) {
+				echo "</table>";
+				$rank = 0;
+			}
+			echo "<div class=graphTitle><h3>Class ".getClassDisplayText($result[0])." Toppers</h3></div>";
+			echo "<table class=studentView>";
+			echo "<tr><th>Rank</th><th>Photo</th><th>Student Name</th><th>Group</th><th>%</th><th>Details</th></tr>";
+		}
+		$rank++;
+		if ($rank<=5) { // only 5 toppers shown per class
+			if (!isset($groupmap[$result[2]])) {
+				$groupmap[$result[2]]['Male']=0;
+				$groupmap[$result[2]]['Female']=0;
+			}
+			$groupmap[$result[2]][$result[3]]++;
+			$percentage = floor(0.5+(100*$result[4])/(6*$maxMarks)); // consider all subjects for topper's list
+			$studentLink = preg_replace("/\/reports[?]?.*$/","/students/view-list?id=$result[6]",$_SERVER['REQUEST_URI'],1);
+			$itemLink = preg_replace("/\/reports[?]?.*$/","/grades/view-grades?id=$result[5]",$_SERVER['REQUEST_URI'],1);
+			echo "<tr><td style='font-size:2em'>$rank</td><td>".getPhotoCode($result[6],"style='width:64px'")."</td>";
+			echo "<td><a href='$studentLink'>$result[1]</a></td><td>$result[2]</td><td>$percentage %</td>";
+			echo "<td><a href='$itemLink'>Details</a></td></tr>";
+		}
+		$prevClass = $result[0];
+	}
+	echo "</table>";
+	
+	$arr = array();
+	ksort($groupmap);
+	foreach ($groupmap as $key => $val) {
+		array_push($arr, array($key,$val['Female'],$val['Male']));
+	}
+	printToFile($csvFile, "Group,Female,Male", getCsvFormat($arr, false));
+
+	echo "<script src='$pathPrefix/media/d3/topStudents.js'></script>";
+	
+	return;
+}
+
+
+function reportStudentPerformance($currtime, $pathPrefix)
+{	// TODO NOT COMPLETED: TBD
+	echo "<h3>Student's Performance Over Time</h3>";
+	$csvFile = "dataStudentPerf-$currtime.csv";
+	$results = getTableData("#__studentform", "sex,COUNT(*)", "year='$year' AND  GROUP BY sex");
+	printToFile($csvFile, "grade,count", getCsvFormat($results, false));
+	echo "<studentPerf src='/$csvFile'></studentPerf>\n";
+
+	echo "<script src='$pathPrefix/media/d3/studentPerformance.js'></script>";
+
+	return;
 }
 
 ?>
