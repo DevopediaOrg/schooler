@@ -4,11 +4,11 @@
 var sexRatio = document.getElementsByTagName('sexRatio')[0];
 var datafile = sexRatio.getAttribute('src');
 
-var marginbottom = 100;
+var marginbottom = 60;
 
-var width = 400,
-    height = 400,
-    radius = Math.min(width, height) / 2;
+var pwidth = 400,
+    pheight = 400,
+    radius = Math.min(pwidth, pheight) / 2;
 
 var color = d3.scale.category20();
 
@@ -21,10 +21,10 @@ var pie = d3.layout.pie()
     .value(function(d) { return d.count; });
 
 var piesvg = d3.select("sexRatio").append("svg")
-    .attr("width", width)
-    .attr("height", height+marginbottom)
+    .attr("width", pwidth)
+    .attr("height", pheight+marginbottom)
   .append("g")
-    .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+    .attr("transform", "translate(" + pwidth / 2 + "," + pheight / 2 + ")");
 
 d3.csv(datafile, function(error, data) {
 
@@ -54,7 +54,7 @@ d3.csv(datafile, function(error, data) {
       .style("text-anchor", "middle")
       .text(function(d) { return d3.round(d.value*100/total,1) + ' %'; });
   g.append("text")
-      .attr("transform", "translate(0," + (height+marginbottom)/2 + ")")
+      .attr("transform", "translate(0," + (pheight+marginbottom)/2 + ")")
       .style("text-anchor", "middle")
       .text("Total students: " + total);
 
@@ -68,8 +68,8 @@ d3.csv(datafile, function(error, data) {
 var ageHist = document.getElementsByTagName('ageHist')[0];
 var datafile = ageHist.getAttribute('src');
 
-var margin = {top: 20, right: 20, bottom: 60, left: 60},
-    width = 600 - margin.left - margin.right,
+var margin = {top: 20, right: 120, bottom: 80, left: 60},
+    width = 700 - margin.left - margin.right,
     height = 400 - margin.top - margin.bottom;
 
 var x0 = d3.scale.ordinal()
@@ -121,7 +121,8 @@ d3.csv(datafile, function(error, data) {
       .call(yAxis)
     .append("text")
       .attr("transform", "rotate(-90)")
-      .attr("y", 6)
+      .attr("x", -100)
+      .attr("y", -40)
       .attr("dy", ".71em")
       .style("text-anchor", "end")
       .text("No. of Students");
@@ -148,16 +149,16 @@ d3.csv(datafile, function(error, data) {
       .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
 
   legend.append("rect")
-      .attr("x", width - 18)
+      .attr("x", width - 6)
       .attr("width", 18)
       .attr("height", 18)
       .style("fill", color);
 
   legend.append("text")
-      .attr("x", width - 24)
+      .attr("x", width + 18)
       .attr("y", 9)
       .attr("dy", ".35em")
-      .style("text-anchor", "end")
+      .style("text-anchor", "begin")
       .text(function(d) { return d; });
 
 });
@@ -170,8 +171,8 @@ d3.csv(datafile, function(error, data) {
 var groupProfile = document.getElementsByTagName('groupProfile')[0];
 var datafile = groupProfile.getAttribute('src');
 
-var gmargin = {top: 20, right: 20, bottom: 60, left: 60},
-    gwidth = 600 - gmargin.left - gmargin.right,
+var gmargin = {top: 20, right: 120, bottom: 80, left: 60},
+    gwidth = 700 - gmargin.left - gmargin.right,
     gheight = 400 - gmargin.top - gmargin.bottom;
 
 var gx0 = d3.scale.ordinal()
@@ -223,7 +224,8 @@ d3.csv(datafile, function(error, data) {
       .call(gyAxis)
     .append("text")
       .attr("transform", "rotate(-90)")
-      .attr("y", 6)
+      .attr("x", -100)
+      .attr("y", -40)
       .attr("dy", ".71em")
       .style("text-anchor", "end")
       .text("No. of Students");
@@ -250,16 +252,16 @@ d3.csv(datafile, function(error, data) {
       .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
 
   glegend.append("rect")
-      .attr("x", gwidth - 18)
+      .attr("x", gwidth - 6)
       .attr("width", 18)
       .attr("height", 18)
       .style("fill", color);
 
   glegend.append("text")
-      .attr("x", gwidth - 24)
+      .attr("x", gwidth + 18)
       .attr("y", 9)
       .attr("dy", ".35em")
-      .style("text-anchor", "end")
+      .style("text-anchor", "begin")
       .text(function(d) { return d; });
 
 });
@@ -271,8 +273,8 @@ d3.csv(datafile, function(error, data) {
 var classProfile = document.getElementsByTagName('classProfile')[0];
 var datafile = classProfile.getAttribute('src');
 
-var cmargin = {top: 20, right: 20, bottom: 60, left: 60},
-    cwidth = 600 - cmargin.left - cmargin.right,
+var cmargin = {top: 20, right: 120, bottom: 80, left: 60},
+    cwidth = 700 - cmargin.left - cmargin.right,
     cheight = 400 - cmargin.top - cmargin.bottom;
 
 var cx0 = d3.scale.ordinal()
@@ -324,7 +326,8 @@ d3.csv(datafile, function(error, data) {
       .call(cyAxis)
     .append("text")
       .attr("transform", "rotate(-90)")
-      .attr("y", 6)
+      .attr("x", -100)
+      .attr("y", -40)
       .attr("dy", ".71em")
       .style("text-anchor", "end")
       .text("No. of Students");
@@ -351,16 +354,16 @@ d3.csv(datafile, function(error, data) {
       .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
 
   clegend.append("rect")
-      .attr("x", cwidth - 18)
+      .attr("x", cwidth - 6)
       .attr("width", 18)
       .attr("height", 18)
       .style("fill", color);
 
   clegend.append("text")
-      .attr("x", cwidth - 24)
+      .attr("x", cwidth + 18)
       .attr("y", 9)
       .attr("dy", ".35em")
-      .style("text-anchor", "end")
+      .style("text-anchor", "begin")
       .text(function(d) { return d; });
 
 });

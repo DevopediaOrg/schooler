@@ -89,8 +89,8 @@ d3.csv(datafile, function(error, data) {
 var sponsored = document.getElementsByTagName('sponsored')[0];
 var spdatafile = sponsored.getAttribute('src');
 
-var margin = {top: 20, right: 20, bottom: 60, left: 60},
-    width = 600 - margin.left - margin.right,
+var margin = {top: 20, right: 120, bottom: 80, left: 60},
+    width = 700 - margin.left - margin.right,
     height = 400 - margin.top - margin.bottom;
 
 var spx0 = d3.scale.ordinal()
@@ -142,7 +142,8 @@ d3.csv(spdatafile, function(error, data) {
       .call(spyAxis)
     .append("text")
       .attr("transform", "rotate(-90)")
-      .attr("y", 6)
+      .attr("x", -100)
+      .attr("y", -40)
       .attr("dy", ".71em")
       .style("text-anchor", "end")
       .text("No. of Students");
@@ -169,16 +170,16 @@ d3.csv(spdatafile, function(error, data) {
       .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
 
   legend.append("rect")
-      .attr("x", width - 18)
+      .attr("x", width - 6)
       .attr("width", 18)
       .attr("height", 18)
       .style("fill", spcolor);
 
   legend.append("text")
-      .attr("x", width - 24)
+      .attr("x", width + 18)
       .attr("y", 9)
       .attr("dy", ".35em")
-      .style("text-anchor", "end")
+      .style("text-anchor", "begin")
       .text(function(d) { return d; });
 
 });
@@ -191,8 +192,8 @@ d3.csv(spdatafile, function(error, data) {
 var unsponsored = document.getElementsByTagName('unsponsored')[0];
 var datafile = unsponsored.getAttribute('src');
 
-var margin = {top: 20, right: 20, bottom: 60, left: 60},
-    width = 600 - margin.left - margin.right,
+var margin = {top: 20, right: 120, bottom: 80, left: 60},
+    width = 700 - margin.left - margin.right,
     height = 400 - margin.top - margin.bottom;
 
 var x0 = d3.scale.ordinal()
@@ -245,7 +246,8 @@ d3.csv(datafile, function(error, data) {
       .call(yAxis)
     .append("text")
       .attr("transform", "rotate(-90)")
-      .attr("y", 6)
+      .attr("x", -100)
+      .attr("y", -40)
       .attr("dy", ".71em")
       .style("text-anchor", "end")
       .text("No. of Students");
@@ -272,16 +274,16 @@ d3.csv(datafile, function(error, data) {
       .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
 
   legend.append("rect")
-      .attr("x", width - 18)
+      .attr("x", width - 6)
       .attr("width", 18)
       .attr("height", 18)
       .style("fill", color);
 
   legend.append("text")
-      .attr("x", width - 24)
+      .attr("x", width + 18)
       .attr("y", 9)
       .attr("dy", ".35em")
-      .style("text-anchor", "end")
+      .style("text-anchor", "begin")
       .text(function(d) { return d; });
 
 });

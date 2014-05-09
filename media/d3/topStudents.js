@@ -5,8 +5,8 @@
 var topStudents = document.getElementsByTagName('topStudents')[0];
 var datafile = topStudents.getAttribute('src');
 
-var gmargin = {top: 20, right: 20, bottom: 60, left: 60},
-    gwidth = 600 - gmargin.left - gmargin.right,
+var gmargin = {top: 20, right: 120, bottom: 80, left: 60},
+    gwidth = 700 - gmargin.left - gmargin.right,
     gheight = 400 - gmargin.top - gmargin.bottom;
 
 var gx0 = d3.scale.ordinal()
@@ -58,7 +58,8 @@ d3.csv(datafile, function(error, data) {
       .call(gyAxis)
     .append("text")
       .attr("transform", "rotate(-90)")
-      .attr("y", 6)
+      .attr("x", -100)
+      .attr("y", -40)
       .attr("dy", ".71em")
       .style("text-anchor", "end")
       .text("No. of Students");
@@ -85,16 +86,16 @@ d3.csv(datafile, function(error, data) {
       .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
 
   glegend.append("rect")
-      .attr("x", gwidth - 18)
+      .attr("x", gwidth - 6)
       .attr("width", 18)
       .attr("height", 18)
       .style("fill", color);
 
   glegend.append("text")
-      .attr("x", gwidth - 24)
+      .attr("x", gwidth + 18)
       .attr("y", 9)
       .attr("dy", ".35em")
-      .style("text-anchor", "end")
+      .style("text-anchor", "begin")
       .text(function(d) { return d; });
 
 });

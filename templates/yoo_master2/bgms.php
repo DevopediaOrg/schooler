@@ -761,14 +761,14 @@ function onLoadReportsForm()
 
 function processFilters()
 {
-	// Filters: reportTypeId reportYearId reportExamTypeId class studentName
+	// Filters: reportTypeId reportYearId reportExamTypeId class studentId
 	// reportTypeId: 'View student sex ratio','View student sponsorship','View grades from an assessment','View top students from an assessment','View a student\'s performance over time'
 
 	reportTypeElem = document.getElementById('reportTypeId');
 	reportYearElem = document.getElementById('reportYearId');
 	reportExamTypeElem = document.getElementById('reportExamTypeId');
 	classElem = document.getElementById('class');
-	studentNameElem = document.getElementById('studentName');
+	studentNameElem = document.getElementById('studentId');
 
 	switch (parseInt(reportTypeElem.value)) {
 		case 2:
@@ -795,9 +795,9 @@ function processFilters()
 
 function loadStudentNames(context)
 {
-	studentNameLoadElem = document.getElementById('studentNameLoad');
+	studentNameLoadElem = document.getElementById('studentIdLoad');
 
-	studentNameElem = document.getElementById('studentName');
+	studentNameElem = document.getElementById('studentId');
 	while(studentNameElem.options.length > 0) studentNameElem.remove(0);
 
 	classElem = document.getElementById('class');
@@ -1082,12 +1082,12 @@ function showReports()
 
 	$classes = array('I','II','III','IV','V','VI','VII','VIII','IX','X');
 	if (isset($_REQUEST['class'])) {
-		$class = $classes[$_REQUEST['class']-1];
-		$studentName = $_REQUEST['studentName'];
+		$class = $_REQUEST['class'];
+		$studentId = $_REQUEST['studentId'];
 	}
 	else {
-		$class = 'I';
-		$studentName = -1; # leave it to JS: select first name in given class
+		$class = 1;
+		$studentId = getTableData("#__studentform","id","class='$class' ORDER BY name LIMIT 1");
 	}
 
 	// Display form for user selection
@@ -1097,8 +1097,8 @@ function showReports()
 	echo "<form id=reportSelForm method=get onsubmit='return true;' action='$actionUrl'>";
 	echo "<select id=reportTypeId style='width:320px;margin-right:5px;float:left' name=reportType>".getOptStr($graphs,true,0,$reportType)."</select>";
 	echo "<select id=class style='margin-right:5px;display:none;float:left' name=class>".getOptStr($classes,true,1,$class)."</select>";
-	echo "<input id=studentNameLoad type=hidden disabled=disabled value='$studentName' />";
-	echo "<select id=studentName style='margin-right:5px;display:none;float:left' name=studentName></select>"; # leave options to JS
+	echo "<input id=studentIdLoad type=hidden disabled=disabled value='$studentId' />";
+	echo "<select id=studentId style='margin-right:5px;display:none;float:left' name=studentId></select>"; # leave options to JS
 	#$years = getTableData("#__gradesform","DISTINCT(year)","1 ORDER BY year DESC");
 	$yrsArr = array('2014-15','2013-14');
 	#foreach ($years as $yr) array_push($yrsArr,$yr[0]);
@@ -1136,9 +1136,27 @@ function showReports()
 			reportTopStudents($currtime,$pathPrefix,$year,$examType);
 			break;
 		case 4:
-			reportStudentPerformance($currtime,$pathPrefix);
+			reportStudentPerformance($currtime,$pathPrefix,$class,$studentId);
 			break;
 	}
+}
+
+function getTsvFormat($arr, $fillZeros=false)
+{
+	$retStr = ''; $prevVal = -1;
+	foreach ($arr as $row) { // can't use indices since they can be any type
+		if ($fillZeros && $prevVal!=-1 && $prevVal+1<$row[0]) {
+			for ($k=$prevVal+1; $k<$row[0]; $k++) {
+				$retStr .= "$k".str_repeat("\t0",count($row)-1)."\n";
+			}
+		}
+		$prevVal = $row[0];
+		for ($j=0; $j<count($row); $j++) {
+			if ($j==count($row)-1) $retStr .= $row[$j]."\n";
+			else $retStr .= $row[$j]."\t";
+		}
+	}
+	return $retStr;
 }
 
 function getCsvFormat($arr, $fillZeros=false)
@@ -1253,30 +1271,69 @@ function reportSponsorship($currtime, $pathPrefix)
 }
 
 function reportGrades($currtime, $pathPrefix, $year, $examType)
-{	// TODO NOT COMPLETED: TBD
-	echo "<h3>School Performance</h3>";
+{
+	$maxMarks = preg_replace("/.*\((\d+) marks.*/","$1",$examType);
+
+	echo "<h3>School Performance Based On Subject Grades</h3>";
 	$csvFile = "dataSchoolPerf-$currtime.csv";
-	$results = getTableData("#__studentform", "sex,COUNT(*)", "year='$year' AND  GROUP BY sex");
-	printToFile($csvFile, "grade,count", getCsvFormat($results, false));
+	$results = getTableData("#__studentform,#__gradesform", "#__gradesform.class,`group`,sex,kannadaMarks,englishMarks,hindiMarks,mathMarks,generalScienceMarks,socialStudiesMarks", "#__studentform.id=studentId AND year='$year' AND examType='$examType'");
+	$grades = array(); $allGrades = array('A+','A','B+','B','C+','C');
+	foreach ($allGrades as $grade) $grades[$grade] = 0;
+	$subjects = array(); $allSubjects = array('Kannada','English','Hindi','Math','Science','Social');
+	foreach ($allSubjects as $subject) $subjects[$subject] = array();
+	$classes = array(); $allClasses = array('I','II','III','IV','V','VI','VII','VIII','IX','X');
+	foreach ($allClasses as $class) $classes[$class] = array();
+	$groups = array(); $allGroups = array('Azad','Bhagath','Subhash','Vivek');
+	foreach ($allGroups as $group) $groups[$group] = array();
+	foreach ($results as $result) {
+		for ($j=3; $j<9; $j++) {
+			if ($result[$j]>0) { // grade is recorded for this subject
+				$percentage = floor(0.5+100*$result[$j]/$maxMarks);
+				$grade = getGrade($percentage);
+				$grades[$grade]++;
+				if ($grade=='A' || $grade=='A+') $gradeIdx = 'A/A+';
+				else if ($grade=='B' || $grade=='B+') $gradeIdx = 'B/B+';
+				else $gradeIdx = 'C/C+';
+				$class = getClassDisplayText($result[0]);
+				$classes[$class][$gradeIdx]++;
+				$groups[$result[1]][$gradeIdx]++;
+				switch ($j) {
+					case 3: $subjects['Kannada'][$gradeIdx]++; break;
+					case 4: $subjects['English'][$gradeIdx]++; break;
+					case 5: $subjects['Hindi'][$gradeIdx]++; break;
+					case 6: $subjects['Math'][$gradeIdx]++; break;
+					case 7: $subjects['Science'][$gradeIdx]++; break;
+					case 8: $subjects['Social'][$gradeIdx]++; break;
+				}
+			}
+		}		
+	}
+	
+	$arr = array();
+	foreach ($allGrades as $grade) array_push($arr, array($grade,$grades[$grade]));
+	printToFile($csvFile, "grade,count", getCsvFormat($arr, false));
 	echo "<schoolPerf src='/$csvFile'></schoolPerf>\n";
+	
+	echo "<div class=graphTitle><h3>Grades by Subject</h3></div>";
+	$csvFile = "dataGradesSubject-$currtime.csv";
+	$arr = array();
+	foreach ($allSubjects as $subject) array_push($arr, array($subject,$subjects[$subject]['A/A+'],$subjects[$subject]['B/B+'],$subjects[$subject]['C/C+']));
+	printToFile($csvFile, "Subject,A/A+,B/B+,C/C+", getCsvFormat($arr, true));
+	echo "<gradesSubject src='/$csvFile'></gradesSubject>\n";
 
 	echo "<div class=graphTitle><h3>Grades by Class</h3></div>";
-	$csvFile = "dataAgeHist-$currtime.csv";
-	$results = getTableData("#__studentform", "age,SUM(CASE WHEN sex='Female' THEN 1 ELSE 0 END),SUM(CASE WHEN sex='Male' THEN 1 ELSE 0 END)", "1 GROUP BY age ORDER BY age+0");
-	printToFile($csvFile, "Age,Female,Male", getCsvFormat($results, true));
-	echo "<ageHist src='/$csvFile'></ageHist>\n";
+	$csvFile = "dataGradesClass-$currtime.csv";
+	$arr = array();
+	foreach ($allClasses as $class) array_push($arr, array($class,$classes[$class]['A/A+'],$classes[$class]['B/B+'],$classes[$class]['C/C+']));
+	printToFile($csvFile, "Class,A/A+,B/B+,C/C+", getCsvFormat($arr, true));
+	echo "<gradesClass src='/$csvFile'></gradesClass>\n";
 
 	echo "<div class=graphTitle><h3>Grades by Group</h3></div>";
-	$csvFile = "dataGroupProfile-$currtime.csv";
-	$results = getTableData("#__studentform", "`group`,SUM(CASE WHEN sex='Female' THEN 1 ELSE 0 END),SUM(CASE WHEN sex='Male' THEN 1 ELSE 0 END)", "1 GROUP BY `group` ORDER BY `group`");
-	printToFile($csvFile, "Group,Female,Male", getCsvFormat($results, true));
-	echo "<groupProfile src='/$csvFile'></groupProfile>\n";
-	
-	echo "<div class=graphTitle><h3>Comparing Grades of Girls and Boys</h3></div>";
-	$csvFile = "dataGroupProfile-$currtime.csv";
-	$results = getTableData("#__studentform", "`group`,SUM(CASE WHEN sex='Female' THEN 1 ELSE 0 END),SUM(CASE WHEN sex='Male' THEN 1 ELSE 0 END)", "1 GROUP BY `group` ORDER BY `group`");
-	printToFile($csvFile, "Group,Female,Male", getCsvFormat($results, true));
-	echo "<groupProfile src='/$csvFile'></groupProfile>\n";
+	$csvFile = "dataGradesGroup-$currtime.csv";
+	$arr = array();
+	foreach ($allGroups as $group) array_push($arr, array($group,$groups[$group]['A/A+'],$groups[$group]['B/B+'],$groups[$group]['C/C+']));
+	printToFile($csvFile, "Group,A/A+,B/B+,C/C+", getCsvFormat($arr, true));
+	echo "<gradesGroup src='/$csvFile'></gradesGroup>\n";
 	
 	echo "<script src='$pathPrefix/media/d3/grades.js'></script>";
 
@@ -1285,11 +1342,12 @@ function reportGrades($currtime, $pathPrefix, $year, $examType)
 
 function reportTopStudents($currtime, $pathPrefix, $year, $examType)
 {
+	$maxMarks = preg_replace("/.*\((\d+) marks.*/","$1",$examType);
+
 	echo "<h3>Class Toppers by Group</h3>";
 	$csvFile = "dataTopStudents-$currtime.csv";
 	echo "<topStudents src='/$csvFile'></topStudents>\n";
 	
-	$maxMarks = preg_replace("/.*\((\d+) marks.*/","$1",$examType);
 	$results = getTableData("#__studentform,#__gradesform", "#__studentform.class,name,`group`,sex,(kannadaMarks+englishMarks+hindiMarks+mathMarks+generalScienceMarks+socialStudiesMarks) AS total,#__gradesform.id,studentId", "#__studentform.id=studentId AND year='$year' AND examType='$examType' ORDER BY #__studentform.class+0, total DESC");
 	$prevClass = -1; $rank = $males = $females = 0; $groupmap = array();
 	foreach ($results as $result) {
@@ -1332,14 +1390,69 @@ function reportTopStudents($currtime, $pathPrefix, $year, $examType)
 	return;
 }
 
-function reportStudentPerformance($currtime, $pathPrefix)
-{	// TODO NOT COMPLETED: TBD
-	echo "<h3>Student's Performance Over Time</h3>";
-	$csvFile = "dataStudentPerf-$currtime.csv";
-	$results = getTableData("#__studentform", "sex,COUNT(*)", "year='$year' AND  GROUP BY sex");
-	printToFile($csvFile, "grade,count", getCsvFormat($results, false));
-	echo "<studentPerf src='/$csvFile'></studentPerf>\n";
+function reportStudentPerformance($currtime, $pathPrefix, $class, $studentId)
+{
+?>
+<style>
+studentTimePerf { font: 11px sans-serif; }
+.axis path, .axis line { fill: none; stroke: #000; shape-rendering: crispEdges; }
+.x.axis path { display: none; }
+.line { fill: none; stroke: steelblue; stroke-width: 1.5px;}
+</style>
+<?php
+	$examOptStr = "'".implode("','",getExamOptions('DESC'))."'";
+	$results = getTableData("#__studentform,#__gradesform","name,year,examType,kannadaMarks,englishMarks,hindiMarks,mathMarks,generalScienceMarks,socialStudiesMarks","studentId='$studentId' AND #__studentform.id=studentId ORDER BY year DESC, FIELD(examType,$examOptStr) LIMIT 1", 1);
 
+	if (count($results)==0) {
+		echo "<div class=message>No grades have been recorded for this combination of student, year and assessment type.</div>";
+		return;
+	}
+
+	$classAvg = getTableData("#__gradesform","kannadaMarks,englishMarks,hindiMarks,mathMarks,generalScienceMarks,socialStudiesMarks","class='$class' AND year='".$results[1]."' AND examType='".$results[2]."'");
+	$maxMarks = preg_replace("/.*\((\d+) marks.*/","$1",$results[2]);
+	$allSubjects = array('Kannada','English','Hindi','Math','Science','Social');
+	$classGrades = array();
+	foreach ($classAvg as $avg) {
+		for ($j=0; $j<count($avg); $j++) {
+			if ($avg[$j]>0) {
+				$classGrades[$allSubjects[$j]]['Total'] += $avg[$j];
+				$classGrades[$allSubjects[$j]]['Count']++;
+			}
+		}
+	}
+	foreach ($classGrades as $key => $val) {
+		if (isset($val['Count']) && $val['Count']>0)
+			$classGrades[$key]['Avg'] =  $val['Total']/$val['Count'];
+	}
+	echo "<h3>Recent Grades for $results[0]</h3>";
+	echo "Class ".getClassDisplayText($class)." / $results[1] / $results[2]<br>";
+	$arr = array();
+	for ($i=0; $i<count($allSubjects); $i++) {
+		$studentPercent = floor(0.5+100*$results[$i+3]/$maxMarks);
+		$classPercent = floor(0.5+100*$classGrades[$allSubjects[$i]]['Avg']/$maxMarks);
+		array_push($arr, array($allSubjects[$i],$studentPercent,$classPercent));
+	}
+	$csvFile = "dataStudentRecentPerf-$currtime.csv";
+	printToFile($csvFile, "Subject,This Student,Class Average", getCsvFormat($arr, false));
+	echo "<studentRecentPerf src='/$csvFile'></studentRecentPerf>\n";
+	
+	echo "<div class=graphTitle><h3>Student's Performance Over Time</h3></div>";
+	// Limit to recent 6 tests, consider only those where at least one subject has recorded marks
+	$results = getTableData("#__gradesform","CONCAT(year,'/',examType),kannadaMarks,englishMarks,hindiMarks,mathMarks,generalScienceMarks,socialStudiesMarks","studentId='$studentId' AND (kannadaMarks+englishMarks+hindiMarks+mathMarks+generalScienceMarks+socialStudiesMarks)>0 ORDER BY year DESC, FIELD(examType,$examOptStr) LIMIT 6");
+	$arr = array();
+	for ($i=count($results)-1, $j=0; $i>=0; $i--, $j++) {
+		$maxMarks = preg_replace("/.*\((\d+) marks.*/","$1",$results[$i][0]);
+		$arr[$j][0] = preg_replace("/ \(.*/","",$results[$i][0]);
+		$arr[$j][0] = preg_replace("/Test (\d)/","Test$1",$arr[$j][0]);
+		$arr[$j][0] = preg_replace("/ Exam/","",$arr[$j][0]);
+		for ($k=1; $k<count($results[$i]); $k++) {
+			$arr[$j][$k] = floor(0.5+100*$results[$i][$k]/$maxMarks);
+		}
+	}
+	$csvFile = "dataStudentTimePerf-$currtime.csv";
+	printToFile($csvFile, "quarter,".implode(",",$allSubjects), getCsvFormat($arr, false));
+	echo "<studentTimePerf src='/$csvFile'></studentTimePerf>\n";
+	
 	echo "<script src='$pathPrefix/media/d3/studentPerformance.js'></script>";
 
 	return;
