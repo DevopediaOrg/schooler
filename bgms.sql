@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: May 08, 2014 at 11:53 PM
+-- Generation Time: May 09, 2014 at 07:11 AM
 -- Server version: 5.5.32-percona-sure1-log
 -- PHP Version: 5.3.28
 
@@ -42,14 +42,14 @@ CREATE TABLE IF NOT EXISTS `ek5d2_assets` (
   UNIQUE KEY `idx_asset_name` (`name`),
   KEY `idx_lft_rgt` (`lft`,`rgt`),
   KEY `idx_parent_id` (`parent_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=160 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=161 ;
 
 --
 -- Dumping data for table `ek5d2_assets`
 --
 
 INSERT INTO `ek5d2_assets` (`id`, `parent_id`, `lft`, `rgt`, `level`, `name`, `title`, `rules`) VALUES
-(1, 0, 1, 490, 0, 'root.1', 'Root Asset', '{"core.login.site":{"6":1,"2":1},"core.login.admin":{"6":1},"core.login.offline":[],"core.admin":{"8":1},"core.manage":{"7":1},"core.create":{"6":1,"3":1},"core.delete":{"6":1},"core.edit":{"6":1,"4":1},"core.edit.state":{"6":1,"5":1},"core.edit.own":{"6":1,"3":1}}'),
+(1, 0, 1, 492, 0, 'root.1', 'Root Asset', '{"core.login.site":{"6":1,"2":1},"core.login.admin":{"6":1},"core.login.offline":[],"core.admin":{"8":1},"core.manage":{"7":1},"core.create":{"6":1,"3":1},"core.delete":{"6":1},"core.edit":{"6":1,"4":1},"core.edit.state":{"6":1,"5":1},"core.edit.own":{"6":1,"3":1}}'),
 (2, 1, 1, 2, 1, 'com_admin', 'com_admin', '{}'),
 (3, 1, 3, 6, 1, 'com_banners', 'com_banners', '{"core.admin":{"7":1},"core.manage":{"6":1},"core.create":[],"core.delete":[],"core.edit":[],"core.edit.state":[]}'),
 (4, 1, 7, 8, 1, 'com_cache', 'com_cache', '{"core.admin":{"7":1},"core.manage":{"7":1}}'),
@@ -66,20 +66,20 @@ INSERT INTO `ek5d2_assets` (`id`, `parent_id`, `lft`, `rgt`, `level`, `name`, `t
 (15, 1, 87, 88, 1, 'com_media', 'com_media', '{"core.admin":{"7":1},"core.manage":{"6":1},"core.create":{"3":1},"core.delete":{"5":1}}'),
 (16, 1, 89, 90, 1, 'com_menus', 'com_menus', '{"core.admin":{"7":1},"core.manage":[],"core.create":[],"core.delete":[],"core.edit":[],"core.edit.state":[]}'),
 (17, 1, 91, 92, 1, 'com_messages', 'com_messages', '{"core.admin":{"7":1},"core.manage":{"7":1}}'),
-(18, 1, 93, 94, 1, 'com_modules', 'com_modules', '{"core.admin":{"7":1},"core.manage":[],"core.create":[],"core.delete":[],"core.edit":[],"core.edit.state":[]}'),
-(19, 1, 95, 98, 1, 'com_newsfeeds', 'com_newsfeeds', '{"core.admin":{"7":1},"core.manage":{"6":1},"core.create":[],"core.delete":[],"core.edit":[],"core.edit.state":[],"core.edit.own":[]}'),
-(20, 1, 99, 100, 1, 'com_plugins', 'com_plugins', '{"core.admin":{"7":1},"core.manage":[],"core.edit":[],"core.edit.state":[]}'),
-(21, 1, 101, 102, 1, 'com_redirect', 'com_redirect', '{"core.admin":{"7":1},"core.manage":[]}'),
-(22, 1, 103, 104, 1, 'com_search', 'com_search', '{"core.admin":{"7":1},"core.manage":{"6":1}}'),
-(23, 1, 105, 106, 1, 'com_templates', 'com_templates', '{"core.admin":{"7":1},"core.manage":[],"core.create":[],"core.delete":[],"core.edit":[],"core.edit.state":[]}'),
-(24, 1, 107, 108, 1, 'com_users', 'com_users', '{"core.admin":{"7":1},"core.manage":[],"core.create":[],"core.delete":[],"core.edit":[],"core.edit.state":[]}'),
-(25, 1, 109, 114, 1, 'com_weblinks', 'com_weblinks', '{"core.admin":{"7":1},"core.manage":{"6":1},"core.create":{"3":1},"core.delete":[],"core.edit":{"4":1},"core.edit.state":{"5":1},"core.edit.own":[]}'),
-(26, 1, 115, 116, 1, 'com_wrapper', 'com_wrapper', '{}'),
+(18, 1, 93, 96, 1, 'com_modules', 'com_modules', '{"core.admin":{"7":1},"core.manage":[],"core.create":[],"core.delete":[],"core.edit":[],"core.edit.state":[]}'),
+(19, 1, 97, 100, 1, 'com_newsfeeds', 'com_newsfeeds', '{"core.admin":{"7":1},"core.manage":{"6":1},"core.create":[],"core.delete":[],"core.edit":[],"core.edit.state":[],"core.edit.own":[]}'),
+(20, 1, 101, 102, 1, 'com_plugins', 'com_plugins', '{"core.admin":{"7":1},"core.manage":[],"core.edit":[],"core.edit.state":[]}'),
+(21, 1, 103, 104, 1, 'com_redirect', 'com_redirect', '{"core.admin":{"7":1},"core.manage":[]}'),
+(22, 1, 105, 106, 1, 'com_search', 'com_search', '{"core.admin":{"7":1},"core.manage":{"6":1}}'),
+(23, 1, 107, 108, 1, 'com_templates', 'com_templates', '{"core.admin":{"7":1},"core.manage":[],"core.create":[],"core.delete":[],"core.edit":[],"core.edit.state":[]}'),
+(24, 1, 109, 110, 1, 'com_users', 'com_users', '{"core.admin":{"7":1},"core.manage":[],"core.create":[],"core.delete":[],"core.edit":[],"core.edit.state":[]}'),
+(25, 1, 111, 116, 1, 'com_weblinks', 'com_weblinks', '{"core.admin":{"7":1},"core.manage":{"6":1},"core.create":{"3":1},"core.delete":[],"core.edit":{"4":1},"core.edit.state":{"5":1},"core.edit.own":[]}'),
+(26, 1, 117, 118, 1, 'com_wrapper', 'com_wrapper', '{}'),
 (27, 8, 20, 49, 2, 'com_content.category.2', 'Uncategorised', '{"core.create":[],"core.delete":[],"core.edit":[],"core.edit.state":[],"core.edit.own":[]}'),
 (28, 3, 4, 5, 2, 'com_banners.category.3', 'Uncategorised', '{"core.create":[],"core.delete":[],"core.edit":[],"core.edit.state":[]}'),
 (29, 7, 14, 15, 2, 'com_contact.category.4', 'Uncategorised', '{"core.create":[],"core.delete":[],"core.edit":[],"core.edit.state":[],"core.edit.own":[]}'),
-(30, 19, 96, 97, 2, 'com_newsfeeds.category.5', 'Uncategorised', '{"core.create":[],"core.delete":[],"core.edit":[],"core.edit.state":[],"core.edit.own":[]}'),
-(31, 25, 110, 111, 2, 'com_weblinks.category.6', 'Uncategorised', '{"core.create":[],"core.delete":[],"core.edit":[],"core.edit.state":[],"core.edit.own":[]}'),
+(30, 19, 98, 99, 2, 'com_newsfeeds.category.5', 'Uncategorised', '{"core.create":[],"core.delete":[],"core.edit":[],"core.edit.state":[],"core.edit.own":[]}'),
+(31, 25, 112, 113, 2, 'com_weblinks.category.6', 'Uncategorised', '{"core.create":[],"core.delete":[],"core.edit":[],"core.edit.state":[],"core.edit.own":[]}'),
 (32, 8, 50, 73, 2, 'com_content.category.7', 'Blog', '{"core.create":[],"core.delete":[],"core.edit":[],"core.edit.state":[],"core.edit.own":[]}'),
 (33, 27, 21, 22, 3, 'com_content.article.1', 'Layouts', '{"core.delete":[],"core.edit":[],"core.edit.state":[]}'),
 (34, 27, 23, 24, 3, 'com_content.article.2', 'Icons', '{"core.delete":[],"core.edit":[],"core.edit.state":[]}'),
@@ -93,95 +93,96 @@ INSERT INTO `ek5d2_assets` (`id`, `parent_id`, `lft`, `rgt`, `level`, `name`, `t
 (42, 32, 55, 56, 3, 'com_content.article.10', 'Warp Framework', '{"core.delete":[],"core.edit":[],"core.edit.state":[]}'),
 (43, 32, 57, 58, 3, 'com_content.article.11', 'ZOO Extension', '{"core.delete":[],"core.edit":[],"core.edit.state":[]}'),
 (56, 7, 16, 17, 2, 'com_contact.category.8', 'Contacts', '{"core.create":[],"core.delete":[],"core.edit":[],"core.edit.state":[],"core.edit.own":[]}'),
-(57, 25, 112, 113, 2, 'com_weblinks.category.9', 'YOOtheme Links', '{"core.create":[],"core.delete":[],"core.edit":[],"core.edit.state":[],"core.edit.own":[]}'),
-(59, 1, 456, 457, 1, 'com_finder', 'com_finder', '{"core.admin":[],"core.manage":[]}'),
-(63, 1, 460, 461, 1, 'com_joomlaupdate', 'com_joomlaupdate', '{"core.admin":{"8":1},"core.manage":{"7":1},"core.delete":{"6":1},"core.edit.state":{"6":1,"5":1}}'),
-(65, 1, 462, 463, 1, '#__ucm_content.1', '#__ucm_content.1', '[]'),
-(66, 1, 464, 465, 1, '#__ucm_content.2', '#__ucm_content.2', '[]'),
-(67, 1, 466, 467, 1, '#__ucm_content.3', '#__ucm_content.3', '[]'),
-(68, 1, 468, 469, 1, '#__ucm_content.4', '#__ucm_content.4', '[]'),
-(69, 1, 470, 471, 1, '#__ucm_content.5', '#__ucm_content.5', '[]'),
-(70, 1, 472, 473, 1, '#__ucm_content.6', '#__ucm_content.6', '[]'),
-(71, 1, 474, 475, 1, 'com_tags', 'com_tags', '{}'),
-(72, 1, 476, 477, 1, 'com_contenthistory', 'com_contenthistory', '{}'),
-(73, 1, 478, 479, 1, 'com_ajax', 'com_ajax', '{}'),
-(74, 1, 480, 481, 1, 'com_postinstall', 'com_postinstall', '{}'),
-(75, 18, 94, 95, 2, 'com_modules.module.1', 'Main Menu', ''),
-(76, 18, 96, 97, 2, 'com_modules.module.17', 'Breadcrumbs', ''),
-(77, 18, 98, 99, 2, 'com_modules.module.19', 'Bottom A', ''),
-(78, 18, 100, 101, 2, 'com_modules.module.20', 'Bottom A', ''),
-(79, 18, 102, 103, 2, 'com_modules.module.21', 'Bottom A', ''),
-(80, 18, 104, 105, 2, 'com_modules.module.22', 'Bottom A', ''),
-(81, 18, 106, 107, 2, 'com_modules.module.23', 'Fast and lightweight', ''),
-(82, 18, 108, 109, 2, 'com_modules.module.24', 'Responsive design', ''),
-(83, 18, 110, 111, 2, 'com_modules.module.25', 'Supported systems', ''),
-(84, 18, 112, 113, 2, 'com_modules.module.26', 'Frequent updates', ''),
-(85, 18, 114, 115, 2, 'com_modules.module.27', 'Bottom B', ''),
-(86, 18, 116, 117, 2, 'com_modules.module.28', 'Bottom B', ''),
-(87, 18, 118, 119, 2, 'com_modules.module.29', 'Bottom B', ''),
-(88, 18, 120, 121, 2, 'com_modules.module.30', 'Bottom B', ''),
-(89, 18, 122, 123, 2, 'com_modules.module.31', 'Footer Menu', ''),
-(90, 18, 124, 125, 2, 'com_modules.module.32', 'Footer', '{"core.delete":{"6":1},"core.edit":{"6":1,"4":1},"core.edit.state":{"6":1,"5":1}}'),
-(91, 18, 126, 127, 2, 'com_modules.module.33', 'Headerbar', ''),
-(92, 18, 128, 129, 2, 'com_modules.module.34', 'Main Bottom', ''),
-(93, 18, 130, 131, 2, 'com_modules.module.35', 'Main Bottom', ''),
-(94, 18, 132, 133, 2, 'com_modules.module.36', ' Main Top', ''),
-(95, 18, 134, 135, 2, 'com_modules.module.37', 'Main Top', ''),
-(96, 18, 136, 137, 2, 'com_modules.module.38', 'Logo', '{"core.delete":{"6":1},"core.edit":{"6":1,"4":1},"core.edit.state":{"6":1,"5":1}}'),
-(97, 18, 138, 139, 2, 'com_modules.module.39', 'Login', '{"core.delete":{"6":1},"core.edit":{"6":1,"4":1},"core.edit.state":{"6":1,"5":1}}'),
-(98, 18, 140, 141, 2, 'com_modules.module.40', 'Search', ''),
-(99, 18, 142, 143, 2, 'com_modules.module.41', 'Sub Menu', '{"core.delete":{"6":1},"core.edit":{"6":1,"4":1},"core.edit.state":{"6":1,"5":1}}'),
-(100, 18, 144, 145, 2, 'com_modules.module.42', 'Sidebar Menu', ''),
-(101, 18, 146, 147, 2, 'com_modules.module.43', 'Sidebar A', ''),
-(102, 18, 148, 149, 2, 'com_modules.module.44', 'Sidebar A', ''),
-(103, 18, 150, 151, 2, 'com_modules.module.48', 'Latest News', ''),
-(104, 18, 152, 153, 2, 'com_modules.module.49', 'Login', ''),
-(105, 18, 154, 155, 2, 'com_modules.module.50', 'Download ZOO', ''),
-(106, 18, 156, 157, 2, 'com_modules.module.53', 'Warp Framework', ''),
-(107, 18, 158, 159, 2, 'com_modules.module.54', 'Joomla & WordPress', ''),
-(108, 18, 160, 161, 2, 'com_modules.module.55', 'UIkit', ''),
-(109, 18, 162, 163, 2, 'com_modules.module.57', 'Sidebar B', ''),
-(110, 18, 164, 165, 2, 'com_modules.module.58', 'Sidebar B', ''),
-(111, 18, 166, 167, 2, 'com_modules.module.59', 'Sidebar B', ''),
-(112, 18, 168, 169, 2, 'com_modules.module.61', 'Top Menu', ''),
-(113, 18, 170, 171, 2, 'com_modules.module.62', 'Top A', ''),
-(114, 18, 172, 173, 2, 'com_modules.module.63', 'Top A', ''),
-(115, 18, 174, 175, 2, 'com_modules.module.64', 'Top A', ''),
-(116, 18, 176, 177, 2, 'com_modules.module.65', 'Top A', ''),
-(121, 18, 178, 179, 2, 'com_modules.module.70', 'Home Photo', '{"core.delete":{"6":1},"core.edit":{"6":1,"4":1},"core.edit.state":{"6":1,"5":1}}'),
-(122, 18, 180, 181, 2, 'com_modules.module.71', 'Top B', ''),
-(123, 18, 182, 183, 2, 'com_modules.module.72', 'Top B', ''),
-(124, 18, 184, 185, 2, 'com_modules.module.73', 'Top B', ''),
-(125, 18, 186, 187, 2, 'com_modules.module.74', 'Top B', ''),
-(127, 18, 190, 191, 2, 'com_modules.module.76', 'Twitter List', ''),
-(128, 18, 192, 193, 2, 'com_modules.module.77', 'Get Widgetkit', ''),
-(129, 18, 194, 195, 2, 'com_modules.module.78', 'Twitter Bubbles', ''),
-(130, 18, 196, 197, 2, 'com_modules.module.79', 'Twitter Single', ''),
-(131, 18, 198, 199, 2, 'com_modules.module.82', 'Finder', ''),
-(132, 18, 200, 201, 2, 'com_modules.module.83', 'ZOO Item', ''),
-(133, 18, 202, 203, 2, 'com_modules.module.84', 'ZOO Comment', ''),
-(134, 18, 204, 205, 2, 'com_modules.module.85', 'ZOO Tag', ''),
-(135, 18, 206, 207, 2, 'com_modules.module.86', 'ZOO Category', ''),
-(136, 18, 208, 209, 2, 'com_modules.module.88', 'App Bundle', ''),
-(141, 18, 210, 211, 2, 'com_modules.module.94', 'Offcanvas Menu', ''),
-(142, 18, 212, 213, 2, 'com_modules.module.95', 'Offcanvas', ''),
-(143, 18, 214, 215, 2, 'com_modules.module.96', 'Students', '{"core.delete":{"6":1},"core.edit":{"6":1,"4":1},"core.edit.state":{"6":1,"5":1}}'),
-(144, 18, 216, 217, 2, 'com_modules.module.97', 'Grades', '{"core.delete":{"6":1},"core.edit":{"6":1,"4":1},"core.edit.state":{"6":1,"5":1}}'),
-(145, 18, 218, 219, 2, 'com_modules.module.98', 'Reports', '{"core.delete":{"6":1},"core.edit":{"6":1,"4":1},"core.edit.state":{"6":1,"5":1}}'),
-(146, 18, 220, 221, 2, 'com_modules.module.99', 'Features UIkit', '{"core.delete":{"6":1},"core.edit":{"6":1,"4":1},"core.edit.state":{"6":1,"5":1}}'),
-(147, 18, 222, 223, 2, 'com_modules.module.100', 'Social Icons', ''),
-(148, 18, 224, 225, 2, 'com_modules.module.101', 'Home features', '{"core.delete":{"6":1},"core.edit":{"6":1,"4":1},"core.edit.state":{"6":1,"5":1}}'),
-(149, 18, 226, 227, 2, 'com_modules.module.102', 'Logo small', '{"core.delete":{"6":1},"core.edit":{"6":1,"4":1},"core.edit.state":{"6":1,"5":1}}'),
+(57, 25, 114, 115, 2, 'com_weblinks.category.9', 'YOOtheme Links', '{"core.create":[],"core.delete":[],"core.edit":[],"core.edit.state":[],"core.edit.own":[]}'),
+(59, 1, 458, 459, 1, 'com_finder', 'com_finder', '{"core.admin":[],"core.manage":[]}'),
+(63, 1, 462, 463, 1, 'com_joomlaupdate', 'com_joomlaupdate', '{"core.admin":{"8":1},"core.manage":{"7":1},"core.delete":{"6":1},"core.edit.state":{"6":1,"5":1}}'),
+(65, 1, 464, 465, 1, '#__ucm_content.1', '#__ucm_content.1', '[]'),
+(66, 1, 466, 467, 1, '#__ucm_content.2', '#__ucm_content.2', '[]'),
+(67, 1, 468, 469, 1, '#__ucm_content.3', '#__ucm_content.3', '[]'),
+(68, 1, 470, 471, 1, '#__ucm_content.4', '#__ucm_content.4', '[]'),
+(69, 1, 472, 473, 1, '#__ucm_content.5', '#__ucm_content.5', '[]'),
+(70, 1, 474, 475, 1, '#__ucm_content.6', '#__ucm_content.6', '[]'),
+(71, 1, 476, 477, 1, 'com_tags', 'com_tags', '{}'),
+(72, 1, 478, 479, 1, 'com_contenthistory', 'com_contenthistory', '{}'),
+(73, 1, 480, 481, 1, 'com_ajax', 'com_ajax', '{}'),
+(74, 1, 482, 483, 1, 'com_postinstall', 'com_postinstall', '{}'),
+(75, 18, 94, 97, 2, 'com_modules.module.1', 'Main Menu', ''),
+(76, 18, 98, 99, 2, 'com_modules.module.17', 'Breadcrumbs', ''),
+(77, 18, 100, 101, 2, 'com_modules.module.19', 'Bottom A', ''),
+(78, 18, 102, 103, 2, 'com_modules.module.20', 'Bottom A', ''),
+(79, 18, 104, 105, 2, 'com_modules.module.21', 'Bottom A', ''),
+(80, 18, 106, 107, 2, 'com_modules.module.22', 'Bottom A', ''),
+(81, 18, 108, 109, 2, 'com_modules.module.23', 'Fast and lightweight', ''),
+(82, 18, 110, 111, 2, 'com_modules.module.24', 'Responsive design', ''),
+(83, 18, 112, 113, 2, 'com_modules.module.25', 'Supported systems', ''),
+(84, 18, 114, 115, 2, 'com_modules.module.26', 'Frequent updates', ''),
+(85, 18, 116, 117, 2, 'com_modules.module.27', 'Bottom B', ''),
+(86, 18, 118, 119, 2, 'com_modules.module.28', 'Bottom B', ''),
+(87, 18, 120, 121, 2, 'com_modules.module.29', 'Bottom B', ''),
+(88, 18, 122, 123, 2, 'com_modules.module.30', 'Bottom B', ''),
+(89, 18, 124, 125, 2, 'com_modules.module.31', 'Footer Menu', ''),
+(90, 18, 126, 127, 2, 'com_modules.module.32', 'Footer', '{"core.delete":{"6":1},"core.edit":{"6":1,"4":1},"core.edit.state":{"6":1,"5":1}}'),
+(91, 18, 128, 129, 2, 'com_modules.module.33', 'Headerbar', ''),
+(92, 18, 130, 131, 2, 'com_modules.module.34', 'Main Bottom', ''),
+(93, 18, 132, 133, 2, 'com_modules.module.35', 'Main Bottom', ''),
+(94, 18, 134, 135, 2, 'com_modules.module.36', ' Main Top', ''),
+(95, 18, 136, 137, 2, 'com_modules.module.37', 'Main Top', ''),
+(96, 18, 138, 139, 2, 'com_modules.module.38', 'Logo', '{"core.delete":{"6":1},"core.edit":{"6":1,"4":1},"core.edit.state":{"6":1,"5":1}}'),
+(97, 18, 140, 141, 2, 'com_modules.module.39', 'Login', '{"core.delete":{"6":1},"core.edit":{"6":1,"4":1},"core.edit.state":{"6":1,"5":1}}'),
+(98, 18, 142, 143, 2, 'com_modules.module.40', 'Search', ''),
+(99, 18, 144, 145, 2, 'com_modules.module.41', 'Sub Menu', '{"core.delete":{"6":1},"core.edit":{"6":1,"4":1},"core.edit.state":{"6":1,"5":1}}'),
+(100, 18, 146, 147, 2, 'com_modules.module.42', 'Sidebar Menu', ''),
+(101, 18, 148, 149, 2, 'com_modules.module.43', 'Sidebar A', ''),
+(102, 18, 150, 151, 2, 'com_modules.module.44', 'Sidebar A', ''),
+(103, 18, 152, 153, 2, 'com_modules.module.48', 'Latest News', ''),
+(104, 18, 154, 155, 2, 'com_modules.module.49', 'Login', ''),
+(105, 18, 156, 157, 2, 'com_modules.module.50', 'Download ZOO', ''),
+(106, 18, 158, 159, 2, 'com_modules.module.53', 'Warp Framework', ''),
+(107, 18, 160, 161, 2, 'com_modules.module.54', 'Joomla & WordPress', ''),
+(108, 18, 162, 163, 2, 'com_modules.module.55', 'UIkit', ''),
+(109, 18, 164, 165, 2, 'com_modules.module.57', 'Sidebar B', ''),
+(110, 18, 166, 167, 2, 'com_modules.module.58', 'Sidebar B', ''),
+(111, 18, 168, 169, 2, 'com_modules.module.59', 'Sidebar B', ''),
+(112, 18, 170, 171, 2, 'com_modules.module.61', 'Top Menu', ''),
+(113, 18, 172, 173, 2, 'com_modules.module.62', 'Top A', ''),
+(114, 18, 174, 175, 2, 'com_modules.module.63', 'Top A', ''),
+(115, 18, 176, 177, 2, 'com_modules.module.64', 'Top A', ''),
+(116, 18, 178, 179, 2, 'com_modules.module.65', 'Top A', ''),
+(121, 18, 180, 181, 2, 'com_modules.module.70', 'Home Photo', '{"core.delete":{"6":1},"core.edit":{"6":1,"4":1},"core.edit.state":{"6":1,"5":1}}'),
+(122, 18, 182, 183, 2, 'com_modules.module.71', 'Top B', ''),
+(123, 18, 184, 185, 2, 'com_modules.module.72', 'Top B', ''),
+(124, 18, 186, 187, 2, 'com_modules.module.73', 'Top B', ''),
+(125, 18, 188, 189, 2, 'com_modules.module.74', 'Top B', ''),
+(127, 18, 192, 193, 2, 'com_modules.module.76', 'Twitter List', ''),
+(128, 18, 194, 195, 2, 'com_modules.module.77', 'Get Widgetkit', ''),
+(129, 18, 196, 197, 2, 'com_modules.module.78', 'Twitter Bubbles', ''),
+(130, 18, 198, 199, 2, 'com_modules.module.79', 'Twitter Single', ''),
+(131, 18, 200, 201, 2, 'com_modules.module.82', 'Finder', ''),
+(132, 18, 202, 203, 2, 'com_modules.module.83', 'ZOO Item', ''),
+(133, 18, 204, 205, 2, 'com_modules.module.84', 'ZOO Comment', ''),
+(134, 18, 206, 207, 2, 'com_modules.module.85', 'ZOO Tag', ''),
+(135, 18, 208, 209, 2, 'com_modules.module.86', 'ZOO Category', ''),
+(136, 18, 210, 211, 2, 'com_modules.module.88', 'App Bundle', ''),
+(141, 18, 212, 213, 2, 'com_modules.module.94', 'Offcanvas Menu', ''),
+(142, 18, 214, 215, 2, 'com_modules.module.95', 'Offcanvas', ''),
+(143, 18, 216, 217, 2, 'com_modules.module.96', 'Students', '{"core.delete":{"6":1},"core.edit":{"6":1,"4":1},"core.edit.state":{"6":1,"5":1}}'),
+(144, 18, 218, 219, 2, 'com_modules.module.97', 'Grades', '{"core.delete":{"6":1},"core.edit":{"6":1,"4":1},"core.edit.state":{"6":1,"5":1}}'),
+(145, 18, 220, 221, 2, 'com_modules.module.98', 'Sponsors', '{"core.delete":{"6":1},"core.edit":{"6":1,"4":1},"core.edit.state":{"6":1,"5":1}}'),
+(146, 18, 222, 223, 2, 'com_modules.module.99', 'Features UIkit', '{"core.delete":{"6":1},"core.edit":{"6":1,"4":1},"core.edit.state":{"6":1,"5":1}}'),
+(147, 18, 224, 225, 2, 'com_modules.module.100', 'Social Icons', ''),
+(148, 18, 226, 227, 2, 'com_modules.module.101', 'Home features', '{"core.delete":{"6":1},"core.edit":{"6":1,"4":1},"core.edit.state":{"6":1,"5":1}}'),
+(149, 18, 228, 229, 2, 'com_modules.module.102', 'Logo small', '{"core.delete":{"6":1},"core.edit":{"6":1,"4":1},"core.edit.state":{"6":1,"5":1}}'),
 (150, 27, 45, 46, 3, 'com_content.article.13', 'Widgetkit', '{"core.delete":[],"core.edit":[],"core.edit.state":[]}'),
 (151, 32, 65, 66, 3, 'com_content.article.24', 'UIkit', '{"core.delete":[],"core.edit":[],"core.edit.state":[]}'),
-(152, 1, 482, 483, 1, '#__ucm_content.7', '#__ucm_content.7', '[]'),
+(152, 1, 484, 485, 1, '#__ucm_content.7', '#__ucm_content.7', '[]'),
 (153, 32, 67, 68, 3, 'com_content.article.25', 'Pagekit', '{"core.delete":[],"core.edit":[],"core.edit.state":[]}'),
-(154, 1, 484, 485, 1, '#__ucm_content.8', '#__ucm_content.8', '[]'),
+(154, 1, 486, 487, 1, '#__ucm_content.8', '#__ucm_content.8', '[]'),
 (155, 32, 69, 70, 3, 'com_content.article.23', 'Widgetkit', '{"core.delete":[],"core.edit":[],"core.edit.state":[]}'),
 (156, 32, 71, 72, 3, 'com_content.article.26', 'Free Halloween Icons', '{"core.delete":[],"core.edit":[],"core.edit.state":[]}'),
-(157, 1, 486, 487, 1, '#__ucm_content.9', '#__ucm_content.9', '[]'),
-(158, 1, 488, 489, 1, 'com_chronoforms5', 'com_chronoforms5', '{}'),
-(159, 27, 47, 48, 3, 'com_content.article.27', 'Blank', '{"core.delete":{"6":1},"core.edit":{"6":1,"4":1},"core.edit.state":{"6":1,"5":1}}');
+(157, 1, 488, 489, 1, '#__ucm_content.9', '#__ucm_content.9', '[]'),
+(158, 1, 490, 491, 1, 'com_chronoforms5', 'com_chronoforms5', '{}'),
+(159, 27, 47, 48, 3, 'com_content.article.27', 'Blank', '{"core.delete":{"6":1},"core.edit":{"6":1,"4":1},"core.edit.state":{"6":1,"5":1}}'),
+(160, 18, 94, 95, 2, 'com_modules.module.103', 'Reports', '{"core.delete":{"6":1},"core.edit":{"6":1,"4":1},"core.edit.state":{"6":1,"5":1}}');
 
 -- --------------------------------------------------------
 
@@ -370,7 +371,7 @@ CREATE TABLE IF NOT EXISTS `ek5d2_chronoengine_chronoforms` (
   `form_type` int(1) NOT NULL DEFAULT '1',
   `content` longtext NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=6 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=8 ;
 
 --
 -- Dumping data for table `ek5d2_chronoengine_chronoforms`
@@ -382,6 +383,9 @@ INSERT INTO `ek5d2_chronoengine_chronoforms` (`id`, `title`, `params`, `extras`,
 (3, 'studentList', '{"description":"Show a list of students.","setup":"0","theme":"bootstrap3","tight_layout":"0"}', 'YTozOntzOjY6ImZpZWxkcyI7YTowOnt9czoxNDoiYWN0aW9uc19jb25maWciO2E6MTp7aTowO2E6MTp7czo3OiJjb250ZW50IjtzOjEwOToiPD9waHAgDQpyZXF1aXJlX29uY2UgKCBKUEFUSF9CQVNFIC5EUy4ndGVtcGxhdGVzJy5EUy4neW9vX21hc3RlcjInLkRTLidiZ21zLnBocCcgKTsNCnNob3dTdHVkZW50TGlzdCgpOw0KPz4NCiI7fX1zOjM6IkROQSI7YToyOntzOjQ6ImxvYWQiO2E6MTp7czoxMzoiY3VzdG9tX2NvZGVfMCI7czowOiIiO31zOjY6InN1Ym1pdCI7czowOiIiO319', 1, '', 1, ''),
 (4, 'gradesList', '{"description":"Show recent grades of all students.","setup":"0","theme":"bootstrap3","tight_layout":"0"}', 'YTozOntzOjY6ImZpZWxkcyI7YTowOnt9czoxNDoiYWN0aW9uc19jb25maWciO2E6MTp7aTowO2E6MTp7czo3OiJjb250ZW50IjtzOjExMjoiPD9waHAgDQogIHJlcXVpcmVfb25jZSAoIEpQQVRIX0JBU0UgLkRTLid0ZW1wbGF0ZXMnLkRTLid5b29fbWFzdGVyMicuRFMuJ2JnbXMucGhwJyApOw0KICBzaG93R3JhZGVzTGlzdCgpOw0KPz4NCiI7fX1zOjM6IkROQSI7YToyOntzOjQ6ImxvYWQiO2E6MTp7czoxMzoiY3VzdG9tX2NvZGVfMCI7czowOiIiO31zOjY6InN1Ym1pdCI7czowOiIiO319', 1, '', 1, ''),
 (5, 'reports', '{"description":"Show recent grades of all students.","setup":"0","theme":"bootstrap3","tight_layout":"0"}', 'YTozOntzOjY6ImZpZWxkcyI7YTowOnt9czoxNDoiYWN0aW9uc19jb25maWciO2E6MTp7aTowO2E6MTp7czo3OiJjb250ZW50IjtzOjE0MjoiPD9waHAgDQogIHJlcXVpcmVfb25jZSAoIEpQQVRIX0JBU0UgLkRTLid0ZW1wbGF0ZXMnLkRTLid5b29fbWFzdGVyMicuRFMuJ2JnbXMucGhwJyApOw0KICBzaG93UmVwb3J0cygpOw0KICBwcmludEN1c3RvbUNvZGVSZXBvcnRzRm9ybSgpOw0KPz4NCiI7fX1zOjM6IkROQSI7YToyOntzOjQ6ImxvYWQiO2E6MTp7czoxMzoiY3VzdG9tX2NvZGVfMCI7czowOiIiO31zOjY6InN1Ym1pdCI7czowOiIiO319', 1, '', 1, '');
+INSERT INTO `ek5d2_chronoengine_chronoforms` (`id`, `title`, `params`, `extras`, `published`, `app`, `form_type`, `content`) VALUES
+(6, 'sponsorForm', '{"description":"Details of each sponsor.","setup":"0","theme":"bootstrap3","tight_layout":"0"}', 'YTo0OntzOjY6ImZpZWxkcyI7YTo0OntpOjE7YToxODp7czo0OiJuYW1lIjtzOjQ6Im5hbWUiO3M6MjoiaWQiO3M6NDoibmFtZSI7czo1OiJ2YWx1ZSI7czowOiIiO3M6NToibGFiZWwiO2E6Mjp7czo0OiJ0ZXh0IjtzOjk6IkZ1bGwgbmFtZSI7czo4OiJwb3NpdGlvbiI7czo0OiJsZWZ0Ijt9czo4OiJzdWJsYWJlbCI7czowOiIiO3M6MTE6InBsYWNlaG9sZGVyIjtzOjA6IiI7czo5OiJtYXhsZW5ndGgiO3M6MDoiIjtzOjQ6InNpemUiO3M6MDoiIjtzOjU6ImNsYXNzIjtzOjA6IiI7czo1OiJ0aXRsZSI7czowOiIiO3M6NToic3R5bGUiO3M6MDoiIjtzOjE1OiI6ZGF0YS1pbnB1dG1hc2siO3M6MDoiIjtzOjY6InBhcmFtcyI7czowOiIiO3M6MTY6IjpkYXRhLWxvYWQtc3RhdGUiO3M6MDoiIjtzOjEzOiI6ZGF0YS10b29sdGlwIjtzOjA6IiI7czo0OiJ0eXBlIjtzOjQ6InRleHQiO3M6MTI6ImNvbnRhaW5lcl9pZCI7czoxOiIwIjtzOjEwOiJ2YWxpZGF0aW9uIjthOjEyOntzOjg6InJlcXVpcmVkIjtzOjE6IjEiO3M6NToiYWxwaGEiO3M6MToiMSI7czo4OiJhbHBoYW51bSI7czowOiIiO3M6NToiZGlnaXQiO3M6MDoiIjtzOjc6Im5vZGlnaXQiO3M6MDoiIjtzOjY6Im51bWJlciI7czowOiIiO3M6NToiZW1haWwiO3M6MDoiIjtzOjU6InBob25lIjtzOjA6IiI7czoxMToicGhvbmVfaW50ZXIiO3M6MDoiIjtzOjM6InVybCI7czowOiIiO3M6NzoiY29uZmlybSI7czowOiIiO3M6NjoiY3VzdG9tIjtzOjA6IiI7fX1pOjk7YToxODp7czo0OiJuYW1lIjtzOjEwOiJzcG9uc29yVWlkIjtzOjI6ImlkIjtzOjEwOiJzcG9uc29yVWlkIjtzOjU6InZhbHVlIjtzOjA6IiI7czo1OiJsYWJlbCI7YToyOntzOjQ6InRleHQiO3M6MTA6IlNwb25zb3IgSUQiO3M6ODoicG9zaXRpb24iO3M6NDoibGVmdCI7fXM6ODoic3VibGFiZWwiO3M6MDoiIjtzOjExOiJwbGFjZWhvbGRlciI7czowOiIiO3M6OToibWF4bGVuZ3RoIjtzOjA6IiI7czo0OiJzaXplIjtzOjA6IiI7czo1OiJjbGFzcyI7czowOiIiO3M6NToidGl0bGUiO3M6MDoiIjtzOjU6InN0eWxlIjtzOjA6IiI7czoxNToiOmRhdGEtaW5wdXRtYXNrIjtzOjA6IiI7czo2OiJwYXJhbXMiO3M6MDoiIjtzOjE2OiI6ZGF0YS1sb2FkLXN0YXRlIjtzOjA6IiI7czoxMzoiOmRhdGEtdG9vbHRpcCI7czowOiIiO3M6NDoidHlwZSI7czo0OiJ0ZXh0IjtzOjEyOiJjb250YWluZXJfaWQiO3M6MToiMCI7czoxMDoidmFsaWRhdGlvbiI7YToxMjp7czo4OiJyZXF1aXJlZCI7czoxOiIxIjtzOjU6ImFscGhhIjtzOjA6IiI7czo4OiJhbHBoYW51bSI7czoxOiIxIjtzOjU6ImRpZ2l0IjtzOjA6IiI7czo3OiJub2RpZ2l0IjtzOjA6IiI7czo2OiJudW1iZXIiO3M6MDoiIjtzOjU6ImVtYWlsIjtzOjA6IiI7czo1OiJwaG9uZSI7czowOiIiO3M6MTE6InBob25lX2ludGVyIjtzOjA6IiI7czozOiJ1cmwiO3M6MDoiIjtzOjc6ImNvbmZpcm0iO3M6MDoiIjtzOjY6ImN1c3RvbSI7czowOiIiO319aTo4O2E6MjA6e3M6NDoibmFtZSI7czoxNzoic3BvbnNvcmVkU3R1ZGVudHMiO3M6MjoiaWQiO3M6MTc6InNwb25zb3JlZFN0dWRlbnRzIjtzOjc6Im9wdGlvbnMiO3M6MDoiIjtzOjU6ImVtcHR5IjtzOjA6IiI7czo2OiJ2YWx1ZXMiO3M6MDoiIjtzOjU6ImxhYmVsIjthOjI6e3M6NDoidGV4dCI7czoxODoiU3BvbnNvcmVkIFN0dWRlbnRzIjtzOjg6InBvc2l0aW9uIjtzOjQ6ImxlZnQiO31zOjg6InN1YmxhYmVsIjtzOjA6IiI7czo4OiJtdWx0aXBsZSI7czoxOiIxIjtzOjQ6InNpemUiO3M6MjoiMTUiO3M6NToiY2xhc3MiO3M6MDoiIjtzOjU6InRpdGxlIjtzOjA6IiI7czo1OiJzdHlsZSI7czowOiIiO3M6NjoicGFyYW1zIjtzOjA6IiI7czoxNjoiOmRhdGEtbG9hZC1zdGF0ZSI7czowOiIiO3M6MTM6IjpkYXRhLXRvb2x0aXAiO3M6MDoiIjtzOjQ6InR5cGUiO3M6ODoiZHJvcGRvd24iO3M6MTI6ImNvbnRhaW5lcl9pZCI7czoxOiIwIjtzOjEwOiJ2YWxpZGF0aW9uIjthOjM6e3M6ODoicmVxdWlyZWQiO3M6MDoiIjtzOjc6ImNvbmZpcm0iO3M6MDoiIjtzOjY6ImN1c3RvbSI7czowOiIiO31zOjEyOiJkeW5hbWljX2RhdGEiO2E6NDp7czo3OiJlbmFibGVkIjtzOjA6IiI7czo5OiJkYXRhX3BhdGgiO3M6MDoiIjtzOjk6InZhbHVlX2tleSI7czowOiIiO3M6ODoidGV4dF9rZXkiO3M6MDoiIjt9czo2OiJldmVudHMiO2E6MTp7aTowO2E6NTp7czo4OiJvcGVyYXRvciI7czoxOiI9IjtzOjU6InN0YXRlIjtzOjA6IiI7czo2OiJhY3Rpb24iO3M6MDoiIjtzOjY6InRhcmdldCI7czowOiIiO3M6Nzoib3B0aW9ucyI7czowOiIiO319fWk6MTI7YToxMDp7czoxMToicmVuZGVyX3R5cGUiO3M6Njoic3VibWl0IjtzOjQ6Im5hbWUiO3M6MTM6InNwb25zb3JTdWJtaXQiO3M6MjoiaWQiO3M6MTM6InNwb25zb3JTdWJtaXQiO3M6NDoidHlwZSI7czo2OiJzdWJtaXQiO3M6NToidmFsdWUiO3M6NDoiU2F2ZSI7czo1OiJjbGFzcyI7czowOiIiO3M6NToic3R5bGUiO3M6MDoiIjtzOjY6InBhcmFtcyI7czowOiIiO3M6MTY6IjpkYXRhLWxvYWQtc3RhdGUiO3M6MDoiIjtzOjEyOiJjb250YWluZXJfaWQiO3M6MToiMCI7fX1zOjE0OiJhY3Rpb25zX2NvbmZpZyI7YTo1OntpOjEwO2E6OTp7czo3OiJlbmFibGVkIjtzOjE6IjEiO3M6OToidGFibGVuYW1lIjtzOjE3OiJlazVkMl9zdHVkZW50Zm9ybSI7czoxMDoibXVsdGlfcmVhZCI7czoxOiIwIjtzOjE4OiJsb2FkX3VuZGVyX21vZGVsaWQiO3M6MToiMCI7czo4OiJtb2RlbF9pZCI7czo0OiJEYXRhIjtzOjY6ImZpZWxkcyI7czowOiIiO3M6NToib3JkZXIiO3M6MDoiIjtzOjU6Imdyb3VwIjtzOjA6IiI7czoxMDoiY29uZGl0aW9ucyI7czoxMjE6Ijw/cGhwDQogIHJlcXVpcmVfb25jZSAoIEpQQVRIX0JBU0UuRFMuJ3RlbXBsYXRlcycuRFMuJ3lvb19tYXN0ZXIyJy5EUy4nYmdtcy5waHAnICk7DQogIHJldHVybiBzaG93U3BvbnNvckZvcm1UaXRsZSgpOw0KPz4iO31pOjA7YTo5OntzOjQ6InBhZ2UiO3M6MToiMSI7czoxMjoic3VibWl0X2V2ZW50IjtzOjY6InN1Ym1pdCI7czoxMToiZm9ybV9tZXRob2QiO3M6NDoicG9zdCI7czoxMDoiYWN0aW9uX3VybCI7czowOiIiO3M6MTA6ImZvcm1fY2xhc3MiO3M6MTA6ImNocm9ub2Zvcm0iO3M6MTU6ImZvcm1fdGFnX2F0dGFjaCI7czowOiIiO3M6MjQ6InJlcXVpcmVkX2xhYmVsc19pZGVudGlmeSI7czoxOiIxIjtzOjEyOiJyZWxhdGl2ZV91cmwiO3M6MToiMSI7czoxMToiYWpheF9zdWJtaXQiO3M6MToiMCI7fWk6MTE7YToxOntzOjc6ImNvbnRlbnQiO3M6MTIwOiI8P3BocA0KICByZXF1aXJlX29uY2UgKCBKUEFUSF9CQVNFLkRTLid0ZW1wbGF0ZXMnLkRTLid5b29fbWFzdGVyMicuRFMuJ2JnbXMucGhwJyApOw0KICBwcmludEN1c3RvbUNvZGVTcG9uc29yRm9ybSgpOw0KPz4iO31pOjQ7YTo1OntzOjc6ImVuYWJsZWQiO3M6MToiMSI7czo5OiJ0YWJsZW5hbWUiO3M6MTc6ImVrNWQyX3N0dWRlbnRmb3JtIjtzOjE4OiJzYXZlX3VuZGVyX21vZGVsaWQiO3M6MToiMCI7czoxMDoibXVsdGlfc2F2ZSI7czoxOiIwIjtzOjg6Im1vZGVsX2lkIjtzOjQ6IkRhdGEiO31pOjI7YToxOntzOjc6ImNvbnRlbnQiO3M6MTE3OiI8P3BocA0KcmVxdWlyZV9vbmNlICggSlBBVEhfQkFTRSAuRFMuJ3RlbXBsYXRlcycuRFMuJ3lvb19tYXN0ZXIyJy5EUy4nYmdtcy5waHAnICk7DQptc2dQb3N0Rm9ybVN1Ym1pdCgnc3BvbnNvcicpOw0KPz4iO319czozOiJETkEiO2E6Mjp7czo0OiJsb2FkIjthOjM6e3M6MTA6ImRiX3JlYWRfMTAiO3M6MDoiIjtzOjY6Imh0bWxfMCI7czowOiIiO3M6MTQ6ImN1c3RvbV9jb2RlXzExIjtzOjA6IiI7fXM6Njoic3VibWl0IjthOjI6e3M6OToiZGJfc2F2ZV80IjtzOjA6IiI7czoxMzoiY3VzdG9tX2NvZGVfMiI7czowOiIiO319czoxNDoiZGJfZmllbGRzX2xpc3QiO2E6MTp7czoxNzoiZWs1ZDJfc3R1ZGVudGZvcm0iO3M6MjQ5OiJpZD1pZA0KY3JlYXRlZD1jcmVhdGVkDQptb2RpZmllZD1tb2RpZmllZA0KbmFtZT1uYW1lDQpkYXRlT2ZCaXJ0aD1kYXRlT2ZCaXJ0aA0KYWdlPWFnZQ0Kc2V4PXNleA0KYWRtaXNzaW9uTnVtYmVyPWFkbWlzc2lvbk51bWJlcg0Kc3R1ZGVudFVpZD1zdHVkZW50VWlkDQpjbGFzcz1jbGFzcw0KZ3JvdXBOYW1lPWdyb3VwTmFtZQ0KcGFyZW50PXBhcmVudA0KZ3VhcmRpYW49Z3VhcmRpYW4NCnNwb25zb3I9c3BvbnNvcg0KcGhvdG89cGhvdG8iO319', 1, '', 1, '<div class="form-group gcore-form-row" id="form-row-2"><label for="name" class="control-label gcore-label-left">Full name</label>\n<div class="gcore-input gcore-display-table" id="fin-name"><input name="name" id="name" value="" placeholder="" maxlength="" size="" class="validate[&#039;required&#039;,&#039;alpha&#039;] form-control A" title="" style="" data-inputmask="" data-load-state="" data-tooltip="" type="text" /></div></div><div class="form-group gcore-form-row" id="form-row-4"><label for="sponsorUid" class="control-label gcore-label-left">Sponsor ID</label>\n<div class="gcore-input gcore-display-table" id="fin-sponsorUid"><input name="sponsorUid" id="sponsorUid" value="" placeholder="" maxlength="" size="" class="validate[&#039;required&#039;,&#039;alphanum&#039;] form-control A" title="" style="" data-inputmask="" data-load-state="" data-tooltip="" type="text" /></div></div><div class="form-group gcore-form-row" id="form-row-5"><label for="sponsoredStudents" class="control-label gcore-label-left">Sponsored Students</label>\n<div class="gcore-input gcore-display-table" id="fin-sponsoredStudents"><select name="sponsoredStudents" id="sponsoredStudents" multiple="1" size="15" class="form-control A" title="" style="" data-load-state="" data-tooltip="">\n</select></div></div><div class="form-group gcore-form-row" id="form-row-6"><div class="gcore-input gcore-display-table" id="fin-sponsorSubmit"><input name="sponsorSubmit" id="sponsorSubmit" type="submit" value="Save" class="form-control A" style="" data-load-state="" /></div></div>'),
+(7, 'sponsorList', '{"description":"Show a list of sponsors.","setup":"0","theme":"bootstrap3","tight_layout":"0"}', 'YTozOntzOjY6ImZpZWxkcyI7YTowOnt9czoxNDoiYWN0aW9uc19jb25maWciO2E6MTp7aTowO2E6MTp7czo3OiJjb250ZW50IjtzOjEwOToiPD9waHAgDQpyZXF1aXJlX29uY2UgKCBKUEFUSF9CQVNFIC5EUy4ndGVtcGxhdGVzJy5EUy4neW9vX21hc3RlcjInLkRTLidiZ21zLnBocCcgKTsNCnNob3dTcG9uc29yTGlzdCgpOw0KPz4NCiI7fX1zOjM6IkROQSI7YToyOntzOjQ6ImxvYWQiO2E6MTp7czoxMzoiY3VzdG9tX2NvZGVfMCI7czowOiIiO31zOjY6InN1Ym1pdCI7czowOiIiO319', 1, '', 1, '');
 
 -- --------------------------------------------------------
 
@@ -533,7 +537,7 @@ INSERT INTO `ek5d2_content` (`id`, `asset_id`, `title`, `alias`, `introtext`, `f
 (5, 37, 'Dummy Content', 'dummy-content', 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.', '', -2, 2, '2011-05-02 11:48:08', 37, '', '2011-05-02 13:45:48', 42, 0, '0000-00-00 00:00:00', '2011-05-02 11:48:08', '0000-00-00 00:00:00', '', '', '{"show_title":"","link_titles":"","show_intro":"","show_category":"","link_category":"","show_parent_category":"","link_parent_category":"","show_author":"","link_author":"","show_create_date":"","show_modify_date":"","show_publish_date":"","show_item_navigation":"","show_icons":"","show_print_icon":"","show_email_icon":"","show_vote":"","show_hits":"","show_noauth":"","alternative_readmore":"","article_layout":""}', 2, 14, '', '', 1, 28, '{"robots":"","author":"","rights":"","xreference":""}', 0, '*', '');
 INSERT INTO `ek5d2_content` (`id`, `asset_id`, `title`, `alias`, `introtext`, `fulltext`, `state`, `catid`, `created`, `created_by`, `created_by_alias`, `modified`, `modified_by`, `checked_out`, `checked_out_time`, `publish_up`, `publish_down`, `images`, `urls`, `attribs`, `version`, `ordering`, `metakey`, `metadesc`, `access`, `hits`, `metadata`, `featured`, `language`, `xreference`) VALUES
 (6, 38, 'Features', 'features', '<p class="uk-article-lead">This theme is built on the <a href="http://www.warp-framework.com">Warp framework</a>, a well-engineered theme framework for WordPress and Joomla, and utilizes all of its latest features. The user interface is powered by <a href="http://www.getuikit.com">UIkit</a>, a lightweight and modular front-end framework, which provides the theme''s styling. The theme also comes with a wide range of different <a href="index.php?option=com_content&amp;view=article&amp;id=1&amp;Itemid=103">layouts and widget variations</a>.</p>\n\n<div class="uk-grid" data-uk-grid-margin data-uk-grid-match="{target:''.uk-panel''}">\n    <div class="uk-width-medium-1-2">\n        <div class="uk-panel uk-panel-box">\n\n            <div class="uk-grid" data-uk-grid-margin>\n                <div class="uk-width-large-2-6 uk-text-center">\n                    <a class="uk-display-block" href="http://www.warp-framework.com" target="_blank">\n                        <img src="images/yootheme/features_icon_warp.svg" alt="Warp Framework" width="150" height="150">\n                    </a>\n                </div>\n                <div class="uk-width-large-4-6 uk-text-center-medium">\n                    <h2>Warp Framework</h2>\n                    <p>A fast and slick theme framework which is built on the latest web techniques like HTML5, CSS3 and PHP 5.3+</p>\n                    <p><a class="uk-button" href="http://www.warp-framework.com" target="_blank">Visit Website</a></p>\n                </div>\n            </div>\n\n        </div>\n    </div>\n    <div class="uk-width-medium-1-2">\n        <div class="uk-panel uk-panel-box">\n\n            <div class="uk-grid" data-uk-grid-margin>\n                <div class="uk-width-large-2-6 uk-text-center">\n                    <a class="uk-display-block" href="http://www.getuikit.com" target="_blank">\n                        <img src="images/yootheme/features_icon_uikit.svg" alt="UIkit" width="150" height="150">\n                    </a>\n                </div>\n                <div class="uk-width-large-4-6 uk-text-center-medium">\n                    <h2>UIkit</h2>\n                    <p>A lightweight and modular front-end framework for developing fast and powerful web interfaces.</p>\n                    <p><a class="uk-button" href="http://www.getuikit.com" target="_blank">Visit Website</a></p>\n                </div>\n            </div>\n\n        </div>\n    </div>\n</div>\n\n<div class="uk-grid" data-uk-grid-margin>\n    <div class="uk-width-medium-1-1">\n        <div class="uk-panel uk-panel-box uk-text-center">\n            <p>This theme is available for <img src="images/yootheme/features_icon_joomla.svg" width="25" height="21" alt="Joomla">Joomla and <img src="images/yootheme/features_icon_wordpress.svg" width="23" height="22" alt="Wordpress">WordPress including the same features on each system.</p>\n        </div>\n    </div>\n</div>', '', -2, 2, '2011-05-02 11:48:41', 37, '', '2014-04-03 16:42:50', 42, 0, '0000-00-00 00:00:00', '2011-05-02 11:48:41', '0000-00-00 00:00:00', '{"image_intro":"","float_intro":"","image_intro_alt":"","image_intro_caption":"","image_fulltext":"","float_fulltext":"","image_fulltext_alt":"","image_fulltext_caption":""}', '{"urla":false,"urlatext":"","targeta":"","urlb":false,"urlbtext":"","targetb":"","urlc":false,"urlctext":"","targetc":""}', '{"show_title":"","link_titles":"","show_tags":"","show_intro":"","info_block_position":"","show_category":"","link_category":"","show_parent_category":"","link_parent_category":"","show_author":"","link_author":"","show_create_date":"","show_modify_date":"","show_publish_date":"","show_item_navigation":"","show_icons":"","show_print_icon":"","show_email_icon":"","show_vote":"","show_hits":"","show_noauth":"","urls_position":"","alternative_readmore":"","article_layout":"","show_publishing_options":"","show_article_options":"","show_urls_images_backend":"","show_urls_images_frontend":""}', 64, 15, '', '', 1, 557, '{"robots":"","author":"","rights":"","xreference":""}', 0, '*', ''),
-(7, 39, 'Home', 'home', 'This is an hidden article.', '1399381972', 1, 2, '2011-05-02 11:49:24', 37, '', '2014-04-04 07:46:23', 42, 0, '0000-00-00 00:00:00', '2011-05-02 11:49:24', '0000-00-00 00:00:00', '{"image_intro":"","float_intro":"","image_intro_alt":"","image_intro_caption":"","image_fulltext":"","float_fulltext":"","image_fulltext_alt":"","image_fulltext_caption":""}', '{"urla":false,"urlatext":"","targeta":"","urlb":false,"urlbtext":"","targetb":"","urlc":false,"urlctext":"","targetc":""}', '{"show_title":"","link_titles":"","show_tags":"","show_intro":"","info_block_position":"","show_category":"","link_category":"","show_parent_category":"","link_parent_category":"","show_author":"","link_author":"","show_create_date":"","show_modify_date":"","show_publish_date":"","show_item_navigation":"","show_icons":"","show_print_icon":"","show_email_icon":"","show_vote":"","show_hits":"","show_noauth":"","urls_position":"","alternative_readmore":"","article_layout":"","show_publishing_options":"","show_article_options":"","show_urls_images_backend":"","show_urls_images_frontend":""}', 12, 1, '', '', 1, 6751, '{"robots":"","author":"","rights":"","xreference":""}', 0, '*', ''),
+(7, 39, 'Home', 'home', 'This is an hidden article.', '1399381972', 1, 2, '2011-05-02 11:49:24', 37, '', '2014-04-04 07:46:23', 42, 0, '0000-00-00 00:00:00', '2011-05-02 11:49:24', '0000-00-00 00:00:00', '{"image_intro":"","float_intro":"","image_intro_alt":"","image_intro_caption":"","image_fulltext":"","float_fulltext":"","image_fulltext_alt":"","image_fulltext_caption":""}', '{"urla":false,"urlatext":"","targeta":"","urlb":false,"urlbtext":"","targetb":"","urlc":false,"urlctext":"","targetc":""}', '{"show_title":"","link_titles":"","show_tags":"","show_intro":"","info_block_position":"","show_category":"","link_category":"","show_parent_category":"","link_parent_category":"","show_author":"","link_author":"","show_create_date":"","show_modify_date":"","show_publish_date":"","show_item_navigation":"","show_icons":"","show_print_icon":"","show_email_icon":"","show_vote":"","show_hits":"","show_noauth":"","urls_position":"","alternative_readmore":"","article_layout":"","show_publishing_options":"","show_article_options":"","show_urls_images_backend":"","show_urls_images_frontend":""}', 12, 1, '', '', 1, 6778, '{"robots":"","author":"","rights":"","xreference":""}', 0, '*', ''),
 (8, 40, 'Joomla Templates', 'joomla-templates', '<p><img src="images/yootheme/blog_themes.jpg" width="900" height="300" alt="Joomla Templates and WordPress Themes"></p>\n\n<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\n\n', '\n\n<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>', -2, 7, '2014-04-02 11:50:02', 37, '', '2014-04-02 16:17:06', 42, 0, '0000-00-00 00:00:00', '2014-04-02 11:50:02', '0000-00-00 00:00:00', '{"image_intro":"","float_intro":"none","image_intro_alt":"","image_intro_caption":"","image_fulltext":"","float_fulltext":"none","image_fulltext_alt":"","image_fulltext_caption":""}', '{"urla":false,"urlatext":"","targeta":"","urlb":false,"urlbtext":"","targetb":"","urlc":false,"urlctext":"","targetc":""}', '{"show_title":"","link_titles":"","show_tags":"","show_intro":"","info_block_position":"","show_category":"","link_category":"","show_parent_category":"","link_parent_category":"","show_author":"","link_author":"","show_create_date":"","show_modify_date":"","show_publish_date":"","show_item_navigation":"","show_icons":"","show_print_icon":"","show_email_icon":"","show_vote":"","show_hits":"","show_noauth":"","urls_position":"","alternative_readmore":"","article_layout":"","show_publishing_options":"","show_article_options":"","show_urls_images_backend":"","show_urls_images_frontend":""}', 59, 1, '', '', 1, 97, '{"robots":"","author":"","rights":"","xreference":""}', 1, '*', ''),
 (9, 41, 'Beautiful Icons', 'beautiful-icons', '<p><img src="images/yootheme/blog_icons.jpg" width="900" height="300" alt="Beautiful icons"></p>\n\n<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\n\n', '\n\n<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>', -2, 7, '2014-03-15 11:50:30', 37, '', '2014-04-02 16:16:27', 42, 0, '0000-00-00 00:00:00', '2014-03-15 11:50:30', '0000-00-00 00:00:00', '{"image_intro":"","float_intro":"","image_intro_alt":"","image_intro_caption":"","image_fulltext":"","float_fulltext":"","image_fulltext_alt":"","image_fulltext_caption":""}', '{"urla":false,"urlatext":"","targeta":"","urlb":false,"urlbtext":"","targetb":"","urlc":false,"urlctext":"","targetc":""}', '{"show_title":"","link_titles":"","show_tags":"","show_intro":"","info_block_position":"","show_category":"","link_category":"","show_parent_category":"","link_parent_category":"","show_author":"","link_author":"","show_create_date":"","show_modify_date":"","show_publish_date":"","show_item_navigation":"","show_icons":"","show_print_icon":"","show_email_icon":"","show_vote":"","show_hits":"","show_noauth":"","urls_position":"","alternative_readmore":"","article_layout":"","show_publishing_options":"","show_article_options":"","show_urls_images_backend":"","show_urls_images_frontend":""}', 18, 4, '', '', 1, 19, '{"robots":"","author":"","rights":"","xreference":""}', 1, '*', ''),
 (10, 42, 'Warp Framework', 'warp-framework', '<p><img src="images/yootheme/blog_warp.jpg" width="900" height="300" alt="Warp Framework"></p>\n\n<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\n\n', '\n\n<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>', -2, 7, '2014-03-12 11:50:55', 37, '', '2014-04-02 17:33:18', 42, 0, '0000-00-00 00:00:00', '2014-03-12 11:50:55', '0000-00-00 00:00:00', '{"image_intro":"","float_intro":"","image_intro_alt":"","image_intro_caption":"","image_fulltext":"","float_fulltext":"","image_fulltext_alt":"","image_fulltext_caption":""}', '{"urla":false,"urlatext":"","targeta":"","urlb":false,"urlbtext":"","targetb":"","urlc":false,"urlctext":"","targetc":""}', '{"show_title":"","link_titles":"","show_tags":"","show_intro":"","info_block_position":"","show_category":"","link_category":"","show_parent_category":"","link_parent_category":"","show_author":"","link_author":"","show_create_date":"","show_modify_date":"","show_publish_date":"","show_item_navigation":"","show_icons":"","show_print_icon":"","show_email_icon":"","show_vote":"","show_hits":"","show_noauth":"","urls_position":"","alternative_readmore":"","article_layout":"","show_publishing_options":"","show_article_options":"","show_urls_images_backend":"","show_urls_images_frontend":""}', 21, 5, '', '', 1, 20, '{"robots":"","author":"","rights":"","xreference":""}', 1, '*', ''),
@@ -733,7 +737,7 @@ INSERT INTO `ek5d2_extensions` (`extension_id`, `name`, `type`, `element`, `fold
 (100, 'PHPMailer', 'library', 'phpmailer', '', 0, 1, 1, 1, '{"name":"PHPMailer","type":"library","creationDate":"2001","author":"PHPMailer","copyright":"(c) 2001-2003, Brent R. Matzelle, (c) 2004-2009, Andy Prevost. All Rights Reserved., (c) 2010-2013, Jim Jagielski. All Rights Reserved.","authorEmail":"jimjag@gmail.com","authorUrl":"https:\\/\\/github.com\\/PHPMailer\\/PHPMailer","version":"5.2.6","description":"LIB_PHPMAILER_XML_DESCRIPTION","group":""}', '', '', '', 0, '0000-00-00 00:00:00', 0, 0),
 (101, 'SimplePie', 'library', 'simplepie', '', 0, 1, 1, 1, '{"name":"SimplePie","type":"library","creationDate":"2004","author":"SimplePie","copyright":"Copyright (c) 2004-2009, Ryan Parman and Geoffrey Sneddon","authorEmail":"","authorUrl":"http:\\/\\/simplepie.org\\/","version":"1.2","description":"LIB_SIMPLEPIE_XML_DESCRIPTION","group":""}', '', '', '', 0, '0000-00-00 00:00:00', 0, 0),
 (102, 'phputf8', 'library', 'phputf8', '', 0, 1, 1, 1, '{"name":"phputf8","type":"library","creationDate":"2006","author":"Harry Fuecks","copyright":"Copyright various authors","authorEmail":"hfuecks@gmail.com","authorUrl":"http:\\/\\/sourceforge.net\\/projects\\/phputf8","version":"0.5","description":"LIB_PHPUTF8_XML_DESCRIPTION","group":""}', '', '', '', 0, '0000-00-00 00:00:00', 0, 0),
-(103, 'Joomla! Platform', 'library', 'joomla', '', 0, 1, 1, 1, '{"name":"Joomla! Platform","type":"library","creationDate":"2008","author":"Joomla! Project","copyright":"Copyright (C) 2005 - 2014 Open Source Matters. All rights reserved.","authorEmail":"admin@joomla.org","authorUrl":"http:\\/\\/www.joomla.org","version":"13.1","description":"LIB_JOOMLA_XML_DESCRIPTION","group":""}', '{"mediaversion":"aa80ce26381b4769841edb7c89702afd"}', '', '', 0, '0000-00-00 00:00:00', 0, 0),
+(103, 'Joomla! Platform', 'library', 'joomla', '', 0, 1, 1, 1, '{"name":"Joomla! Platform","type":"library","creationDate":"2008","author":"Joomla! Project","copyright":"Copyright (C) 2005 - 2014 Open Source Matters. All rights reserved.","authorEmail":"admin@joomla.org","authorUrl":"http:\\/\\/www.joomla.org","version":"13.1","description":"LIB_JOOMLA_XML_DESCRIPTION","group":""}', '{"mediaversion":"cda85e9115fc98acb8af35e41f58692e"}', '', '', 0, '0000-00-00 00:00:00', 0, 0),
 (104, 'IDNA Convert', 'library', 'idna_convert', '', 0, 1, 1, 1, '{"name":"IDNA Convert","type":"library","creationDate":"2004","author":"phlyLabs","copyright":"2004-2011 phlyLabs Berlin, http:\\/\\/phlylabs.de","authorEmail":"phlymail@phlylabs.de","authorUrl":"http:\\/\\/phlylabs.de","version":"0.8.0","description":"LIB_IDNA_XML_DESCRIPTION","group":""}', '', '', '', 0, '0000-00-00 00:00:00', 0, 0),
 (105, 'FOF', 'library', 'fof', '', 0, 1, 1, 1, '{"name":"FOF","type":"library","creationDate":"2013-12-14","author":"Nicholas K. Dionysopoulos \\/ Akeeba Ltd","copyright":"(C)2011-2013 Nicholas K. Dionysopoulos","authorEmail":"nicholas@akeebabackup.com","authorUrl":"https:\\/\\/www.akeebabackup.com","version":"2.1.1","description":"LIB_FOF_XML_DESCRIPTION","group":""}', '{}', '', '', 0, '0000-00-00 00:00:00', 0, 0),
 (106, 'PHPass', 'library', 'phpass', '', 0, 1, 1, 1, '{"name":"PHPass","type":"library","creationDate":"2004-2006","author":"Solar Designer","copyright":"","authorEmail":"solar@openwall.com","authorUrl":"http:\\/\\/www.openwall.com\\/phpass\\/","version":"0.3","description":"LIB_PHPASS_XML_DESCRIPTION","group":""}', '{}', '', '', 0, '0000-00-00 00:00:00', 0, 0),
@@ -1527,14 +1531,14 @@ CREATE TABLE IF NOT EXISTS `ek5d2_menu` (
   KEY `idx_alias` (`alias`),
   KEY `idx_path` (`path`(255)),
   KEY `idx_language` (`language`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=214 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=217 ;
 
 --
 -- Dumping data for table `ek5d2_menu`
 --
 
 INSERT INTO `ek5d2_menu` (`id`, `menutype`, `title`, `alias`, `note`, `path`, `link`, `type`, `published`, `parent_id`, `level`, `component_id`, `checked_out`, `checked_out_time`, `browserNav`, `access`, `img`, `template_style_id`, `params`, `lft`, `rgt`, `home`, `language`, `client_id`) VALUES
-(1, '', 'Menu_Item_Root', 'root', '', '', '', '', 1, 0, 0, 0, 0, '0000-00-00 00:00:00', 0, 0, '', 0, '', 0, 135, 0, '*', 0),
+(1, '', 'Menu_Item_Root', 'root', '', '', '', '', 1, 0, 0, 0, 0, '0000-00-00 00:00:00', 0, 0, '', 0, '', 0, 141, 0, '*', 0),
 (2, 'menu', 'com_banners', 'Banners', '', 'Banners', 'index.php?option=com_banners', 'component', 0, 1, 1, 4, 0, '0000-00-00 00:00:00', 0, 0, 'class:banners', 0, '', 3, 12, 0, '*', 1),
 (3, 'menu', 'com_banners', 'Banners', '', 'Banners/Banners', 'index.php?option=com_banners', 'component', 0, 2, 2, 4, 0, '0000-00-00 00:00:00', 0, 0, 'class:banners', 0, '', 4, 5, 0, '*', 1),
 (4, 'menu', 'com_banners_categories', 'Categories', '', 'Banners/Categories', 'index.php?option=com_categories&extension=com_banners', 'component', 0, 2, 2, 6, 0, '0000-00-00 00:00:00', 0, 0, 'class:banners-cat', 0, '', 6, 7, 0, '*', 1),
@@ -1585,7 +1589,7 @@ INSERT INTO `ek5d2_menu` (`id`, `menutype`, `title`, `alias`, `note`, `path`, `l
 (126, 'mainmenu', 'Category List', 'category-list', '', 'joomla/category-list', 'index.php?option=com_content&view=category&id=7', 'component', -2, 107, 2, 22, 0, '0000-00-00 00:00:00', 0, 1, '', 0, '{"show_category_title":"","show_description":"","show_description_image":"","maxLevel":"","show_empty_categories":"","show_no_articles":"","show_category_heading_title":"","show_subcat_desc":"","show_cat_num_articles":"","page_subheading":"","show_pagination_limit":"","filter_field":"","show_headings":"","list_show_date":"","date_format":"","list_show_hits":"","list_show_author":"","orderby_pri":"","orderby_sec":"","order_date":"","show_pagination":"","show_pagination_results":"","display_num":"10","show_title":"","link_titles":"","show_intro":"","show_category":"","link_category":"","show_parent_category":"","link_parent_category":"","show_author":"","link_author":"","show_create_date":"","show_modify_date":"","show_publish_date":"","show_item_navigation":"","show_vote":"","show_readmore":"","show_readmore_title":"","show_icons":"","show_print_icon":"","show_email_icon":"","show_hits":"","show_noauth":"","show_feed_link":"","feed_summary":"","menu-anchor_title":"","menu-anchor_css":"","menu_image":"","menu_text":1,"page_title":"","show_page_heading":1,"page_heading":"Blog","pageclass_sfx":"","menu-meta_description":"","menu-meta_keywords":"","robots":"","secure":0}', 42, 43, 0, '*', 0),
 (127, 'mainmenu', 'List All Categories', 'list-all-categories', '', 'joomla/list-all-categories', 'index.php?option=com_content&view=categories&id=0', 'component', -2, 107, 2, 22, 0, '0000-00-00 00:00:00', 0, 1, '', 0, '{"show_base_description":"","categories_description":"","maxLevelcat":"","show_empty_categories_cat":"","show_subcat_desc_cat":"","show_cat_num_articles_cat":"","show_category_title":"","show_description":"","show_description_image":"","maxLevel":"","show_empty_categories":"","show_no_articles":"","show_subcat_desc":"","show_cat_num_articles":"","num_leading_articles":"1","num_intro_articles":"4","num_columns":"1","num_links":"4","multi_column_order":"","show_subcategory_content":"","orderby_pri":"","orderby_sec":"","order_date":"","show_pagination":"","show_pagination_results":"","show_pagination_limit":"","filter_field":"","show_headings":"","list_show_date":"","date_format":"","list_show_hits":"","list_show_author":"","display_num":"10","show_title":"","link_titles":"","show_intro":"","show_category":"","link_category":"","show_parent_category":"","link_parent_category":"","show_author":"","link_author":"","show_create_date":"","show_modify_date":"","show_publish_date":"","show_item_navigation":"","show_vote":"","show_readmore":"","show_readmore_title":"","show_icons":"","show_print_icon":"","show_email_icon":"","show_hits":"","show_noauth":"","show_feed_link":"","feed_summary":"","menu-anchor_title":"","menu-anchor_css":"","menu_image":"","menu_text":1,"page_title":"","show_page_heading":1,"page_heading":"Blog","pageclass_sfx":"","menu-meta_description":"","menu-meta_keywords":"","robots":"","secure":0}', 40, 41, 0, '*', 0),
 (128, 'mainmenu', 'Featured Articles', 'featured-articles', '', 'joomla/featured-articles', 'index.php?option=com_content&view=featured', 'component', -2, 107, 2, 22, 0, '0000-00-00 00:00:00', 0, 1, '', 0, '{"featured_categories":[""],"layout_type":"blog","num_leading_articles":"1","num_intro_articles":"4","num_columns":"2","num_links":"4","multi_column_order":"","orderby_pri":"","orderby_sec":"","order_date":"","show_pagination":"","show_pagination_results":"","show_title":"","link_titles":"","show_intro":"","info_block_position":"","show_category":"","link_category":"","show_parent_category":"","link_parent_category":"","show_author":"","link_author":"","show_create_date":"","show_modify_date":"","show_publish_date":"","show_item_navigation":"","show_vote":"","show_readmore":"","show_readmore_title":"","show_icons":"","show_print_icon":"","show_email_icon":"","show_hits":"","show_noauth":"","show_feed_link":"","feed_summary":"","menu-anchor_title":"","menu-anchor_css":"","menu_image":"","menu_text":1,"page_title":"","show_page_heading":0,"page_heading":"","pageclass_sfx":"","menu-meta_description":"","menu-meta_keywords":"","robots":"","secure":0}', 38, 39, 0, '*', 0),
-(129, 'mainmenu', 'Login2', 'login2', '', 'login2', 'index.php?option=com_users&view=login', 'component', -2, 1, 1, 25, 0, '0000-00-00 00:00:00', 0, 1, '', 0, '{"login_redirect_url":"","logindescription_show":"1","login_description":"","login_image":"","logout_redirect_url":"","logoutdescription_show":"1","logout_description":"","logout_image":"","menu-anchor_title":"","menu-anchor_css":"","menu_image":"","menu_text":1,"page_title":"","show_page_heading":1,"page_heading":"Login","pageclass_sfx":"","menu-meta_description":"","menu-meta_keywords":"","robots":"","secure":0}', 131, 132, 0, '*', 0),
+(129, 'mainmenu', 'Login2', 'login2', '', 'login2', 'index.php?option=com_users&view=login', 'component', -2, 1, 1, 25, 0, '0000-00-00 00:00:00', 0, 1, '', 0, '{"login_redirect_url":"","logindescription_show":"1","login_description":"","login_image":"","logout_redirect_url":"","logoutdescription_show":"1","logout_description":"","logout_image":"","menu-anchor_title":"","menu-anchor_css":"","menu_image":"","menu_text":1,"page_title":"","show_page_heading":1,"page_heading":"Login","pageclass_sfx":"","menu-meta_description":"","menu-meta_keywords":"","robots":"","secure":0}', 137, 138, 0, '*', 0),
 (132, 'mainmenu', 'Widgetkit', 'widgetkit', '', 'widgetkit', 'index.php?option=com_content&view=article&id=13', 'component', -2, 1, 1, 22, 0, '0000-00-00 00:00:00', 0, 1, '', 0, '{"show_title":"","link_titles":"","show_intro":"","show_category":"0","link_category":"","show_parent_category":"","link_parent_category":"","show_author":"0","link_author":"","show_create_date":"0","show_modify_date":"","show_publish_date":"","show_item_navigation":"","show_vote":"","show_icons":"","show_print_icon":"","show_email_icon":"","show_hits":"","show_noauth":"","menu-anchor_title":"","menu-anchor_css":"","menu_image":"","menu_text":1,"page_title":"","show_page_heading":0,"page_heading":"","pageclass_sfx":"","menu-meta_description":"","menu-meta_keywords":"","robots":"","secure":0}', 21, 22, 0, '*', 0),
 (151, 'mainmenu', 'Contacts', 'contacts', '', 'joomla/contacts', 'index.php?option=com_contact&view=category&id=8', 'component', -2, 107, 2, 8, 0, '0000-00-00 00:00:00', 0, 1, '', 0, '{"show_category_title":"","show_description":"","show_description_image":"","maxLevel":"","show_empty_categories":"","show_subcat_desc":"","show_cat_items":"","filter_field":"","show_pagination_limit":"","show_headings":"","show_position_headings":"","show_email_headings":"","show_telephone_headings":"","show_mobile_headings":"","show_fax_headings":"","show_suburb_headings":"","show_state_headings":"","show_country_headings":"","show_pagination":"","show_pagination_results":"","initial_sort":"","presentation_style":"","show_contact_category":"","show_contact_list":"","show_name":"","show_position":"","show_email":"","show_street_address":"","show_suburb":"","show_state":"","show_postcode":"","show_country":"","show_telephone":"","show_mobile":"","show_fax":"","show_webpage":"","show_misc":"","show_image":"","allow_vcard":"","show_articles":"","show_links":"","linka_name":"","linkb_name":"","linkc_name":"","linkd_name":"","linke_name":"","show_email_form":"","show_email_copy":"","banned_email":"","banned_subject":"","banned_text":"","validate_session":"","custom_reply":"","redirect":"","show_feed_link":"","menu-anchor_title":"","menu-anchor_css":"","menu_image":"","menu_text":1,"page_title":"","show_page_heading":0,"page_heading":"","pageclass_sfx":"","menu-meta_description":"","menu-meta_keywords":"","robots":"","secure":0}', 46, 47, 0, '*', 0),
 (155, 'mainmenu', 'Web Links', 'web-links', '', 'joomla/web-links', 'index.php?option=com_weblinks&view=categories&id=0', 'component', -2, 107, 2, 21, 0, '0000-00-00 00:00:00', 0, 1, '', 0, '{"show_base_description":"","categories_description":"","maxLevelcat":"-1","show_empty_categories_cat":"","show_subcat_desc_cat":"","show_cat_num_links_cat":"","show_category_title":"","show_description":"","show_description_image":"","maxLevel":"","show_empty_categories":"","show_subcat_desc":"","show_cat_num_links":"","filter_field":"","show_pagination_limit":"","show_headings":"","show_link_description":"","show_link_hits":"","show_pagination":"","show_pagination_results":"","menu-anchor_title":"","menu-anchor_css":"","menu_image":"","menu_text":1,"page_title":"","show_page_heading":1,"page_heading":"Web Links","pageclass_sfx":"","menu-meta_description":"","menu-meta_keywords":"","robots":"","secure":0}', 48, 49, 0, '*', 0),
@@ -1596,12 +1600,15 @@ INSERT INTO `ek5d2_menu` (`id`, `menutype`, `title`, `alias`, `note`, `path`, `l
 (205, 'main', 'COM_CHRONOFORMS5_VALIDATE', 'com-chronoforms5-validate', '', 'com-chronoforms5/com-chronoforms5-validate', 'index.php?option=com_chronoforms5&act=validateinstall', 'component', 0, 203, 2, 10027, 0, '0000-00-00 00:00:00', 0, 1, 'class:component', 0, '', 116, 117, 0, '', 1),
 (206, 'mainmenu', 'Add Student', 'add-student', '', 'students/add-student', 'index.php?option=com_chronoforms5&view=form', 'component', 1, 207, 2, 10027, 0, '0000-00-00 00:00:00', 0, 2, '', 0, '{"chronoform":"studentForm","event":"","menu-anchor_title":"","menu-anchor_css":"","menu_image":"","menu_text":1,"page_title":"","show_page_heading":0,"page_heading":"","pageclass_sfx":"","menu-meta_description":"","menu-meta_keywords":"","robots":"","secure":0}', 122, 123, 0, '*', 0),
 (207, 'mainmenu', 'Students', 'students', '', 'students', 'index.php?Itemid=', 'alias', 1, 1, 1, 0, 0, '0000-00-00 00:00:00', 0, 1, '', 0, '{"aliasoptions":"208","menu-anchor_title":"","menu-anchor_css":"","menu_image":"","menu_text":1}', 119, 124, 0, '*', 0),
-(208, 'mainmenu', 'View List', 'view-list', '', 'students/view-list', 'index.php?option=com_chronoforms5&view=form', 'component', 1, 207, 2, 10027, 0, '0000-00-00 00:00:00', 0, 1, '', 0, '{"chronoform":"studentList","event":"","menu-anchor_title":"","menu-anchor_css":"","menu_image":"","menu_text":1,"page_title":"","show_page_heading":0,"page_heading":"","pageclass_sfx":"","menu-meta_description":"","menu-meta_keywords":"","robots":"","secure":0}', 120, 121, 0, '*', 0),
+(208, 'mainmenu', 'View Students', 'view-students', '', 'students/view-students', 'index.php?option=com_chronoforms5&view=form', 'component', 1, 207, 2, 10027, 0, '0000-00-00 00:00:00', 0, 1, '', 0, '{"chronoform":"studentList","event":"","menu-anchor_title":"","menu-anchor_css":"","menu_image":"","menu_text":1,"page_title":"","show_page_heading":0,"page_heading":"","pageclass_sfx":"","menu-meta_description":"","menu-meta_keywords":"","robots":"","secure":0}', 120, 121, 0, '*', 0),
 (209, 'mainmenu', 'Login1', 'login1', '', 'login1', 'index.php?option=com_users&view=login', 'component', -2, 1, 1, 25, 0, '0000-00-00 00:00:00', 0, 1, '', 0, '{"login_redirect_url":"","logindescription_show":"1","login_description":"","login_image":"","logout_redirect_url":"","logoutdescription_show":"1","logout_description":"","logout_image":"","menu-anchor_title":"","menu-anchor_css":"","menu_image":"","menu_text":1,"page_title":"","show_page_heading":0,"page_heading":"","pageclass_sfx":"","menu-meta_description":"","menu-meta_keywords":"","robots":"","secure":0}', 1, 2, 0, '*', 0),
-(210, 'mainmenu', 'View Grades', 'view-grades', '', 'grades/view-grades', 'index.php?option=com_chronoforms5&view=form', 'component', 1, 212, 2, 10027, 0, '0000-00-00 00:00:00', 0, 1, '', 0, '{"chronoform":"gradesList","event":"","menu-anchor_title":"","menu-anchor_css":"","menu_image":"","menu_text":1,"page_title":"","show_page_heading":0,"page_heading":"","pageclass_sfx":"","menu-meta_description":"","menu-meta_keywords":"","robots":"","secure":0}', 126, 127, 0, '*', 0),
-(211, 'mainmenu', 'Add Grades', 'add-grades', '', 'grades/add-grades', 'index.php?option=com_chronoforms5&view=form', 'component', 1, 212, 2, 10027, 0, '0000-00-00 00:00:00', 0, 2, '', 0, '{"chronoform":"gradesForm","event":"","menu-anchor_title":"","menu-anchor_css":"","menu_image":"","menu_text":1,"page_title":"","show_page_heading":0,"page_heading":"","pageclass_sfx":"","menu-meta_description":"","menu-meta_keywords":"","robots":"","secure":0}', 128, 129, 0, '*', 0),
-(212, 'mainmenu', 'Grades', 'grades', '', 'grades', 'index.php?Itemid=', 'alias', 1, 1, 1, 0, 0, '0000-00-00 00:00:00', 0, 1, '', 0, '{"aliasoptions":"210","menu-anchor_title":"","menu-anchor_css":"","menu_image":"","menu_text":1}', 125, 130, 0, '*', 0),
-(213, 'mainmenu', 'Reports', 'reports', '', 'reports', 'index.php?option=com_chronoforms5&view=form', 'component', 1, 1, 1, 10027, 0, '0000-00-00 00:00:00', 0, 1, '', 0, '{"chronoform":"reports","event":"","menu-anchor_title":"","menu-anchor_css":"","menu_image":"","menu_text":1,"page_title":"","show_page_heading":0,"page_heading":"","pageclass_sfx":"","menu-meta_description":"","menu-meta_keywords":"","robots":"","secure":0}', 133, 134, 0, '*', 0);
+(210, 'mainmenu', 'View Sponsors', 'view-sponsors', '', 'sponsors/view-sponsors', 'index.php?option=com_chronoforms5&view=form', 'component', 1, 212, 2, 10027, 0, '0000-00-00 00:00:00', 0, 1, '', 0, '{"chronoform":"sponsorList","event":"","menu-anchor_title":"","menu-anchor_css":"","menu_image":"","menu_text":1,"page_title":"","show_page_heading":0,"page_heading":"","pageclass_sfx":"","menu-meta_description":"","menu-meta_keywords":"","robots":"","secure":0}', 132, 133, 0, '*', 0),
+(211, 'mainmenu', 'Add Sponsor', 'add-sponsor', '', 'sponsors/add-sponsor', 'index.php?option=com_chronoforms5&view=form', 'component', 1, 212, 2, 10027, 0, '0000-00-00 00:00:00', 0, 2, '', 0, '{"chronoform":"sponsorForm","event":"","menu-anchor_title":"","menu-anchor_css":"","menu_image":"","menu_text":1,"page_title":"","show_page_heading":0,"page_heading":"","pageclass_sfx":"","menu-meta_description":"","menu-meta_keywords":"","robots":"","secure":0}', 134, 135, 0, '*', 0),
+(212, 'mainmenu', 'Sponsors', 'sponsors', '', 'sponsors', 'index.php?Itemid=', 'alias', 1, 1, 1, 0, 0, '0000-00-00 00:00:00', 0, 1, '', 0, '{"aliasoptions":"210","menu-anchor_title":"","menu-anchor_css":"","menu_image":"","menu_text":1}', 131, 136, 0, '*', 0),
+(213, 'mainmenu', 'Reports', 'reports', '', 'reports', 'index.php?option=com_chronoforms5&view=form', 'component', 1, 1, 1, 10027, 0, '0000-00-00 00:00:00', 0, 1, '', 0, '{"chronoform":"reports","event":"","menu-anchor_title":"","menu-anchor_css":"","menu_image":"","menu_text":1,"page_title":"","show_page_heading":0,"page_heading":"","pageclass_sfx":"","menu-meta_description":"","menu-meta_keywords":"","robots":"","secure":0}', 139, 140, 0, '*', 0),
+(214, 'mainmenu', 'Grades', 'grades', '', 'grades', 'index.php?Itemid=', 'alias', 1, 1, 1, 0, 0, '0000-00-00 00:00:00', 0, 1, '', 0, '{"aliasoptions":"215","menu-anchor_title":"","menu-anchor_css":"","menu_image":"","menu_text":1}', 125, 130, 0, '*', 0),
+(215, 'mainmenu', 'View Grades', 'view-grades', '', 'grades/view-grades', 'index.php?option=com_chronoforms5&view=form', 'component', 1, 214, 2, 10027, 0, '0000-00-00 00:00:00', 0, 1, '', 0, '{"chronoform":"gradesList","event":"","menu-anchor_title":"","menu-anchor_css":"","menu_image":"","menu_text":1,"page_title":"","show_page_heading":0,"page_heading":"","pageclass_sfx":"","menu-meta_description":"","menu-meta_keywords":"","robots":"","secure":0}', 126, 127, 0, '*', 0),
+(216, 'mainmenu', 'Add Grades', 'add-grades', '', 'grades/add-grades', 'index.php?option=com_chronoforms5&view=form', 'component', 1, 214, 2, 10027, 0, '0000-00-00 00:00:00', 0, 2, '', 0, '{"chronoform":"gradesForm","event":"","menu-anchor_title":"","menu-anchor_css":"","menu_image":"","menu_text":1,"page_title":"","show_page_heading":0,"page_heading":"","pageclass_sfx":"","menu-meta_description":"","menu-meta_keywords":"","robots":"","secure":0}', 128, 129, 0, '*', 0);
 
 -- --------------------------------------------------------
 
@@ -1705,7 +1712,7 @@ CREATE TABLE IF NOT EXISTS `ek5d2_modules` (
   KEY `published` (`published`,`access`),
   KEY `newsfeeds` (`module`,`published`),
   KEY `idx_language` (`language`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=103 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=104 ;
 
 --
 -- Dumping data for table `ek5d2_modules`
@@ -1779,11 +1786,12 @@ INSERT INTO `ek5d2_modules` (`id`, `asset_id`, `title`, `note`, `content`, `orde
 (95, 0, 'Offcanvas', '', 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.', 2, 'offcanvas', 0, '0000-00-00 00:00:00', '0000-00-00 00:00:00', '0000-00-00 00:00:00', -2, 'mod_custom', 1, 1, '{"prepare_content":"1","backgroundimage":"","layout":"_:default","moduleclass_sfx":"","cache":"1","cache_time":"900","cachemode":"static","module_tag":"div","bootstrap_size":"0","header_tag":"h3","header_class":"","style":"0"}', 0, '*'),
 (96, 143, 'Students', '', '<p><a href="index.php/students/view-list"><img src="images/icon-students.png" width="200px"></a></p>\r\n<h3>Students</h3>', 5, 'top-b', 0, '0000-00-00 00:00:00', '0000-00-00 00:00:00', '0000-00-00 00:00:00', 1, 'mod_custom', 1, 0, '{"prepare_content":"1","backgroundimage":"","layout":"_:default","moduleclass_sfx":"","cache":"1","cache_time":"900","cachemode":"static","module_tag":"div","bootstrap_size":"0","header_tag":"h3","header_class":"","style":"0"}', 0, '*'),
 (97, 144, 'Grades', '', '<p><a href="index.php/grades/view-grades"><img src="images/icon-grades.png" width="200px"></a></p>\r\n<h3>Grades</h3>', 6, 'top-b', 0, '0000-00-00 00:00:00', '0000-00-00 00:00:00', '0000-00-00 00:00:00', 1, 'mod_custom', 1, 0, '{"prepare_content":"1","backgroundimage":"","layout":"_:default","moduleclass_sfx":"","cache":"1","cache_time":"900","cachemode":"static","module_tag":"div","bootstrap_size":"0","header_tag":"h3","header_class":"","style":"0"}', 0, '*'),
-(98, 145, 'Reports', '', '<p><a href="index.php/reports"><img src="images/icon-reports.png" width="200px"></a></p>\r\n<h3>Reports</h3>', 7, 'top-b', 0, '0000-00-00 00:00:00', '0000-00-00 00:00:00', '0000-00-00 00:00:00', 1, 'mod_custom', 1, 0, '{"prepare_content":"1","backgroundimage":"","layout":"_:default","moduleclass_sfx":"","cache":"1","cache_time":"900","cachemode":"static","module_tag":"div","bootstrap_size":"0","header_tag":"h3","header_class":"","style":"0"}', 0, '*'),
+(98, 145, 'Sponsors', '', '<p><a href="index.php/sponsors"><img src="images/icon-sponsors.png" width="200px"></a></p>\r\n<h3>Sponsors</h3>', 7, 'top-b', 0, '0000-00-00 00:00:00', '0000-00-00 00:00:00', '0000-00-00 00:00:00', 1, 'mod_custom', 1, 0, '{"prepare_content":"1","backgroundimage":"","layout":"_:default","moduleclass_sfx":"","cache":"1","cache_time":"900","cachemode":"static","module_tag":"div","bootstrap_size":"0","header_tag":"h3","header_class":"","style":"0"}', 0, '*'),
 (99, 146, 'Features UIkit', '', '<div class="uk-grid" data-uk-grid-margin>\n    <div class="uk-width-medium-1-4 uk-width-large-1-5 uk-text-center">\n        <img src="images/yootheme/features_uikit.svg" alt="Get UIkit" title="Get UIkit" width="180" height="180">\n    </div>\n    <div class="uk-width-medium-3-4 uk-width-large-4-5 uk-text-center-small">\n        <h3 class="uk-panel-title">Built with UIkit</h3>\n        <p>UIkit is a lightweight and modular front-end framework for developing fast and powerful web interfaces. It comes with a wide range of reusable and combinable components. All UIkit classes are namespaced, so they won''t interfere with other frameworks and extensions you might be using. Here''s an overview of the different UIkit components, which you can easily modify using the customizer.</p>\n        <p><a class="uk-button" href="http://www.getuikit.com" target="_blank">Visit Website</a></p>\n    </div>\n</div>', 1, 'top-a', 0, '0000-00-00 00:00:00', '0000-00-00 00:00:00', '0000-00-00 00:00:00', -2, 'mod_custom', 1, 0, '{"prepare_content":"1","backgroundimage":"","layout":"_:default","moduleclass_sfx":"","cache":"1","cache_time":"900","cachemode":"static","module_tag":"div","bootstrap_size":"0","header_tag":"h3","header_class":"","style":"0"}', 0, '*'),
 (100, 0, 'Social Icons', '', '<div class="uk-margin-top">\n    <a href="#" class="uk-icon-button uk-icon-github"></a>\n    <a href="#" class="uk-icon-button uk-icon-twitter"></a>\n    <a href="#" class="uk-icon-button uk-icon-dribbble"></a>\n    <a href="#" class="uk-icon-button uk-icon-facebook"></a>\n</div>', 1, 'headerbar', 0, '0000-00-00 00:00:00', '0000-00-00 00:00:00', '0000-00-00 00:00:00', -2, 'mod_custom', 1, 1, '{"prepare_content":"0","backgroundimage":"","layout":"_:default","moduleclass_sfx":"","cache":"1","cache_time":"900","cachemode":"static","module_tag":"div","bootstrap_size":"0","header_tag":"h3","header_class":"","style":"0"}', 0, '*'),
 (101, 148, 'Home features', '', '<div class="uk-grid uk-margin-top uk-margin-bottom">\n    <div class="uk-width-1-2">\n        <h3 class="uk-h1">Customizer</h3>\n        <p class="uk-text-large">Pick colors, select fonts and modify sizes without any CSS coding. See the changes in a real-time preview.</p>\n        <img width="545" height="180" src="images/yootheme/home_customizer.png" alt="Demo">\n    </div>\n    <div class="uk-width-1-2">\n        <h3 class="uk-h1">Mobile menu</h3>\n        <p class="uk-text-large">A modern and beautiful off-canvas navigation to enhance your site on mobile devices.</p>\n        <img width="545" height="180" src="images/yootheme/home_mobilemenu.png" alt="Mobile Menu">\n    </div>\n</div>', 1, 'main-top', 0, '0000-00-00 00:00:00', '0000-00-00 00:00:00', '0000-00-00 00:00:00', -2, 'mod_custom', 1, 0, '{"prepare_content":"0","backgroundimage":"","layout":"_:default","moduleclass_sfx":"","cache":"1","cache_time":"900","cachemode":"static","module_tag":"div","bootstrap_size":"0","header_tag":"h3","header_class":"","style":"0"}', 0, '*'),
-(102, 149, 'Logo small', '', '<img src="images/yootheme/logo_small.svg" width="135" height="40" alt="Demo" class="uk-responsive-height">', 1, 'logo-small', 0, '0000-00-00 00:00:00', '0000-00-00 00:00:00', '0000-00-00 00:00:00', -2, 'mod_custom', 1, 1, '{"prepare_content":"0","backgroundimage":"","layout":"_:default","moduleclass_sfx":"","cache":"1","cache_time":"900","cachemode":"static","module_tag":"div","bootstrap_size":"0","header_tag":"h3","header_class":"","style":"0"}', 0, '*');
+(102, 149, 'Logo small', '', '<img src="images/yootheme/logo_small.svg" width="135" height="40" alt="Demo" class="uk-responsive-height">', 1, 'logo-small', 0, '0000-00-00 00:00:00', '0000-00-00 00:00:00', '0000-00-00 00:00:00', -2, 'mod_custom', 1, 1, '{"prepare_content":"0","backgroundimage":"","layout":"_:default","moduleclass_sfx":"","cache":"1","cache_time":"900","cachemode":"static","module_tag":"div","bootstrap_size":"0","header_tag":"h3","header_class":"","style":"0"}', 0, '*'),
+(103, 160, 'Reports', '', '<span style="text-align:center">\r\n<p><a href="index.php/reports"><img src="images/icon-reports.png" width="200px"></a></p>\r\n<h3>Reports</h3>\r\n</span>', 7, 'top-b', 0, '0000-00-00 00:00:00', '0000-00-00 00:00:00', '0000-00-00 00:00:00', 1, 'mod_custom', 1, 0, '{"prepare_content":"1","backgroundimage":"","layout":"_:default","moduleclass_sfx":"","cache":"1","cache_time":"900","cachemode":"static","module_tag":"div","bootstrap_size":"0","header_tag":"h3","header_class":"","style":"0"}', 0, '*');
 
 -- --------------------------------------------------------
 
@@ -2000,7 +2008,8 @@ INSERT INTO `ek5d2_modules_menu` (`moduleid`, `menuid`) VALUES
 (101, 194),
 (101, 195),
 (101, 196),
-(102, 0);
+(102, 0),
+(103, 101);
 
 -- --------------------------------------------------------
 
@@ -2120,7 +2129,7 @@ CREATE TABLE IF NOT EXISTS `ek5d2_redirect_links` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_link_old` (`old_url`),
   KEY `idx_link_modifed` (`modified_date`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=17 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=18 ;
 
 --
 -- Dumping data for table `ek5d2_redirect_links`
@@ -2142,7 +2151,8 @@ INSERT INTO `ek5d2_redirect_links` (`id`, `old_url`, `new_url`, `referer`, `comm
 (13, 'http://bgms.iedf.in/index.php/data.csv', '', 'http://bgms.iedf.in/index.php/reports', '', 1, 0, '2014-05-06 15:43:57', '0000-00-00 00:00:00'),
 (14, 'http://bgms.iedf.in/index.php//view-grades?id=1254', '', 'http://bgms.iedf.in/index.php/reports?reportType=3&class=1&studentName=109&year=2013-14&examType=Final+Exam+%28100+marks%29', '', 1, 0, '2014-05-07 18:12:08', '0000-00-00 00:00:00'),
 (15, 'http://bgms.iedf.in/index.php/view-grades?id=1254', '', 'http://bgms.iedf.in/index.php/reports?reportType=3&class=1&studentName=109&year=2013-14&examType=Final+Exam+%28100+marks%29', '', 1, 0, '2014-05-07 18:12:37', '0000-00-00 00:00:00'),
-(16, 'http://bgms.iedf.in/index.php/student/view-list?id=118', '', 'http://bgms.iedf.in/index.php/grades/view-grades?id=1247', '', 1, 0, '2014-05-07 19:16:32', '0000-00-00 00:00:00');
+(16, 'http://bgms.iedf.in/index.php/student/view-list?id=118', '', 'http://bgms.iedf.in/index.php/grades/view-grades?id=1247', '', 1, 0, '2014-05-07 19:16:32', '0000-00-00 00:00:00'),
+(17, 'http://bgms.iedf.in/index.php/sponsors', '', 'http://bgms.iedf.in/', '', 1, 0, '2014-05-09 09:12:34', '0000-00-00 00:00:00');
 
 -- --------------------------------------------------------
 
@@ -2189,7 +2199,8 @@ CREATE TABLE IF NOT EXISTS `ek5d2_session` (
 --
 
 INSERT INTO `ek5d2_session` (`session_id`, `client_id`, `guest`, `time`, `data`, `userid`, `username`) VALUES
-('97c77b1a5cb1598dea56b3cf7e31c8ac', 0, 0, '1399607556', '__default|a:8:{s:15:"session.counter";i:24;s:19:"session.timer.start";i:1399605466;s:18:"session.timer.last";i:1399607552;s:17:"session.timer.now";i:1399607555;s:22:"session.client.browser";s:65:"Mozilla/5.0 (Windows NT 5.1; rv:29.0) Gecko/20100101 Firefox/29.0";s:8:"registry";O:9:"JRegistry":1:{s:7:"\\0\\0\\0data";O:8:"stdClass":0:{}}s:4:"user";O:5:"JUser":27:{s:9:"\\0\\0\\0isRoot";b:0;s:2:"id";s:2:"40";s:4:"name";s:6:"arvind";s:8:"username";s:6:"arvind";s:5:"email";s:17:"arvindpdmn@ov.com";s:8:"password";s:34:"$P$D6CcnNttxcRBecoH15AeFprf/2gbWn1";s:14:"password_clear";s:0:"";s:5:"block";s:1:"0";s:9:"sendEmail";s:1:"0";s:12:"registerDate";s:19:"2014-05-01 06:43:50";s:13:"lastvisitDate";s:19:"2014-05-08 17:06:25";s:10:"activation";s:0:"";s:6:"params";s:2:"{}";s:6:"groups";a:1:{i:2;s:1:"2";}s:5:"guest";i:0;s:13:"lastResetTime";s:19:"0000-00-00 00:00:00";s:10:"resetCount";s:1:"0";s:10:"\\0\\0\\0_params";O:9:"JRegistry":1:{s:7:"\\0\\0\\0data";O:8:"stdClass":0:{}}s:14:"\\0\\0\\0_authGroups";a:2:{i:0;i:1;i:1;i:2;}s:14:"\\0\\0\\0_authLevels";a:3:{i:0;i:1;i:1;i:1;i:2;i:2;}s:15:"\\0\\0\\0_authActions";N;s:12:"\\0\\0\\0_errorMsg";N;s:10:"\\0\\0\\0_errors";a:0:{}s:3:"aid";i:0;s:6:"otpKey";s:0:"";s:4:"otep";s:0:"";s:11:"cookieLogin";b:1;}s:13:"session.token";s:32:"5bedc81cb33ad234a3eb5e527e35560f";}gcore|a:1:{s:4:"user";a:9:{s:2:"id";s:2:"40";s:4:"name";s:6:"arvind";s:8:"username";s:6:"arvind";s:5:"email";s:17:"arvindpdmn@ov.com";s:10:"last_login";s:19:"2014-05-08 17:06:25";s:9:"logged_in";b:1;s:5:"guest";i:0;s:6:"groups";a:1:{i:0;s:1:"2";}s:11:"inheritance";a:2:{i:0;s:1:"1";i:1;s:1:"0";}}}', 40, 'arvind');
+('0d046f04b2dd87d35629ff4089e1d952', 1, 0, '1399633744', '__default|a:8:{s:15:"session.counter";i:63;s:19:"session.timer.start";i:1399626277;s:18:"session.timer.last";i:1399633479;s:17:"session.timer.now";i:1399633744;s:22:"session.client.browser";s:65:"Mozilla/5.0 (Windows NT 5.1; rv:29.0) Gecko/20100101 Firefox/29.0";s:8:"registry";O:9:"JRegistry":1:{s:7:"\\0\\0\\0data";O:8:"stdClass":1:{s:11:"application";O:8:"stdClass":1:{s:4:"lang";s:5:"en-GB";}}}s:4:"user";O:5:"JUser":26:{s:9:"\\0\\0\\0isRoot";b:1;s:2:"id";s:2:"37";s:4:"name";s:10:"Super User";s:8:"username";s:8:"webadmin";s:5:"email";s:20:"arvindpdmn@gmail.com";s:8:"password";s:34:"$P$DayMKCjvSNqXzbatwx1Nb59YbEiDOq/";s:14:"password_clear";s:0:"";s:5:"block";s:1:"0";s:9:"sendEmail";s:1:"1";s:12:"registerDate";s:19:"2014-04-29 15:26:07";s:13:"lastvisitDate";s:19:"2014-05-09 06:06:50";s:10:"activation";s:1:"0";s:6:"params";s:0:"";s:6:"groups";a:1:{i:8;s:1:"8";}s:5:"guest";i:0;s:13:"lastResetTime";s:19:"0000-00-00 00:00:00";s:10:"resetCount";s:1:"0";s:10:"\\0\\0\\0_params";O:9:"JRegistry":1:{s:7:"\\0\\0\\0data";O:8:"stdClass":0:{}}s:14:"\\0\\0\\0_authGroups";a:2:{i:0;i:1;i:1;i:8;}s:14:"\\0\\0\\0_authLevels";a:5:{i:0;i:1;i:1;i:1;i:2;i:2;i:3;i:3;i:4;i:6;}s:15:"\\0\\0\\0_authActions";N;s:12:"\\0\\0\\0_errorMsg";N;s:10:"\\0\\0\\0_errors";a:0:{}s:3:"aid";i:0;s:6:"otpKey";s:0:"";s:4:"otep";s:0:"";}s:13:"session.token";s:32:"1dcd9dd810df689b161ab00eaaf7ba2d";}gcore|a:3:{s:4:"user";a:9:{s:2:"id";s:2:"37";s:4:"name";s:10:"Super User";s:8:"username";s:8:"webadmin";s:5:"email";s:20:"arvindpdmn@gmail.com";s:10:"last_login";s:19:"2014-05-09 06:06:50";s:9:"logged_in";b:1;s:5:"guest";i:0;s:6:"groups";a:1:{i:0;s:1:"8";}s:11:"inheritance";a:2:{i:0;s:1:"1";i:1;s:1:"0";}}s:56:"GCore\\Admin\\Extensions\\Chronoforms\\Chronoforms.Form.page";i:1;s:57:"GCore\\Admin\\Extensions\\Chronoforms\\Chronoforms.Form.limit";i:30;}', 37, 'webadmin'),
+('97c77b1a5cb1598dea56b3cf7e31c8ac', 0, 0, '1399633854', '__default|a:8:{s:15:"session.counter";i:49;s:19:"session.timer.start";i:1399626750;s:18:"session.timer.last";i:1399633845;s:17:"session.timer.now";i:1399633854;s:22:"session.client.browser";s:65:"Mozilla/5.0 (Windows NT 5.1; rv:29.0) Gecko/20100101 Firefox/29.0";s:8:"registry";O:9:"JRegistry":1:{s:7:"\\0\\0\\0data";O:8:"stdClass":0:{}}s:4:"user";O:5:"JUser":27:{s:9:"\\0\\0\\0isRoot";b:0;s:2:"id";s:2:"40";s:4:"name";s:6:"arvind";s:8:"username";s:6:"arvind";s:5:"email";s:17:"arvindpdmn@ov.com";s:8:"password";s:34:"$P$D6CcnNttxcRBecoH15AeFprf/2gbWn1";s:14:"password_clear";s:0:"";s:5:"block";s:1:"0";s:9:"sendEmail";s:1:"0";s:12:"registerDate";s:19:"2014-05-01 06:43:50";s:13:"lastvisitDate";s:19:"2014-05-09 08:53:53";s:10:"activation";s:0:"";s:6:"params";s:2:"{}";s:6:"groups";a:1:{i:2;s:1:"2";}s:5:"guest";i:0;s:13:"lastResetTime";s:19:"0000-00-00 00:00:00";s:10:"resetCount";s:1:"0";s:10:"\\0\\0\\0_params";O:9:"JRegistry":1:{s:7:"\\0\\0\\0data";O:8:"stdClass":0:{}}s:14:"\\0\\0\\0_authGroups";a:2:{i:0;i:1;i:1;i:2;}s:14:"\\0\\0\\0_authLevels";a:3:{i:0;i:1;i:1;i:1;i:2;i:2;}s:15:"\\0\\0\\0_authActions";N;s:12:"\\0\\0\\0_errorMsg";N;s:10:"\\0\\0\\0_errors";a:0:{}s:3:"aid";i:0;s:6:"otpKey";s:0:"";s:4:"otep";s:0:"";s:11:"cookieLogin";b:1;}s:13:"session.token";s:32:"7ecc1fb07ba322a97e65c73ce3349df8";}gcore|a:1:{s:4:"user";a:9:{s:2:"id";s:2:"40";s:4:"name";s:6:"arvind";s:8:"username";s:6:"arvind";s:5:"email";s:17:"arvindpdmn@ov.com";s:10:"last_login";s:19:"2014-05-09 08:53:53";s:9:"logged_in";b:1;s:5:"guest";i:0;s:6:"groups";a:1:{i:0;s:1:"2";}s:11:"inheritance";a:2:{i:0;s:1:"1";i:1;s:1:"0";}}}', 40, 'arvind');
 
 -- --------------------------------------------------------
 
@@ -2216,7 +2227,7 @@ CREATE TABLE IF NOT EXISTS `ek5d2_studentform` (
   `guardian` varchar(255) NOT NULL,
   `sponsor` varchar(255) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=172 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=174 ;
 
 -- --------------------------------------------------------
 
@@ -2425,9 +2436,9 @@ CREATE TABLE IF NOT EXISTS `ek5d2_update_sites` (
 --
 
 INSERT INTO `ek5d2_update_sites` (`update_site_id`, `name`, `type`, `location`, `enabled`, `last_check_timestamp`, `extra_query`) VALUES
-(1, 'Joomla Core', 'collection', 'http://update.joomla.org/core/list.xml', 1, 0, ''),
-(2, 'Joomla Extension Directory', 'collection', 'http://update.joomla.org/jed/list.xml', 1, 0, ''),
-(3, 'Accredited Joomla! Translations', 'collection', 'http://update.joomla.org/language/translationlist_3.xml', 1, 0, '');
+(1, 'Joomla Core', 'collection', 'http://update.joomla.org/core/list.xml', 1, 1399615620, ''),
+(2, 'Joomla Extension Directory', 'collection', 'http://update.joomla.org/jed/list.xml', 1, 1399615620, ''),
+(3, 'Accredited Joomla! Translations', 'collection', 'http://update.joomla.org/language/translationlist_3.xml', 1, 1399615620, '');
 
 -- --------------------------------------------------------
 
@@ -2474,7 +2485,66 @@ CREATE TABLE IF NOT EXISTS `ek5d2_updates` (
   `infourl` text NOT NULL,
   `extra_query` varchar(1000) DEFAULT '',
   PRIMARY KEY (`update_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Available Updates' AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Available Updates' AUTO_INCREMENT=54 ;
+
+--
+-- Dumping data for table `ek5d2_updates`
+--
+
+INSERT INTO `ek5d2_updates` (`update_id`, `update_site_id`, `extension_id`, `name`, `description`, `element`, `type`, `folder`, `client_id`, `version`, `data`, `detailsurl`, `infourl`, `extra_query`) VALUES
+(1, 1, 700, 'Joomla', '', 'joomla', 'file', '', 0, '3.3.0', '', 'http://update.joomla.org/core/sts/extension_sts.xml', '', ''),
+(2, 3, 0, 'Malay', '', 'pkg_ms-MY', 'package', '', 0, '3.2.2.1', '', 'http://update.joomla.org/language/details3/ms-MY_details.xml', '', ''),
+(3, 3, 0, 'Romanian', '', 'pkg_ro-RO', 'package', '', 0, '3.2.3.1', '', 'http://update.joomla.org/language/details3/ro-RO_details.xml', '', ''),
+(4, 3, 0, 'Flemish', '', 'pkg_nl-BE', 'package', '', 0, '3.3.0.1', '', 'http://update.joomla.org/language/details3/nl-BE_details.xml', '', ''),
+(5, 3, 0, 'Chinese Traditional', '', 'pkg_zh-TW', 'package', '', 0, '3.3.0.1', '', 'http://update.joomla.org/language/details3/zh-TW_details.xml', '', ''),
+(6, 3, 0, 'French', '', 'pkg_fr-FR', 'package', '', 0, '3.3.0.1', '', 'http://update.joomla.org/language/details3/fr-FR_details.xml', '', ''),
+(7, 3, 0, 'German', '', 'pkg_de-DE', 'package', '', 0, '3.3.0.1', '', 'http://update.joomla.org/language/details3/de-DE_details.xml', '', ''),
+(8, 3, 0, 'Greek', '', 'pkg_el-GR', 'package', '', 0, '3.2.0.1', '', 'http://update.joomla.org/language/details3/el-GR_details.xml', '', ''),
+(9, 3, 0, 'Japanese', '', 'pkg_ja-JP', 'package', '', 0, '3.3.0.1', '', 'http://update.joomla.org/language/details3/ja-JP_details.xml', '', ''),
+(10, 3, 0, 'Hebrew', '', 'pkg_he-IL', 'package', '', 0, '3.1.1.1', '', 'http://update.joomla.org/language/details3/he-IL_details.xml', '', ''),
+(11, 3, 0, 'EnglishAU', '', 'pkg_en-AU', 'package', '', 0, '3.3.0.1', '', 'http://update.joomla.org/language/details3/en-AU_details.xml', '', ''),
+(12, 3, 0, 'EnglishUS', '', 'pkg_en-US', 'package', '', 0, '3.3.0.1', '', 'http://update.joomla.org/language/details3/en-US_details.xml', '', ''),
+(13, 3, 0, 'Hungarian', '', 'pkg_hu-HU', 'package', '', 0, '3.3.0.1', '', 'http://update.joomla.org/language/details3/hu-HU_details.xml', '', ''),
+(14, 3, 0, 'Afrikaans', '', 'pkg_af-ZA', 'package', '', 0, '3.2.0.1', '', 'http://update.joomla.org/language/details3/af-ZA_details.xml', '', ''),
+(15, 3, 0, 'Arabic Unitag', '', 'pkg_ar-AA', 'package', '', 0, '3.3.0.2', '', 'http://update.joomla.org/language/details3/ar-AA_details.xml', '', ''),
+(16, 3, 0, 'Belarusian', '', 'pkg_be-BY', 'package', '', 0, '3.2.1.1', '', 'http://update.joomla.org/language/details3/be-BY_details.xml', '', ''),
+(17, 3, 0, 'Bulgarian', '', 'pkg_bg-BG', 'package', '', 0, '3.2.1.1', '', 'http://update.joomla.org/language/details3/bg-BG_details.xml', '', ''),
+(18, 3, 0, 'Catalan', '', 'pkg_ca-ES', 'package', '', 0, '3.3.0.1', '', 'http://update.joomla.org/language/details3/ca-ES_details.xml', '', ''),
+(19, 3, 0, 'Chinese Simplified', '', 'pkg_zh-CN', 'package', '', 0, '3.3.0.1', '', 'http://update.joomla.org/language/details3/zh-CN_details.xml', '', ''),
+(20, 3, 0, 'Croatian', '', 'pkg_hr-HR', 'package', '', 0, '3.1.5.1', '', 'http://update.joomla.org/language/details3/hr-HR_details.xml', '', ''),
+(21, 3, 0, 'Czech', '', 'pkg_cs-CZ', 'package', '', 0, '3.3.0.1', '', 'http://update.joomla.org/language/details3/cs-CZ_details.xml', '', ''),
+(22, 3, 0, 'Danish', '', 'pkg_da-DK', 'package', '', 0, '3.3.0.1', '', 'http://update.joomla.org/language/details3/da-DK_details.xml', '', ''),
+(23, 3, 0, 'Dutch', '', 'pkg_nl-NL', 'package', '', 0, '3.3.0.1', '', 'http://update.joomla.org/language/details3/nl-NL_details.xml', '', ''),
+(24, 3, 0, 'Estonian', '', 'pkg_et-EE', 'package', '', 0, '3.3.0.1', '', 'http://update.joomla.org/language/details3/et-EE_details.xml', '', ''),
+(25, 3, 0, 'Italian', '', 'pkg_it-IT', 'package', '', 0, '3.3.0.1', '', 'http://update.joomla.org/language/details3/it-IT_details.xml', '', ''),
+(26, 3, 0, 'Korean', '', 'pkg_ko-KR', 'package', '', 0, '3.2.3.1', '', 'http://update.joomla.org/language/details3/ko-KR_details.xml', '', ''),
+(27, 3, 0, 'Latvian', '', 'pkg_lv-LV', 'package', '', 0, '3.3.0.1', '', 'http://update.joomla.org/language/details3/lv-LV_details.xml', '', ''),
+(28, 3, 0, 'Macedonian', '', 'pkg_mk-MK', 'package', '', 0, '3.3.0.1', '', 'http://update.joomla.org/language/details3/mk-MK_details.xml', '', ''),
+(29, 3, 0, 'Norwegian Bokmal', '', 'pkg_nb-NO', 'package', '', 0, '3.2.2.1', '', 'http://update.joomla.org/language/details3/nb-NO_details.xml', '', ''),
+(30, 3, 0, 'Persian', '', 'pkg_fa-IR', 'package', '', 0, '3.3.0.1', '', 'http://update.joomla.org/language/details3/fa-IR_details.xml', '', ''),
+(31, 3, 0, 'Polish', '', 'pkg_pl-PL', 'package', '', 0, '3.3.0.1', '', 'http://update.joomla.org/language/details3/pl-PL_details.xml', '', ''),
+(32, 3, 0, 'Russian', '', 'pkg_ru-RU', 'package', '', 0, '3.2.3.1', '', 'http://update.joomla.org/language/details3/ru-RU_details.xml', '', ''),
+(33, 3, 0, 'Slovak', '', 'pkg_sk-SK', 'package', '', 0, '3.3.0.1', '', 'http://update.joomla.org/language/details3/sk-SK_details.xml', '', ''),
+(34, 3, 0, 'Swedish', '', 'pkg_sv-SE', 'package', '', 0, '3.2.1.1', '', 'http://update.joomla.org/language/details3/sv-SE_details.xml', '', ''),
+(35, 3, 0, 'Syriac', '', 'pkg_sy-IQ', 'package', '', 0, '3.2.3.1', '', 'http://update.joomla.org/language/details3/sy-IQ_details.xml', '', ''),
+(36, 3, 0, 'Tamil', '', 'pkg_ta-IN', 'package', '', 0, '3.3.0.2', '', 'http://update.joomla.org/language/details3/ta-IN_details.xml', '', ''),
+(37, 3, 0, 'Thai', '', 'pkg_th-TH', 'package', '', 0, '3.3.0.1', '', 'http://update.joomla.org/language/details3/th-TH_details.xml', '', ''),
+(38, 3, 0, 'Turkish', '', 'pkg_tr-TR', 'package', '', 0, '3.3.0.1', '', 'http://update.joomla.org/language/details3/tr-TR_details.xml', '', ''),
+(39, 3, 0, 'Ukrainian', '', 'pkg_uk-UA', 'package', '', 0, '3.2.0.6', '', 'http://update.joomla.org/language/details3/uk-UA_details.xml', '', ''),
+(40, 3, 0, 'Uyghur', '', 'pkg_ug-CN', 'package', '', 0, '3.3.0.1', '', 'http://update.joomla.org/language/details3/ug-CN_details.xml', '', ''),
+(41, 3, 0, 'Albanian', '', 'pkg_sq-AL', 'package', '', 0, '3.1.1.1', '', 'http://update.joomla.org/language/details3/sq-AL_details.xml', '', ''),
+(42, 3, 0, 'Portuguese Brazil', '', 'pkg_pt-BR', 'package', '', 0, '3.0.2.1', '', 'http://update.joomla.org/language/details3/pt-BR_details.xml', '', ''),
+(43, 3, 0, 'Serbian Latin', '', 'pkg_sr-YU', 'package', '', 0, '3.3.0.1', '', 'http://update.joomla.org/language/details3/sr-YU_details.xml', '', ''),
+(44, 3, 0, 'Spanish', '', 'pkg_es-ES', 'package', '', 0, '3.3.0.1', '', 'http://update.joomla.org/language/details3/es-ES_details.xml', '', ''),
+(45, 3, 0, 'Bosnian', '', 'pkg_bs-BA', 'package', '', 0, '3.3.0.1', '', 'http://update.joomla.org/language/details3/bs-BA_details.xml', '', ''),
+(46, 3, 0, 'Serbian Cyrillic', '', 'pkg_sr-RS', 'package', '', 0, '3.3.0.1', '', 'http://update.joomla.org/language/details3/sr-RS_details.xml', '', ''),
+(47, 3, 0, 'Vietnamese', '', 'pkg_vi-VN', 'package', '', 0, '3.2.1.1', '', 'http://update.joomla.org/language/details3/vi-VN_details.xml', '', ''),
+(48, 3, 0, 'Bahasa Indonesia', '', 'pkg_id-ID', 'package', '', 0, '3.3.0.2', '', 'http://update.joomla.org/language/details3/id-ID_details.xml', '', ''),
+(49, 3, 0, 'Finnish', '', 'pkg_fi-FI', 'package', '', 0, '3.3.0.1', '', 'http://update.joomla.org/language/details3/fi-FI_details.xml', '', ''),
+(50, 3, 0, 'Swahili', '', 'pkg_sw-KE', 'package', '', 0, '3.3.0.1', '', 'http://update.joomla.org/language/details3/sw-KE_details.xml', '', ''),
+(51, 3, 0, 'Montenegrin', '', 'pkg_srp-ME', 'package', '', 0, '3.2.1.1', '', 'http://update.joomla.org/language/details3/srp-ME_details.xml', '', ''),
+(52, 3, 0, 'EnglishCA', '', 'pkg_en-CA', 'package', '', 0, '3.3.0.1', '', 'http://update.joomla.org/language/details3/en-CA_details.xml', '', ''),
+(53, 3, 0, 'FrenchCA', '', 'pkg_fr-CA', 'package', '', 0, '3.3.0.1', '', 'http://update.joomla.org/language/details3/fr-CA_details.xml', '', '');
 
 -- --------------------------------------------------------
 
@@ -2504,10 +2574,10 @@ CREATE TABLE IF NOT EXISTS `ek5d2_user_keys` (
 
 INSERT INTO `ek5d2_user_keys` (`id`, `user_id`, `token`, `series`, `invalid`, `time`, `uastring`) VALUES
 (3, 'arvind', '$P$DO5LgOlQHDhJmEAHs2RDPdJHgUR1K71', '5JjAU5EqPPsOLmBnxEgS', 0, '1404144299', '182632cbdd1707b48a338f2002e830a7'),
-(5, 'arvind', '$P$DDwM5S4dCujCE7kf5r8E5de7xMI1ES0', 'eBjbRtX5xF2bg7v6S9of', 0, '1404277990', '87ee68311f30a12059030769698a9518'),
+(5, 'arvind', '$P$DgBYzAnkmtHq7tNOpH1PDJ.bTozLJ0.', 'eBjbRtX5xF2bg7v6S9of', 0, '1404277990', '87ee68311f30a12059030769698a9518'),
 (6, 'arvind', '$P$DynCAt9ga74iagetyjYl0eTdjC/aMd/', 'jJSZxAiPS1ZRAHj5CiAA', 0, '1404299233', '0fe98ce63d11a47ae17b3dd228652a71'),
 (8, 'arvind', '$P$DGFGs8oETXRCHugbR7zf9BilqHDS8m0', 'vdncfLFKKAuTvbUghZSx', 0, '1404480845', '314cb5720105bd4127bc39bc3172c753'),
-(9, 'arvind', '$P$DQsQy33a5y.Gfg93nvW6lSdT/90DR20', 'kds7U67SRnRpjm4d74VT', 0, '1404724215', '8d5e6c037655b5c6fe3a6607b8667621');
+(9, 'arvind', '$P$DFbZAeDMCCY4.ATZJVLaHGCWk6DinV/', 'kds7U67SRnRpjm4d74VT', 0, '1404724215', '8d5e6c037655b5c6fe3a6607b8667621');
 
 -- --------------------------------------------------------
 
@@ -2643,8 +2713,8 @@ CREATE TABLE IF NOT EXISTS `ek5d2_users` (
 --
 
 INSERT INTO `ek5d2_users` (`id`, `name`, `username`, `email`, `password`, `block`, `sendEmail`, `registerDate`, `lastvisitDate`, `activation`, `params`, `lastResetTime`, `resetCount`, `otpKey`, `otep`) VALUES
-(37, 'Super User', 'webadmin', 'arvindpdmn@gmail.com', '$P$DayMKCjvSNqXzbatwx1Nb59YbEiDOq/', 0, 1, '2014-04-29 15:26:07', '2014-05-05 12:49:11', '0', '', '0000-00-00 00:00:00', 0, '', ''),
-(40, 'arvind', 'arvind', 'arvindpdmn@ov.com', '$P$D6CcnNttxcRBecoH15AeFprf/2gbWn1', 0, 0, '2014-05-01 06:43:50', '2014-05-09 03:17:47', '', '{}', '0000-00-00 00:00:00', 0, '', '');
+(37, 'Super User', 'webadmin', 'arvindpdmn@gmail.com', '$P$DayMKCjvSNqXzbatwx1Nb59YbEiDOq/', 0, 1, '2014-04-29 15:26:07', '2014-05-09 09:04:43', '0', '', '0000-00-00 00:00:00', 0, '', ''),
+(40, 'arvind', 'arvind', 'arvindpdmn@ov.com', '$P$D6CcnNttxcRBecoH15AeFprf/2gbWn1', 0, 0, '2014-05-01 06:43:50', '2014-05-09 09:12:30', '', '{}', '0000-00-00 00:00:00', 0, '', '');
 
 -- --------------------------------------------------------
 

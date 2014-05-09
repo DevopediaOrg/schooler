@@ -251,12 +251,16 @@ function msgPostFormSubmit($linkType)
 		$aliasname = 'view-grades';
 		$id = getRecordId('gradesform');
 	}
+	else if ($linkType=='sponsor') {
+		$aliasname = 'view-sponsors';
+		$id = getRecordId('sponsorform');
+	}
 	else {
-		$aliasname = 'view-list';
+		$aliasname = 'view-students';
 		$id = getRecordId('studentform');
 	}
 
-	$itemLink = preg_replace("/(view-list|view-grades|add-student|add-grades)[?]?.*$/","$aliasname?id=$id",$_SERVER['REQUEST_URI'],1);
+	$itemLink = preg_replace("/(view-students|view-sponsors|view-grades|add-student|add-sponsor|add-grades)[?]?.*$/","$aliasname?id=$id",$_SERVER['REQUEST_URI'],1);
 
 	echo "<div class=message>Details have been saved.<br>";
 	echo "You may wish to <a href='$itemLink'>review them</a>.</div>";
@@ -291,6 +295,12 @@ function deleteStudent($id)
 	echo "<div class=message>Entry has been deleted.<br>";
 }
 
+function deleteSponsor($id)
+{	// Do not delete the grades of this student.
+	executeQuery("DELETE FROM #__sponsorform WHERE id=$id", 0);
+	echo "<div class=message>Entry has been deleted.<br>";
+}
+
 function showStudent($id)
 {
 	echo "<table class=studentPageTitle><tr>";
@@ -309,8 +319,8 @@ function showStudent($id)
 	$user = JFactory::getUser();
 	if (!$user->guest) {
 		echo "<td style='text-align:right'>";
-		echo "<b><a href='".preg_replace("/view-list/","add-student",$_SERVER['REQUEST_URI'])."'>Edit</a></b>";
-		echo " | <b><a onclick='return confirm(\"Are you sure you want to delete this entry?\")' href='".preg_replace("/view-list\?.*/","view-list?action=delete&id=$id",$_SERVER['REQUEST_URI'])."'>Delete</a></b>";
+		echo "<b><a href='".preg_replace("/view-students/","add-student",$_SERVER['REQUEST_URI'])."'>Edit</a></b>";
+		echo " | <b><a onclick='return confirm(\"Are you sure you want to delete this entry?\")' href='".preg_replace("/view-students\?.*/","view-students?action=delete&id=$id",$_SERVER['REQUEST_URI'])."'>Delete</a></b>";
 		echo "</td>";
 	}
 
@@ -338,6 +348,11 @@ function showStudent($id)
 		}
 	}
 	echo "</table>";
+}
+
+function showSponsorList()
+{
+	
 }
 
 function printAllGradesTable($data, $year, $class)
@@ -399,7 +414,7 @@ function showStudentAllGrades($id)
 	
 	echo "<table class=studentView>";
 	echo "<tr><td rowspan=4 width=120px>".getPhotoCode($id, "style='width:100px'")."</td>";
-	$studentLink = preg_replace("/\/grades\/.*/","/students/view-list?id=".$id,$_SERVER['REQUEST_URI']);
+	$studentLink = preg_replace("/\/grades\/.*/","/students/view-students?id=".$id,$_SERVER['REQUEST_URI']);
 	echo "  <th>Student Name</th><td><a href='".$studentLink."'>".$studentDetails[0]."</a></td></tr>";
 	echo "<tr><th>Student ID</th><td>".$studentDetails[1]."</td></tr>";
 	echo "<tr><th>Class</th><td>".getClassDisplayText($studentDetails[2])."</td></tr>";
@@ -517,7 +532,7 @@ function showStudentGrades($id)
 	}
 	echo "</tr></table>";
 	
-	$studentLink = preg_replace("/\/grades[?]?.*$/","/students/view-list?id=$result[0]",$_SERVER['REQUEST_URI'],1);
+	$studentLink = preg_replace("/\/grades[?]?.*$/","/students/view-students?id=$result[0]",$_SERVER['REQUEST_URI'],1);
 	$studentGradesLink = preg_replace("/\/grades[?]?.*$/","/grades/view-grades?studentId=$result[0]",$_SERVER['REQUEST_URI'],1);
 							 
 	$headings = array('Student Name','Current','This Grade For','Year','Assessment','Date','Kannada','English','Hindi','Mathematics','General Science','Social Studies','Computer Science','Physical Education','Conduct','Attendance','Remarks');
@@ -603,7 +618,7 @@ function validateGradesForm($form)
 
 	if ($id!=0 && (!isset($_REQUEST['id']) || $id!=$_REQUEST['id'])) {
 		// either adding a new record or editing an existing one: clash with record in table ($id)
-		$itemLink = preg_replace("/(view-list|view-grades|add-student|add-grades)[?]?.*$/","add-grades?id=$id",$_SERVER['REQUEST_URI'],1);
+		$itemLink = preg_replace("/(view-students|view-sponsors|view-grades|add-student|add-sponsor|add-grades)[?]?.*$/","add-grades?id=$id",$_SERVER['REQUEST_URI'],1);
 		echo "<div class='error message'>Grades for this student were already entered earlier.<br>";
 		echo "You may wish to <a href='$itemLink'>edit them</a>.</div>";
 		return 'fail';
@@ -643,6 +658,18 @@ function printCustomCodeReportsForm()
 	insertReportsFormJS();
 	echo "<div id=classStudentMap style='display:none'>".implode('/',$options)."</div>\n";
 	echo "<img src='".preg_replace("/index\.php.*/","images/blank.gif",$_SERVER['REQUEST_URI'])."' onload='onLoadReportsForm()' />\n";
+}
+
+function printCustomCodeSponsorForm()
+{
+	$options = array();
+	$results = getTableData("#__studentform", "id,name", "1 ORDER BY name");
+	foreach ($results as $result) {
+		array_push($options, "$result[0]:$result[1]");
+	}
+	insertSponsorFormJS();
+	echo "<div id=idStudentMap style='display:none'>".implode('/',$options)."</div>\n";
+	echo "<img src='".preg_replace("/index\.php.*/","images/blank.gif",$_SERVER['REQUEST_URI'])."' onload='onLoadSponsorForm()' />\n";
 }
 
 function insertGradesFormJS()
@@ -821,6 +848,55 @@ function loadStudentNames(context)
 <?php
 }
 
+function insertSponsorFormJS()
+{
+?>
+<script type='text/javascript'>
+//<![CDATA[
+function onLoadSponsorForm()
+{
+	loadStudentNames('init');
+}
+
+function loadStudentNames(context)
+{
+	sponsoredStudentsElem = document.getElementById('sponsoredStudents');
+	while(sponsoredStudentsElem.options.length > 0) sponsoredStudentsElem.remove(0);
+
+	mapElem = document.getElementById('idStudentMap');
+
+	if (mapElem.innerHTML=='') {
+		var option = document.createElement("option");
+		option.value = -1;
+		option.text = "No students defined.";
+		sponsoredStudentsElem.add(option);
+		sponsoredStudentsElem.disabled = true;
+		return;		
+	}
+
+	students = mapElem.innerHTML.split('/');	
+	for (var i=0; i<students.length; i++) {
+		fields = students[i].split(':');
+		var option = document.createElement("option");
+		option.value = fields[0];
+		option.text = fields[1];
+		sponsoredStudentsElem.add(option);
+/*		for(var j=0; j<sponsoredStudentsLoad.length; j++) {
+            if(sponsoredStudentsLoad[j] == fields[0]) {
+				sponsoredStudentsElem.selectedIndex = studentNameElem.options.length-1;
+            }
+        }*/
+	}
+
+	//sponsoredStudentsLoadElem = document.getElementById('sponsoredStudentsLoad');
+	//sponsoredStudentsLoad = sponsoredStudentsLoadElem.split(',');
+	//sponsoredStudentsElem.val(sponsoredStudentsLoad); 
+}
+//]]>
+</script>
+<?php	
+}
+
 function showStudentFormTitle()
 {
 	if (isset($_REQUEST['id'])) {
@@ -834,6 +910,23 @@ function showStudentFormTitle()
 
 	echo "<table class=studentPageTitle><tr>";
 	echo "<td><h2>Adding a New Student</h2></td>";
+	echo "</tr></table>";
+	return array('id' => '99999999');
+}
+
+function showSponsorFormTitle()
+{
+	if (isset($_REQUEST['id'])) {
+		$id = $_REQUEST['id'];
+		echo "<table class=studentPageTitle><tr>";
+		echo "<td><h2>Editing Sponsor Details</h2></td>";
+		echo "</tr></table>";
+		echo getPhotoCode($id);
+		return array('id' => $id);
+	}
+
+	echo "<table class=studentPageTitle><tr>";
+	echo "<td><h2>Adding a New Sponsor</h2></td>";
 	echo "</tr></table>";
 	return array('id' => '99999999');
 }
@@ -867,7 +960,7 @@ function showStudentList()
 	echo "</tr></table>";
 
 	$allPhotoStr = '/'.implode('/',readPhotoDir()).'/';
-	$itemLink = preg_replace("/view-list\??.*/","view-list",$_SERVER['REQUEST_URI']);
+	$itemLink = preg_replace("/view-students\??.*/","view-students",$_SERVER['REQUEST_URI']);
 	$columnHeadings = array('Photo','Student ID','Admission No.','Name','Class','Group','Sex','Parent','Guardian','Sponsor');
 	$students = getTableData("#__studentform",
 							 "id,studentUid,admissionNumber,name,class,`group`,sex,parent,guardian,sponsor",
@@ -1015,7 +1108,7 @@ function showGradesList()
 				echo "<td>".getClassDisplayText($student[$i])."</td>";
 			}
 			else if ($i==3) { // have link for name and indicate duplicates
-				$itemLink = preg_replace("/\/grades\/.*/","/students/view-list",$_SERVER['REQUEST_URI']);
+				$itemLink = preg_replace("/\/grades\/.*/","/students/view-students",$_SERVER['REQUEST_URI']);
 				if (in_array($studentId,$dups)) echo "<td><a href='$itemLink?id=$studentId'>".$student[$i]." <span class=duplicateErr>*</span></td>";
 				else echo "<td><a href='$itemLink?id=$studentId'>".$student[$i]."</td>";
 			}
@@ -1096,7 +1189,7 @@ function showReports()
 	$actionUrl = preg_replace("/[?].*/","",$_SERVER['REQUEST_URI']);
 	echo "<form id=reportSelForm method=get onsubmit='return true;' action='$actionUrl'>";
 	echo "<select id=reportTypeId style='width:320px;margin-right:5px;float:left' name=reportType>".getOptStr($graphs,true,0,$reportType)."</select>";
-	echo "<select id=class style='margin-right:5px;display:none;float:left' name=class>".getOptStr($classes,true,1,$class)."</select>";
+	echo "<select id=class style='margin-right:5px;display:none;float:left' name=class>".getOptStr($classes,true,1,$classes[$class-1])."</select>";
 	echo "<input id=studentIdLoad type=hidden disabled=disabled value='$studentId' />";
 	echo "<select id=studentId style='margin-right:5px;display:none;float:left' name=studentId></select>"; # leave options to JS
 	#$years = getTableData("#__gradesform","DISTINCT(year)","1 ORDER BY year DESC");
@@ -1141,24 +1234,6 @@ function showReports()
 	}
 }
 
-function getTsvFormat($arr, $fillZeros=false)
-{
-	$retStr = ''; $prevVal = -1;
-	foreach ($arr as $row) { // can't use indices since they can be any type
-		if ($fillZeros && $prevVal!=-1 && $prevVal+1<$row[0]) {
-			for ($k=$prevVal+1; $k<$row[0]; $k++) {
-				$retStr .= "$k".str_repeat("\t0",count($row)-1)."\n";
-			}
-		}
-		$prevVal = $row[0];
-		for ($j=0; $j<count($row); $j++) {
-			if ($j==count($row)-1) $retStr .= $row[$j]."\n";
-			else $retStr .= $row[$j]."\t";
-		}
-	}
-	return $retStr;
-}
-
 function getCsvFormat($arr, $fillZeros=false)
 {
 	$retStr = ''; $prevVal = -1;
@@ -1186,7 +1261,7 @@ function printToFile($filename, $header, $str)
 }
 
 function reorderByAge($results)
-{
+{	// Function is not used for the moment: handled in MySQL query
 	$arr = array(); $minAge = $maxAge = -1;
 	foreach ($results as $result) {
 		if ($minAge==-1) { // first age
@@ -1368,7 +1443,7 @@ function reportTopStudents($currtime, $pathPrefix, $year, $examType)
 			}
 			$groupmap[$result[2]][$result[3]]++;
 			$percentage = floor(0.5+(100*$result[4])/(6*$maxMarks)); // consider all subjects for topper's list
-			$studentLink = preg_replace("/\/reports[?]?.*$/","/students/view-list?id=$result[6]",$_SERVER['REQUEST_URI'],1);
+			$studentLink = preg_replace("/\/reports[?]?.*$/","/students/view-students?id=$result[6]",$_SERVER['REQUEST_URI'],1);
 			$itemLink = preg_replace("/\/reports[?]?.*$/","/grades/view-grades?id=$result[5]",$_SERVER['REQUEST_URI'],1);
 			echo "<tr><td style='font-size:2em'>$rank</td><td>".getPhotoCode($result[6],"style='width:64px'")."</td>";
 			echo "<td><a href='$studentLink'>$result[1]</a></td><td>$result[2]</td><td>$percentage %</td>";
