@@ -1398,7 +1398,7 @@ iframe {
  ========================================================================== */
 .uk-panel-box {
   padding: 20px;
-  background: #f5f5f5;
+  background: #ffffff; /* #f5f5f5 */
   color: #444444;
 }
 .uk-panel-box .uk-panel-title {
