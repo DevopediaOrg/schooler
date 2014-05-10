@@ -495,9 +495,16 @@ function showSponsorList()
 
 function printAllGradesTable($data, $year, $class)
 {
-	$rows = array('Kannada','English','Hindi','Mathematics','General Science','Social Studies','Total','Physical Education','Computer Science','Attendance','Conduct','Remarks','Date');
+	if ($class>=6) {
+		$numSubjects = 7;
+		$rows = array('Kannada','English','Hindi','Mathematics','General Science','Social Studies','Computer Science','Total','Physical Education','Attendance','Conduct','Remarks','Date');	
+	}
+	else {
+		$numSubjects = 6;
+		$rows = array('Kannada','English','Hindi','Mathematics','General Science','Social Studies','Total','Physical Education','Attendance','Conduct','Remarks','Date');	
+	}
 	$cols = array_merge(array('Subject'),getExamOptions('ASC'));
-	echo "<h3 style='margin-top:40px'>$year / Class $class</h3>";
+	echo "<h3 style='margin-top:40px'>$year / Class ".getClassDisplayText($class)."</h3>";
 	echo "<table class=studentAllGrades>";
 
 	echo "<tr rowspan=2><th>$cols[0]</th>";
@@ -513,11 +520,11 @@ function printAllGradesTable($data, $year, $class)
 		else echo "<tr><td>".$rows[$i]."</td>";
 		for ($j=1; $j<count($cols); $j++) {
 			if (!isset($data[$rows[$i]][$cols[$j]])) {
-				if ($i<=6) $cell = array('grade'=>'','%'=>'','marks'=>'');
+				if ($i<=$numSubjects) $cell = array('grade'=>'','%'=>'','marks'=>'');
 				else $cell = '';
 			}
 			else $cell = $data[$rows[$i]][$cols[$j]];
-			if ($i<=6) {
+			if ($i<=$numSubjects) {
 				if ($rows[$i]=='Total') {
 					echo "<td><b>".$cell['grade']."</b></td>";
 					echo "<td class=marks><b>".$cell['%']."</b></td>";
@@ -579,7 +586,7 @@ function showStudentAllGrades($id)
 			$data = array();
 		}
 		$year = $res[1];
-		$class = getClassDisplayText($res[17]);
+		$class = $res[17];
 		$examType = $res[2];
 		$maxMarks = preg_replace("/.*\((\d+) marks.*/","$1",$examType);
 		$numSubjects = 0;
@@ -589,9 +596,9 @@ function showStudentAllGrades($id)
 		if (setGrade($data['Mathematics'][$examType], $res[8], $maxMarks)) $numSubjects++;
 		if (setGrade($data['General Science'][$examType], $res[9], $maxMarks)) $numSubjects++;
 		if (setGrade($data['Social Studies'][$examType], $res[10], $maxMarks)) $numSubjects++;
-		setGrade($data['Total'][$examType], $res[5]+$res[6]+$res[7]+$res[8]+$res[9]+$res[10], $numSubjects*$maxMarks);
-		$data['Physical Education'][$examType] = $res[11];
-		$data['Computer Science'][$examType] = $res[12];
+		if (setGrade($data['Computer Science'][$examType], $res[11], $maxMarks)) $numSubjects++;
+		setGrade($data['Total'][$examType], $res[5]+$res[6]+$res[7]+$res[8]+$res[9]+$res[10]+$res[11], $numSubjects*$maxMarks);
+		$data['Physical Education'][$examType] = $res[12];
 		$attendanceFields = explode('/',preg_replace("/ /","",$res[14]));
 		if (count($attendanceFields)==2 && $attendanceFields[1]) {
 			$percentage = floor(0.5+100*$attendanceFields[0]/$attendanceFields[1]);
@@ -692,8 +699,9 @@ function showStudentGrades($id)
 			echo "<tr><th>".$headings[$i]."</th><td colspan=3>$fieldVal</td></tr>";
 			$j++;
 		}
-		else if ($i>=6 && $i<=11) {
+		else if ($i>=6 && $i<=12) {
 			if ($fieldVal>0) {
+				// computerScience for class 6 and above but display if marks are recorded
 				$totalMarks += $fieldVal;
 				$numSubjects++;
 				$percentage = floor(0.5+100*$fieldVal/$maxMarks);
@@ -703,7 +711,9 @@ function showStudentGrades($id)
 				echo "<td>$fieldVal</td>";
 				echo "</tr>";
 			}
-			else { // we assume that student did not take this subject: no one will get zero!
+			else if ($i!=12 || $i==12 && $result[3]>=6) {
+				// computerScience for class 6 and above
+				// we assume that student did not take this subject: no one will get zero!
 				echo "<tr class=marks><th>".$headings[$i]."</th>";
 				echo "<td style='text-align:left'>&nbsp;</td>";
 				echo "<td>&nbsp;</td>";
@@ -727,7 +737,7 @@ function showStudentGrades($id)
 			echo "<tr><td colspan=4 style='border:0px'>&nbsp;</td></tr>";
 			echo "<tr><td style='border:0px'>&nbsp;</td><td class=gradeHead style='text-align:left'>Grade</td><td class=gradeHead>Percentage</td><td class=gradeHead>Marks</td></tr>";
 		}
-		else if ($i==11) {
+		else if ($i==12) {
 			if ($numSubjects*$maxMarks) {
 				$percentage = floor(0.5+100*$totalMarks/($numSubjects*$maxMarks)); // count only subjects taken for overall percentage
 				echo "<tr class=marks><td style='text-align:left'><b>Total</b></td><td style='text-align:left'><b>".getGrade($percentage)."</b></td><td><b>$percentage %</b></td><td><b>$totalMarks</b></td></tr>";
@@ -843,7 +853,7 @@ function insertGradesFormJS()
 //<![CDATA[
 
 window.addEvent('domready', function() {
-  $('class').addEvent('change', function() {
+  $('currentClass').addEvent('change', function() {
     loadStudentNames('onchange');
   });
 
@@ -888,6 +898,10 @@ function loadStudentNames(context)
 	while(studentNameElem.options.length > 0) studentNameElem.remove(0);
 
 	classElem = document.getElementById('class');
+	currentClassElem = document.getElementById('currentClass');
+	if (context == 'init') {
+		currentClassElem.value = classElem.options[classElem.selectedIndex].value;
+	}
 	mapElem = document.getElementById('classStudentMap');
 
 	studentIdElem = document.getElementById('studentId');
@@ -895,9 +909,9 @@ function loadStudentNames(context)
 		re = new RegExp('([0-9]+):'+studentIdElem.value+':([A-Za-z ]+)');
     	found = mapElem.innerHTML.match(re);
 		if (found.length) {
-			for (var i=0; i<classElem.length; i++) {
-				if (classElem.options[i].value==found[1]) {
-					classElem.selectedIndex = i;
+			for (var i=0; i<currentClassElem.length; i++) {
+				if (currentClassElem.options[i].value==found[1]) {
+					currentClassElem.selectedIndex = i;
 					break;
 				}
 			}
@@ -908,7 +922,7 @@ function loadStudentNames(context)
 	selectIndex = -1;
 	for (var i=0; i<students.length; i++) {
 		fields = students[i].split(':');
-		if (classElem.value == fields[0]) { // applicable class
+		if (currentClassElem.value == fields[0]) { // applicable class
 			var option = document.createElement("option");
 			option.value = fields[1];
 			option.text = fields[2];
@@ -920,8 +934,9 @@ function loadStudentNames(context)
 
 	if (selectIndex!=-1) {
 		studentNameElem.selectedIndex = selectIndex;
-		//classElem.disabled=true;
+		//currentClassElem.disabled=true;
 		//studentNameElem.disabled=true;
+		//classElem.disabled=true;
 	}
 	else setStudentId();
 }
@@ -1255,12 +1270,12 @@ function showGradesList()
 	echo "</tr></table>";
 
 	$allPhotoStr = '/'.implode('/',readPhotoDir()).'/';
-	$columnHeadings = array('Photo','Current Class','Student ID','Name','Kannada','English','Hindi','Mathematics','General Science','Social Studies','Total','Details');
+	$columnHeadings = array('Photo','Current Class','Student ID','Name','Kannada','English','Hindi','Maths','General Science','Social Studies','Computer Science','Total','Details');
 
 	# Get only current class, not the class where the student was in the past
 	# If there are no grades for a combination of year and examType, the student will not be displayed
 	$students = getTableData("#__studentform,#__gradesform",
-							 "studentId,#__studentform.class,studentUid,name,kannadaMarks,englishMarks,hindiMarks,mathMarks,generalScienceMarks,socialStudiesMarks",
+							 "studentId,#__studentform.class,studentUid,name,kannadaMarks,englishMarks,hindiMarks,mathMarks,generalScienceMarks,socialStudiesMarks,computerScience",
 							 "#__studentform.id=studentId AND year='$year' AND examType='$examType' ORDER BY #__studentform.class+0, name"
 				);
 
@@ -1320,7 +1335,7 @@ function showGradesList()
 				if (in_array($studentId,$dups)) echo "<td><a href='$itemLink?id=$studentId'>".$student[$i]." <span class=duplicateErr>*</span></td>";
 				else echo "<td><a href='$itemLink?id=$studentId'>".$student[$i]."</td>";
 			}
-			else if ($i>=4 && $i<=9) {
+			else if ($i>=4 && $i<=10) {
 				if (setGrade($data,$student[$i],$maxMarks)) {
 					$totalMarks += $student[$i];
 					$numSubjects++;
@@ -1577,17 +1592,17 @@ function reportGrades($currtime, $pathPrefix, $year, $examType)
 
 	echo "<h3>School Performance Based On Subject Grades</h3>";
 	$csvFile = "dataSchoolPerf-$currtime.csv";
-	$results = getTableData("#__studentform,#__gradesform", "#__gradesform.class,`group`,sex,kannadaMarks,englishMarks,hindiMarks,mathMarks,generalScienceMarks,socialStudiesMarks", "#__studentform.id=studentId AND year='$year' AND examType='$examType'");
+	$results = getTableData("#__studentform,#__gradesform", "#__gradesform.class,`group`,sex,kannadaMarks,englishMarks,hindiMarks,mathMarks,generalScienceMarks,socialStudiesMarks,computerScience", "#__studentform.id=studentId AND year='$year' AND examType='$examType'");
 	$grades = array(); $allGrades = array('A+','A','B+','B','C+','C');
 	foreach ($allGrades as $grade) $grades[$grade] = 0;
-	$subjects = array(); $allSubjects = array('Kannada','English','Hindi','Math','Science','Social');
+	$subjects = array(); $allSubjects = array('Kannada','English','Hindi','Math','Science','Social','Computer');
 	foreach ($allSubjects as $subject) $subjects[$subject] = array();
 	$classes = array(); $allClasses = array('I','II','III','IV','V','VI','VII','VIII','IX','X');
 	foreach ($allClasses as $class) $classes[$class] = array();
 	$groups = array(); $allGroups = array('Azad','Bhagath','Subhash','Vivek');
 	foreach ($allGroups as $group) $groups[$group] = array();
 	foreach ($results as $result) {
-		for ($j=3; $j<9; $j++) {
+		for ($j=3; $j<10; $j++) {
 			if ($result[$j]>0) { // grade is recorded for this subject
 				$percentage = floor(0.5+100*$result[$j]/$maxMarks);
 				$grade = getGrade($percentage);
@@ -1605,6 +1620,7 @@ function reportGrades($currtime, $pathPrefix, $year, $examType)
 					case 6: $subjects['Math'][$gradeIdx]++; break;
 					case 7: $subjects['Science'][$gradeIdx]++; break;
 					case 8: $subjects['Social'][$gradeIdx]++; break;
+					case 9: $subjects['Computer'][$gradeIdx]++; break;
 				}
 			}
 		}
@@ -1649,7 +1665,7 @@ function reportTopStudents($currtime, $pathPrefix, $year, $examType)
 	$csvFile = "dataTopStudents-$currtime.csv";
 	echo "<topStudents src='/$csvFile'></topStudents>\n";
 
-	$results = getTableData("#__studentform,#__gradesform", "#__studentform.class,name,`group`,sex,(kannadaMarks+englishMarks+hindiMarks+mathMarks+generalScienceMarks+socialStudiesMarks) AS total,#__gradesform.id,studentId", "#__studentform.id=studentId AND year='$year' AND examType='$examType' ORDER BY #__studentform.class+0, total DESC");
+	$results = getTableData("#__studentform,#__gradesform", "#__gradesform.class,name,`group`,sex,(kannadaMarks+englishMarks+hindiMarks+mathMarks+generalScienceMarks+socialStudiesMarks+computerScience) AS total,#__gradesform.id,studentId", "#__studentform.id=studentId AND year='$year' AND examType='$examType' ORDER BY #__gradesform.class+0, total DESC");
 	$prevClass = -1; $rank = $males = $females = 0; $groupmap = array();
 	foreach ($results as $result) {
 		if ($prevClass!=$result[0]) {
@@ -1659,7 +1675,7 @@ function reportTopStudents($currtime, $pathPrefix, $year, $examType)
 			}
 			echo "<div class=graphTitle><h3>Class ".getClassDisplayText($result[0])." Toppers</h3></div>";
 			echo "<table class=studentView>";
-			echo "<tr><th>Rank</th><th>Photo</th><th>Student Name</th><th>Group</th><th>%</th><th>Details</th></tr>";
+			echo "<tr><th>Rank</th><th>Photo</th><th>Student Name</th><th>Group</th><th>Percentage</th><th>Details</th></tr>";
 		}
 		$rank++;
 		if ($rank<=5) { // only 5 toppers shown per class
@@ -1668,7 +1684,10 @@ function reportTopStudents($currtime, $pathPrefix, $year, $examType)
 				$groupmap[$result[2]]['Female']=0;
 			}
 			$groupmap[$result[2]][$result[3]]++;
-			$percentage = floor(0.5+(100*$result[4])/(6*$maxMarks)); // consider all subjects for topper's list
+			// TODO Assumption that toppers have taken all subjects
+			if ($result[0]>=6) $numSubjects = 7; // include computer science
+			else $numSubjects = 6;
+			$percentage = floor(0.5+(100*$result[4])/($numSubjects*$maxMarks));
 			$studentLink = preg_replace("/\/reports[?]?.*$/","/students/view-students?id=$result[6]",$_SERVER['REQUEST_URI'],1);
 			$itemLink = preg_replace("/\/reports[?]?.*$/","/grades/view-grades?id=$result[5]",$_SERVER['REQUEST_URI'],1);
 			echo "<tr><td style='font-size:2em'>$rank</td><td>".getPhotoCode($result[6],"style='width:64px'")."</td>";
@@ -1702,7 +1721,7 @@ studentTimePerf { font: 11px sans-serif; }
 </style>
 <?php
 	$examOptStr = "'".implode("','",getExamOptions('DESC'))."'";
-	$results = getTableData("#__studentform,#__gradesform","name,year,examType,kannadaMarks,englishMarks,hindiMarks,mathMarks,generalScienceMarks,socialStudiesMarks","studentId='$studentId' AND #__studentform.id=studentId ORDER BY year DESC, FIELD(examType,$examOptStr) LIMIT 1", 1);
+	$results = getTableData("#__studentform,#__gradesform","name,year,examType,kannadaMarks,englishMarks,hindiMarks,mathMarks,generalScienceMarks,socialStudiesMarks,computerScience","studentId='$studentId' AND #__studentform.id=studentId ORDER BY year DESC, FIELD(examType,$examOptStr) LIMIT 1", 1);
 
 	if (count($results)==0) {
 		echo "<div class=message>No grades have been recorded for this combination of student, year and assessment type.</div>";
@@ -1711,7 +1730,7 @@ studentTimePerf { font: 11px sans-serif; }
 
 	$classAvg = getTableData("#__gradesform","kannadaMarks,englishMarks,hindiMarks,mathMarks,generalScienceMarks,socialStudiesMarks","class='$class' AND year='".$results[1]."' AND examType='".$results[2]."'");
 	$maxMarks = preg_replace("/.*\((\d+) marks.*/","$1",$results[2]);
-	$allSubjects = array('Kannada','English','Hindi','Math','Science','Social');
+	$allSubjects = array('Kannada','English','Hindi','Math','Science','Social','Computer');
 	$classGrades = array();
 	foreach ($classAvg as $avg) {
 		for ($j=0; $j<count($avg); $j++) {
@@ -1739,7 +1758,7 @@ studentTimePerf { font: 11px sans-serif; }
 
 	echo "<div class=graphTitle><h3>Student's Performance Over Time</h3></div>";
 	// Limit to recent 6 tests, consider only those where at least one subject has recorded marks
-	$results = getTableData("#__gradesform","CONCAT(year,'/',examType),kannadaMarks,englishMarks,hindiMarks,mathMarks,generalScienceMarks,socialStudiesMarks","studentId='$studentId' AND (kannadaMarks+englishMarks+hindiMarks+mathMarks+generalScienceMarks+socialStudiesMarks)>0 ORDER BY year DESC, FIELD(examType,$examOptStr) LIMIT 6");
+	$results = getTableData("#__gradesform","CONCAT(year,'/',examType),kannadaMarks,englishMarks,hindiMarks,mathMarks,generalScienceMarks,socialStudiesMarks,computerScience","studentId='$studentId' AND (kannadaMarks+englishMarks+hindiMarks+mathMarks+generalScienceMarks+socialStudiesMarks)>0 ORDER BY year DESC, FIELD(examType,$examOptStr) LIMIT 6");
 	$arr = array();
 	for ($i=count($results)-1, $j=0; $i>=0; $i--, $j++) {
 		$maxMarks = preg_replace("/.*\((\d+) marks.*/","$1",$results[$i][0]);

@@ -136,8 +136,8 @@ def generateGrades(outfile):
           else:
             for l in range(6):
               fields.append(generateGrade(maxMarks));
-            if(random.randint(0,19) > 1): # skip 5%
-              fields.append(random.choice(descText));
+            if(classes[j]-k>=6 and random.randint(0,19) > 1): # skip 5%; computerScience for only for class 6 and above
+              fields.append(generateGrade(maxMarks));
             else:
               fields.append("");          
             if(random.randint(0,19) > 1): # skip 5%
