@@ -59,7 +59,7 @@ d3.csv(datafile, function(error, data) {
   g.append("text")
       .attr("transform", "translate(0," + (pieheight+piemargin.bottom)/2 + ")")
       .style("text-anchor", "middle")
-      .text("Total students: " + total);
+      .text("Total students/graduates: " + total);
 
   var legend = piesvg.selectAll(".legend")
       .data(groupNames.slice().reverse())

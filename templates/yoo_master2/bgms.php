@@ -846,7 +846,7 @@ function printCustomCodeSponsorForm()
 	if ($showStr) $filter = "id IN ($showStr) OR";
 	else $filter = '';
 	// TODO: $hideStr is also null
-	$results = getTableData("#__studentform", "id,name", "$filter id NOT IN ($hideStr) AND class<=10 ORDER BY name");
+	$results = getTableData("#__studentform", "id,name", "$filter id NOT IN ($hideStr) ORDER BY name");
 	foreach ($results as $result) {
 		array_push($options, "$result[0]:$result[1]");
 	}
@@ -1560,7 +1560,7 @@ function reportStudentProfile($currtime, $pathPrefix)
 
 function reportSponsorship($currtime, $pathPrefix)
 {
-	$numStudents = getTableData("#__studentform","COUNT(*)","class<=10",0);
+	$numStudents = getTableData("#__studentform","COUNT(*)","1",0);
 	$sponsored = getTableData("#__sponsorform","sponsoredStudents");
 	$allSponsoredStr = '';
 	foreach ($sponsored as $spd) $allSponsoredStr .= ','.$spd[0];
@@ -1580,13 +1580,13 @@ function reportSponsorship($currtime, $pathPrefix)
 	printToFile($csvFile, "group,count", getCsvFormat($results, false));
 	echo "<sponsorship src='/$csvFile'></sponsorship>\n";
 
-	echo "<div class=graphTitle><h3>Age Profile of Sponsored Students</h3></div>";
+	echo "<div class=graphTitle><h3>Age Profile of Sponsored Students/Graduates</h3></div>";
 	$csvFile = "dataSponsoredAgeHist-$currtime.csv";
 	$results = getTableData("#__studentform",
 							getAgeQuery()
 							.",SUM(CASE WHEN sex='Female' AND id IN ($allSponsoredStr) THEN 1 ELSE 0 END)"
 							.",SUM(CASE WHEN sex='Male' AND id IN ($allSponsoredStr) THEN 1 ELSE 0 END)",
-							"class<=10 GROUP BY age ORDER BY age+0");
+							"1 GROUP BY age ORDER BY age+0");
 	printToFile($csvFile, "Age,Female,Male", getCsvFormat($results, true));
 	echo "<sponsored src='/$csvFile'></sponsored>\n";
 
