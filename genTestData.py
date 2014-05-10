@@ -32,7 +32,10 @@ remarks = ['Can do better.', 'Need to work independently.', 'Well done. Concentr
 timeoffset = 13*3600; # server may be on a different TZ than where this script runs
 classes = []; # we need to use the same for students and grades
 for name in personNames:
-  classes.append(random.randint(1,10));
+  if(random.randint(0,19) > 1): # 5% graduates
+    classes.append(random.randint(1,10));
+  else:
+    classes.append(11);
 
 
 #====================================================================
@@ -125,7 +128,10 @@ def generateGrades(outfile):
             fields.append(str(currdatetime)[:19]);
           else:
             fields.append("");
-          fields.append(str(classes[j]-k));
+          if (classes[j]-k<=10):
+            fields.append(str(classes[j]-k));
+          else:
+            fields.append("");
           fields.append(str(j+1));
           fields.append(examYear[k]);
           fields.append(examType[i]);

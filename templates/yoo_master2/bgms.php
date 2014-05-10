@@ -254,11 +254,13 @@ function msgPostFormSubmit($linkType)
 		$id = getRecordId('sponsorform');
 	}
 	else {
-		$aliasname = 'view-students';
 		$id = getRecordId('studentform');
+		$class = getTableData("#__studentform","class","id=$id",0);
+		if ($class>10) $aliasname = 'view-graduates';
+		else $aliasname = 'view-students';
 	}
 
-	$itemLink = preg_replace("/(view-students|view-sponsors|view-grades|add-student|add-sponsor|add-grades)[?]?.*$/","$aliasname?id=$id",$_SERVER['REQUEST_URI'],1);
+	$itemLink = preg_replace("/(view-students|view-graduates|view-sponsors|view-grades|add-student|add-sponsor|add-grades)[?]?.*$/","$aliasname?id=$id",$_SERVER['REQUEST_URI'],1);
 
 	echo "<div class=message>Details have been saved.<br>";
 	echo "You may wish to <a href='$itemLink'>review them</a>.</div>";
@@ -282,12 +284,13 @@ function getGrade($percentage)
 
 function getClassDisplayText($myclass)
 {
-	if ($myclass<1 || $myclass>10) return '-';
+	if ($myclass<1) return '-';
+	if ($myclass>10) return 'Graduated';
 	$romans = array('-','I','II','III','IV','V','VI','VII','VIII','IX','X');
 	return $romans[$myclass];
 }
 
-function deleteStudent($id)
+function deleteStudent($id, $who='student')
 {	// Do not delete the grades of this student.
 	executeQuery("DELETE FROM #__studentform WHERE id=$id", 0); // will delete nothing if id doesn't exist
 	echo "<div class=message>Entry has been deleted.<br>";
@@ -310,7 +313,7 @@ function getAgeQuery()
 	return "YEAR(CURDATE()) - YEAR(STR_TO_DATE(dateOfBirth,'%d/%m/%Y')) - (DATE_FORMAT(CURDATE(), '%m%d') < DATE_FORMAT(STR_TO_DATE(dateOfBirth,'%d/%m/%Y'), '%m%d')) AS age";
 }
 
-function showStudent($id)
+function showStudent($id, $who='student')
 {
 	echo "<table class=studentPageTitle><tr>";
 	echo "<td><h2>Viewing Student Details</h2></td>";
@@ -328,8 +331,8 @@ function showStudent($id)
 	$user = JFactory::getUser();
 	if (!$user->guest) {
 		echo "<td style='text-align:right'>";
-		echo "<b><a href='".preg_replace("/view-students/","add-student",$_SERVER['REQUEST_URI'])."'>Edit</a></b>";
-		echo " | <b><a onclick='return confirm(\"Are you sure you want to delete this entry?\")' href='".preg_replace("/view-students\?.*/","view-students?action=delete&id=$id",$_SERVER['REQUEST_URI'])."'>Delete</a></b>";
+		echo "<b><a href='".preg_replace("/view-(students|graduates)/","add-student",$_SERVER['REQUEST_URI'])."'>Edit</a></b>";
+		echo " | <b><a onclick='return confirm(\"Are you sure you want to delete this entry?\")' href='".preg_replace("/view-(students|graduates)\?.*/","view-$1?action=delete&id=$id",$_SERVER['REQUEST_URI'])."'>Delete</a></b>";
 		echo "</td>";
 	}
 
@@ -395,7 +398,8 @@ function showSponsor($id)
 
 	echo "</tr></table>";
 
-	$itemLink = preg_replace("/\/sponsors\/view-sponsors[?]?.*$/","/students/view-students",$_SERVER['REQUEST_URI'],1);
+	$studentLink = preg_replace("/\/sponsors\/view-sponsors[?]?.*$/","/students/view-students",$_SERVER['REQUEST_URI'],1);
+	$graduateLink = preg_replace("/\/sponsors\/view-sponsors[?]?.*$/","/students/view-graduates",$_SERVER['REQUEST_URI'],1);
 	$headings = array('Name','Sponsor ID','Sponsored Students');
 	echo "<table class=studentView>";
 	for ($i=0; $i<count($headings); $i++) {
@@ -406,7 +410,10 @@ function showSponsor($id)
 				if ($students) {
 					echo "<td><ol>";
 					foreach ($students as $student) {
-						echo "<li><a href='$itemLink?id=$student[0]'>$student[1]</a> / Class ".getClassDisplayText($student[2])." / Group $student[3]</li>";
+						if ($student[2]>10)
+							echo "<li><a href='$graduateLink?id=$student[0]'>$student[1]</a> / Class ".getClassDisplayText($student[2])." / Group $student[3]</li>";
+						else
+							echo "<li><a href='$studentLink?id=$student[0]'>$student[1]</a> / Class ".getClassDisplayText($student[2])." / Group $student[3]</li>";
 					}
 					echo "</ol></td>";
 				}
@@ -436,6 +443,7 @@ function showSponsorList()
 
 	$itemLink = preg_replace("/view-sponsors\??.*/","view-sponsors",$_SERVER['REQUEST_URI']);
 	$studentLink = preg_replace("/\/sponsors\/view-sponsors[?]?.*$/","/students/view-students",$_SERVER['REQUEST_URI'],1);
+	$graduateLink = preg_replace("/\/sponsors\/view-sponsors[?]?.*$/","/students/view-graduates",$_SERVER['REQUEST_URI'],1);
 	$columnHeadings = array('Sponsor ID','Name','Sponsored Students');
 	$sponsors = getTableData("#__sponsorform","id,sponsorUid,name,sponsoredStudents","1 ORDER BY name ASC");
 
@@ -478,7 +486,8 @@ function showSponsorList()
 					if ($students) {
 						echo "<td><ol>";
 						foreach ($students as $student) {
-							echo "<li><a href='$studentLink?id=$student[0]'>$student[1]</a> / Class ".getClassDisplayText($student[2])." / Group $student[3]</li>";
+							if ($student[2]>10) echo "<li><a href='$graduateLink?id=$student[0]'>$student[1]</a> / Class ".getClassDisplayText($student[2])." / Group $student[3]</li>";
+							else echo "<li><a href='$studentLink?id=$student[0]'>$student[1]</a> / Class ".getClassDisplayText($student[2])." / Group $student[3]</li>";
 						}
 						echo "</ol></td>";
 					}
@@ -766,7 +775,7 @@ function validateGradesForm($form)
 
 	if ($id!=0 && (!isset($_REQUEST['id']) || $id!=$_REQUEST['id'])) {
 		// either adding a new record or editing an existing one: clash with record in table ($id)
-		$itemLink = preg_replace("/(view-students|view-sponsors|view-grades|add-student|add-sponsor|add-grades)[?]?.*$/","add-grades?id=$id",$_SERVER['REQUEST_URI'],1);
+		$itemLink = preg_replace("/(view-students|view-graduates|view-sponsors|view-grades|add-student|add-sponsor|add-grades)[?]?.*$/","add-grades?id=$id",$_SERVER['REQUEST_URI'],1);
 		echo "<div class='error message'>Grades for this student were already entered earlier.<br>";
 		echo "You may wish to <a href='$itemLink'>edit them</a>.</div>";
 		return 'fail';
@@ -787,7 +796,7 @@ function isGradesFormToBeShown()
 function printCustomCodeGradesForm()
 {
 	$options = array();
-	$results = getTableData("#__studentform", "class,id,name", "1 ORDER BY class+0, name");
+	$results = getTableData("#__studentform", "class,id,name", "class<=10 ORDER BY class+0, name");
 	foreach ($results as $result) { // presence of $results checked in isGradesFormToBeShown()
 		array_push($options, "$result[0]:$result[1]:$result[2]");
 	}
@@ -799,7 +808,7 @@ function printCustomCodeGradesForm()
 function printCustomCodeReportsForm()
 {
 	$options = array();
-	$results = getTableData("#__studentform", "class,id,name", "1 ORDER BY class+0, name");
+	$results = getTableData("#__studentform", "class,id,name", "class<=10 ORDER BY class+0, name");
 	foreach ($results as $result) {
 		array_push($options, "$result[0]:$result[1]:$result[2]");
 	}
@@ -837,7 +846,7 @@ function printCustomCodeSponsorForm()
 	if ($showStr) $filter = "id IN ($showStr) OR";
 	else $filter = '';
 	// TODO: $hideStr is also null
-	$results = getTableData("#__studentform", "id,name", "$filter id NOT IN ($hideStr) ORDER BY name");
+	$results = getTableData("#__studentform", "id,name", "$filter id NOT IN ($hideStr) AND class<=10 ORDER BY name");
 	foreach ($results as $result) {
 		array_push($options, "$result[0]:$result[1]");
 	}
@@ -1155,25 +1164,34 @@ function showGradesFormTitle()
 	return array('id' => '99999999');
 }
 
-function showStudentList()
+function showStudentList($who='student')
 {
+	if ($who=='graduate') {
+		$filter = 'class>10';
+		$title = 'Graduates';
+	}
+	else {
+		$filter = 'class<=10';
+		$title = 'Students';
+	}
+	
 	if (isset($_REQUEST['id'])) {
-		if (isset($_REQUEST['action']) && $_REQUEST['action']=='delete') deleteStudent($_REQUEST['id']);
-		else showStudent($_REQUEST['id']);
+		if (isset($_REQUEST['action']) && $_REQUEST['action']=='delete') deleteStudent($_REQUEST['id'],$who);
+		else showStudent($_REQUEST['id'],$who);
 		return;
 	}
 
 	echo "<table class=studentPageTitle><tr>";
-	echo "<td><h2>Listing All Students</h2></td>";
+	echo "<td><h2>Listing All $title</h2></td>";
 	echo "</tr></table>";
 
 	$allPhotoStr = '/'.implode('/',readPhotoDir()).'/';
-	$itemLink = preg_replace("/view-students\??.*/","view-students",$_SERVER['REQUEST_URI']);
-	$sponsorLink = preg_replace("/students\/view-students\??.*/","sponsors/view-sponsors",$_SERVER['REQUEST_URI']);
+	$itemLink = preg_replace("/view-(students|graduates)\??.*/","view-$1",$_SERVER['REQUEST_URI']);
+	$sponsorLink = preg_replace("/students\/view-(students|graduates)\??.*/","sponsors/view-sponsors",$_SERVER['REQUEST_URI']);
 	$columnHeadings = array('Photo','Student ID','Admission No.','Name','Class','Group','Sex','Parent','Guardian','Sponsor');
 	$students = getTableData("#__studentform",
 							 "id,studentUid,admissionNumber,name,class,`group`,sex,parent,guardian",
-							 "1 ORDER BY name ASC"
+							 "$filter ORDER BY name ASC"
 				);
 
 	# Find duplicates in studentUid
@@ -1194,7 +1212,8 @@ function showStudentList()
 	echo "</tr>";
 
 	if (count($students)==0) {
-		echo "<tr><td colspan=".count($columnHeadings)."><div class=message>No students have been entered into the system.</div></td></tr></table>";
+		if ($who=='student') echo "<tr><td colspan=".count($columnHeadings)."><div class=message>No students have been entered into the system.</div></td></tr></table>";
+		else echo "<tr><td colspan=".count($columnHeadings)."><div class=message>There are no graduates to display.</div></td></tr></table>";
 		return;
 	}
 
@@ -1361,7 +1380,7 @@ function showGradesList()
 
 function showReports()
 {
-	$numStudents = getTableData("#__studentform", "COUNT(id)", "1", 0);
+	$numStudents = getTableData("#__studentform", "COUNT(id)", "class<=10", 0);
 	if ($numStudents==0) {
 		echo "<div class=message>There are no reports to view because no students have been entered into the system.<br>";
 		return;
@@ -1507,25 +1526,25 @@ function reportStudentProfile($currtime, $pathPrefix)
 {
 	echo "<h3>Sex Ratio</h3>";
 	$csvFile = "dataSexRatio-$currtime.csv";
-	$results = getTableData("#__studentform", "sex,COUNT(*)", "1 GROUP BY sex");
+	$results = getTableData("#__studentform", "sex,COUNT(*)", "class<=10 GROUP BY sex");
 	printToFile($csvFile, "sex,count", getCsvFormat($results, false));
 	echo "<sexRatio src='/$csvFile'></sexRatio>\n";
 
 	echo "<div class=graphTitle><h3>Age Profile</h3></div>";
 	$csvFile = "dataAgeHist-$currtime.csv";
-	$results = getTableData("#__studentform", getAgeQuery().",SUM(CASE WHEN sex='Female' THEN 1 ELSE 0 END),SUM(CASE WHEN sex='Male' THEN 1 ELSE 0 END)", "1 GROUP BY age ORDER BY age+0");
+	$results = getTableData("#__studentform", getAgeQuery().",SUM(CASE WHEN sex='Female' THEN 1 ELSE 0 END),SUM(CASE WHEN sex='Male' THEN 1 ELSE 0 END)", "class<=10 GROUP BY age ORDER BY age+0");
 	printToFile($csvFile, "Age,Female,Male", getCsvFormat($results, true));
 	echo "<ageHist src='/$csvFile'></ageHist>\n";
 
 	echo "<div class=graphTitle><h3>Group Profile</h3></div>";
 	$csvFile = "dataGroupProfile-$currtime.csv";
-	$results = getTableData("#__studentform", "`group`,SUM(CASE WHEN sex='Female' THEN 1 ELSE 0 END),SUM(CASE WHEN sex='Male' THEN 1 ELSE 0 END)", "1 GROUP BY `group` ORDER BY `group`");
+	$results = getTableData("#__studentform", "`group`,SUM(CASE WHEN sex='Female' THEN 1 ELSE 0 END),SUM(CASE WHEN sex='Male' THEN 1 ELSE 0 END)", "class<=10 GROUP BY `group` ORDER BY `group`");
 	printToFile($csvFile, "Group,Female,Male", getCsvFormat($results, true));
 	echo "<groupProfile src='/$csvFile'></groupProfile>\n";
 
 	echo "<div class=graphTitle><h3>Class Profile</h3></div>";
 	$csvFile = "dataClassProfile-$currtime.csv";
-	$results = getTableData("#__studentform", "class,SUM(CASE WHEN sex='Female' THEN 1 ELSE 0 END),SUM(CASE WHEN sex='Male' THEN 1 ELSE 0 END)", "1 GROUP BY class ORDER BY class+0");
+	$results = getTableData("#__studentform", "class,SUM(CASE WHEN sex='Female' THEN 1 ELSE 0 END),SUM(CASE WHEN sex='Male' THEN 1 ELSE 0 END)", "class<=10 GROUP BY class ORDER BY class+0");
 	$arr = array();
 	for($i=0; $i<count($results); $i++) {
 		$arr[$i] = $results[$i];
@@ -1541,7 +1560,7 @@ function reportStudentProfile($currtime, $pathPrefix)
 
 function reportSponsorship($currtime, $pathPrefix)
 {
-	$numStudents = getTableData("#__studentform","COUNT(*)","1",0);
+	$numStudents = getTableData("#__studentform","COUNT(*)","class<=10",0);
 	$sponsored = getTableData("#__sponsorform","sponsoredStudents");
 	$allSponsoredStr = '';
 	foreach ($sponsored as $spd) $allSponsoredStr .= ','.$spd[0];
@@ -1567,7 +1586,7 @@ function reportSponsorship($currtime, $pathPrefix)
 							getAgeQuery()
 							.",SUM(CASE WHEN sex='Female' AND id IN ($allSponsoredStr) THEN 1 ELSE 0 END)"
 							.",SUM(CASE WHEN sex='Male' AND id IN ($allSponsoredStr) THEN 1 ELSE 0 END)",
-							"1 GROUP BY age ORDER BY age+0");
+							"class<=10 GROUP BY age ORDER BY age+0");
 	printToFile($csvFile, "Age,Female,Male", getCsvFormat($results, true));
 	echo "<sponsored src='/$csvFile'></sponsored>\n";
 
@@ -1577,7 +1596,7 @@ function reportSponsorship($currtime, $pathPrefix)
 							getAgeQuery()
 							.",SUM(CASE WHEN sex='Female' AND id NOT IN ($allSponsoredStr) THEN 1 ELSE 0 END)"
 							.",SUM(CASE WHEN sex='Male' AND id NOT IN ($allSponsoredStr) THEN 1 ELSE 0 END)",
-							"1 GROUP BY age ORDER BY age+0");
+							"class<=10 GROUP BY age ORDER BY age+0");
 	printToFile($csvFile, "Age,Female,Male", getCsvFormat($results, true));
 	echo "<unsponsored src='/$csvFile'></unsponsored>\n";
 
