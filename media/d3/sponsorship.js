@@ -9,7 +9,8 @@ var piewidth = 400,
     pieheight = 400,
     radius = Math.min(piewidth, pieheight) / 2;
 
-var piecolor = d3.scale.category20();
+var piecolor = d3.scale.ordinal()
+			.range(["#ff9896", "#ffbb78", "#aec7e8", "#98df8a"]);
 
 var arc = d3.svg.arc()
     .outerRadius(radius - 10)
@@ -120,8 +121,9 @@ var spsvg = d3.select("sponsored").append("svg")
 d3.csv(spdatafile, function(error, data) {
   var spgroupNames = d3.keys(data[0]).filter(function(key) { return key !== "Age"; });
 
+  var stotal = 0;
   data.forEach(function(d) {
-    d.groups = spgroupNames.map(function(name) { return {name: name, value: +d[name]}; });
+    d.groups = spgroupNames.map(function(name) { stotal += +d[name]; return {name: name, value: +d[name]}; });
   });
 
   spx0.domain(data.map(function(d) { return d.Age; }));
@@ -181,7 +183,6 @@ d3.csv(spdatafile, function(error, data) {
       .attr("dy", ".35em")
       .style("text-anchor", "begin")
       .text(function(d) { return d; });
-
 });
 
 

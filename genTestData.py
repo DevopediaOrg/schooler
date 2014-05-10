@@ -10,6 +10,7 @@
 # Imports
 #--------------------------------------------------------------------
 import random;
+import collections;
 import datetime;
 import re;
 import sys;
@@ -19,12 +20,13 @@ import sys;
 # Initializations
 #--------------------------------------------------------------------
 personNames = ['Adelle Stmartin', 'Adena Ricken', 'Adina Ridgeway', 'Alan Causey', 'Alena Girton', 'Alene Vinton', 'Alessandra Shewmaker', 'Amada Matis', 'Amish Gire', 'Amy Macarthur', 'Antionette Zalewski', 'Ardelia Elias', 'Ariana Newbill', 'Arianne Escudero', 'Arminda Collington', 'Arturo Baxter', 'Aurora Fichter', 'Benedict Teasdale', 'Bobby Yarber', 'Bonita Crittendon', 'Brianna Oxford', 'Bud Bartolomeo', 'Camille Kniffen', 'Carolann Kies', 'Cecily Burr', 'Chantell Gathers', 'Chauncey Devlin', 'Christal Delrosario', 'Cristin Sutter', 'Dalene Fritz', 'Danica Cable', 'Daron Byrns', 'Dasa Balakrishnan', 'Dasras Murthy', 'Davis Stump', 'Deangelo Brecht', 'Delorse Sievers', 'Deon Woltz', 'Derick Pinckard', 'Dhenuka Bhandari', 'Dusti Mazzola', 'Dwain Klingbeil', 'Dwayne Lefebre', 'Eboni Falkowski', 'Eilene Gerstein', 'Errol Callihan', 'Evie Mabrey', 'Florencia Schurman', 'Francis Lamkin', 'Frankie Hartfield', 'Gaylord Atienza', 'Graham Velarde', 'Gwenn Balch', 'Halley Shima', 'Hastin Modi', 'Haydee Maranto', 'Hien Mule', 'Hillary Petrella', 'Holly Squires', 'Indra Hayer', 'Isabella Morriss', 'Jacinto Gangestad', 'Jaclyn Fernando', 'Jamal Haugen', 'Jannette Ellinger', 'Jarod Pittmon', 'Jed Rountree', 'Jen Nath', 'Jeromy Faulkner', 'Jimmie Flannery', 'Joaquina Paulino', 'Joellen Dalman', 'Johnathon Towns', 'Judy Bran', 'Julee Woodring', 'Julius Weide', 'Kacy Klingbeil', 'Karla Pierce', 'Katheryn Monteleone', 'Kay Lintner', 'Keiko Santiago', 'Kirstin Dineen', 'Kori Fiqueroa', 'Kristie Luna', 'Kritanta Shah', 'Larraine Valone', 'Lavette Ritacco', 'Lenna Kopecky', 'Loan Alongi', 'Lorriane Koontz', 'Lorrine Mayeda', 'Louise Muszynski', 'Lupita Kilbourn', 'Madonna Foret', 'Mahakala Mallick', 'Malcom Bowes', 'Mandi Mcaninch', 'Marianela Scianna', 'Marla Theurer', 'Mathew Basch', 'May Metheny', 'Maybell Brannum', 'Mesha Mukhopadhyay', 'Monet Prioleau', 'Myrl Chenard', 'Narcisa Mcsween', 'Norene Ginsburg', 'Oda Pinon', 'Odell Warburton', 'Olene Hauck', 'Olga Hayashi', 'Otto Both', 'Patricia Welsh', 'Patsy Paras', 'Peter Atherton', 'Phil Higuchi', 'Porsche Lunn', 'Priscila Bailes', 'Quiana Heacock', 'Quinn Verhoeven', 'Ramonita Bardsley', 'Ranae Maly', 'Regan Weller', 'Russel Fahnestock', 'Sang Silverman', 'Sari Pouncy', 'Selene Thayer', 'Shandra Craner', 'Shavonne Bradly', 'Shawanna Mcmahan', 'Sherrill Rudisill', 'Shondra Andrada', 'Silvia Berning', 'Simona Furlong', 'Son Orourke', 'Sondra Bevis', 'Stasia Rapier', 'Tabatha Bale', 'Talisha Clothier', 'Tamal Pathak', 'Tasha Mondy', 'Tena Charest', 'Teofila Nickens', 'Terisa Klapp', 'Thresa Fowles', 'Toby Lebowitz', 'Tressie Crews', 'Tyron Hostetter', 'Valentina Belmont', 'Velda Sitzes', 'Verdell Lingerfelt', 'Vernell Ekhoff', 'Vivienne Kuchta', 'Voncile Davids', 'Wallace Gallion', 'Wally Rains', 'Winnifred Lehmkuhl', 'Yessenia Raposo', 'Yolando Lightcap', 'Zenaida Dicicco'];
+otherNames = ['Abhinandin Prashanth', 'Abhiraja Ghoshal', 'Abhramu Sundaramoorthy', 'Aditeya Gundugollu', 'Adrienne Zimmerman', 'Agnes Jennings', 'Agnibija Saklani', 'Agnivirya Shashwat', 'Agrayani Polavarapu', 'Ahobala Diwan', 'Ajatashatru Varghese', 'Akasa Yesh', 'Akupara Surendran', 'Alan Hunt', 'Alex Potter', 'Alopa Srivathsan', 'Amaraprita Vadakke', 'Amavasya Salil', 'Amir Thimanniya', 'Amritendu Srivatsan', 'Amy Hughes', 'Anant Patterjee', 'Anasaya Sraddha', 'Andala Mahale', 'Anhati Koganti', 'Anila Pradip', 'Anima Thuraisingham', 'Anji Dinkerrai', 'Anji Shashank', 'Ankan Savdeep', 'Ankitha Pravil', 'Antonio Sutton', 'Anubha Pivari', 'Anupriya Shiladitya', 'Anuvaha Venkateswarn', 'Apaga Harku', 'Aparananda Pawan', 'Ara Rajani', 'Aubrey Perez', 'Ausinari Vaisakhi', 'Badsah Pratyush', 'Bagga Prafull', 'Bahuvirya Sachi', 'Bandhura Parvin', 'Bansuri Profulla', 'Beerud Tina', 'Beni Vasudev', 'Bennie Drake', 'Bhanupriya Labhsha', 'Bhumralkar Sughavanam', 'Bhuvanaraja Rasiah', 'Billy Mills', 'Blanca Campbell', 'Blanche Cobb', 'Bradford Reed', 'Brhat Mansey', 'Buddhimatika Namasri', 'Caksani Kumawagra', 'Carlos Santiago', 'Carmen Garner', 'Cassandra Craig', 'Casukhela Muthukumarasamy', 'Cetas Somasundara', 'Chandan Niradhara', 'Charlene Hicks', 'Charles George', 'Chris Cooper', 'Christie Mason', 'Claire Cortez', 'Clara Harrison', 'Claude Ramos', 'Clay Perkins', 'Clifton Hart', 'Cynthia Chavez', 'Dalaja Renukunta', 'Dalamodaka Shujauddin', 'Darla Martinez', 'Dasasarman Mayappan', 'Dave Mcdonald', 'Dawn Yates', 'Dean Klein', 'Debdan Sawant', 'Devanaman Subas', 'Devila Shubhabrata', 'Dharmasimha Kambhampat', 'Dhita Sunondo', 'Dhritiman Yashodhar', 'Dhyanayogi Yudhajit', 'Divya Umesh', 'Donna Ramirez', 'Doyle Rodriguez', 'Earl Webb', 'Ekadasi Suketu', 'Ekadhipati Vajpayee', 'Elbert Curry', 'Eloise Hunter', 'Emmett Reynolds', 'Eric Graves', 'Erik Holmes', 'Eta Mankad', 'Faye Copeland', 'Floyd Hardy', 'Frank Bass', 'Gajamukta Smitha', 'Garrett Townsend', 'Genevieve Black', 'Gita Macwan', 'Glen Dixon', 'Gobinda Payal', 'Gopalakrishna Perumal', 'Gopinath Pawan', 'Gordon Barnes', 'Guneeta Ramdas', 'Halima Savdeep', 'Harvey Love', 'Hector Hampton', 'Iksenya Jai', 'Iksenya Vivek', 'Ira Ruiz', 'Isabel Kennedy', 'Jack Phelps', 'Jackie Lowe', 'Jacqueline Singleton', 'Janardhan Vasudhara', 'Jaya Ulind', 'Jean Fleming', 'Jeanette Jefferson', 'Jeff Guerrero', 'Jennifer Jackson', 'Jessica Manning', 'Jessie Horton', 'Jhilmil Vivekanand', 'Joann Smith', 'Joe Morris', 'Joshua Ramsey', 'Joy Fletcher', 'Joydeep Sandeep', 'Jvalitri Ghazali', 'Kakila Nehru', 'Kalpita Shalabh', 'Kamala Mamgain', 'Kanakendu Thukral', 'Kara Shishir', 'Karin Ghemawat', 'Karmavira Shrivastava', 'Kartik Ranhotra', 'Kartikeya Prabhath', 'Karttiki Sunondo', 'Karuna Gajendra', 'Katrina Lambert', 'Kavana Veeramany', 'Kerry Abbott', 'Kirin Namasri', 'Lakshmi Mangalvedhe', 'Lewis Gutierrez', 'Lloyd Stanley', 'Loren Collins', 'Lorena Moran', 'Lorenzo Moreno', 'Lorraine Nelson', 'Luther Holland', 'Maggie Lyons', 'Mario Davis', 'Maureen Howell', 'May Hall', 'Mercedes Curtis', 'Michael Carroll', 'Michele Webster', 'Misty Ortega', 'Molly Gill', 'Myrtle Logan', 'Nadine Garza', 'Narottam Shriharsha', 'Nicholas Pena', 'Nichole Morgan', 'Noel Jimenez', 'Nora Rodriquez', 'Olive Riley', 'Pat Dennis', 'Peggy Mckenzie', 'Raul Thompson', 'Rene Cannon', 'Rohena Chidamber', 'Samantha Higgins', 'Sara Johnston', 'Shanthi Savarna', 'Shanti Pendharkar', 'Shelly Clark', 'Shri Sidda', 'Simon James', 'Sonal Gopinath', 'Suneet Pothireddy', 'Sunil Ujjaval', 'Sunit Smita', 'Tamara Dunn', 'Tami Blake', 'Traci Park', 'Wallace Day', 'Wayne Brock', 'Wilbur Phillips'];
 sex = ['Male', 'Female'];
 admissionYear = ['09-08', '09-10', '10-11', '11-12', '13-14', '14-15'];
 group = ['Azad', 'Bhagath', 'Subhash', 'Vivek'];
 examYear = ['2014-15','2013-14'];
 examType = ['Test 1 (25 marks)', 'Test 2 (25 marks)', 'Midterm Exam (100 marks)', 'Test 3 (25 marks)', 'Test 4 (25 marks)', 'Final Exam (100 marks)'];
-conduct = ['Excellent', 'Good', 'Needs to improve'];
+scaleRating = ['Excellent', 'Good', 'Needs to improve'];
 descText = ['Can do better.', 'Congratulations. Potential to do even better.', 'Well done.'];
 remarks = ['Can do better.', 'Need to work independently.', 'Well done. Concentrate on maths.', 'Good job in English and Kannada.', 'Need to work hard.', 'Need to work hard in Hindi. All the best.', 'Good work.', 'Congratulations. Potential to do even better.', 'Need assistance in languages. Well done in social.', 'Concentrate. Too playful.']
 timeoffset = 13*3600; # server may be on a different TZ than where this script runs
@@ -38,7 +40,7 @@ for name in personNames:
 #--------------------------------------------------------------------
 def generateStudents(outfile):
   outfile.write("DELETE FROM `ek5d2_studentform`;\n");
-  outfile.write("INSERT INTO `ek5d2_studentform` (`id`, `uniq_id`, `user_id`, `created`, `modified`, `name`, `dateOfBirth`, `age`, `sex`, `admissionNumber`, `studentUid`, `class`, `group`, `parent`, `guardian`, `sponsor`) VALUES\n");
+  outfile.write("INSERT INTO `ek5d2_studentform` (`id`, `uniq_id`, `user_id`, `created`, `modified`, `name`, `dateOfBirth`, `sex`, `admissionNumber`, `studentUid`, `class`, `group`, `parent`, `guardian`) VALUES\n");
 
   random.shuffle(personNames);
   for i in range(len(personNames)):
@@ -65,7 +67,6 @@ def generateStudents(outfile):
     fields.append("NULL");
     fields.append(personNames[i]);
     fields.append(str(birthDate)+'/'+str(birthMonth)+'/'+birthYear);
-    fields.append(str(datetime.datetime.now().year-int(birthYear)));
     fields.append(random.choice(sex));
     fields.append(str(i+1)+'/'+random.choice(admissionYear));
     fields.append(uid);
@@ -73,13 +74,9 @@ def generateStudents(outfile):
     fields.append(random.choice(group));
     if (random.randint(0,1)):
       fields.append("");
-      fields.append(random.choice(personNames));
+      fields.append(random.choice(otherNames));
     else:
-      fields.append(random.choice(personNames));
-      fields.append("");
-    if (random.randint(0,1)):
-      fields.append(random.choice(personNames));
-    else:
+      fields.append(random.choice(otherNames));
       fields.append("");
 
     line = "('" + "', '".join(fields) + "'),";
@@ -144,11 +141,11 @@ def generateGrades(outfile):
             else:
               fields.append("");          
             if(random.randint(0,19) > 1): # skip 5%
-              fields.append(random.choice(descText));
+              fields.append(random.choice(scaleRating));
             else:
               fields.append("");          
             if(random.randint(0,19) > 1): # skip 5%
-              fields.append(random.choice(conduct));
+              fields.append(random.choice(scaleRating));
             else:
               fields.append("");          
             if(random.randint(0,19) > 1): # skip 5%
@@ -172,9 +169,44 @@ def generateGrade(maxMarks):
   return "";
 
 
+def generateSponsors(outfile):
+  outfile.write("DELETE FROM `ek5d2_sponsorform`;\n");
+  outfile.write("INSERT INTO `ek5d2_sponsorform` (`id`, `uniq_id`, `user_id`, `created`, `modified`, `name`, `sponsorUid`, `sponsoredStudents`) VALUES\n");
+
+  sponsoredCount = collections.defaultdict(int)
+  random.shuffle(otherNames);
+  for i in range(len(otherNames)):
+    uid = 'M000';
+    if (i<9):
+      uid = uid[:4]+str(i+1);
+    elif (i<99):
+      uid = uid[:3]+str(i+1);
+    else:
+      uid = uid[:2]+str(i+1);
+    fields = [];
+    fields.append(str(i+1));
+    fields.append("");
+    fields.append("40");
+    fields.append(str(datetime.datetime.now()-datetime.timedelta(seconds=timeoffset))[:19]);
+    fields.append("NULL");
+    fields.append(otherNames[i]);
+    fields.append(uid);
+    sponsored = random.sample(range(0,len(personNames)),int(abs(random.gauss(1.8,0.7))));
+    for s in sponsored:
+    	sponsoredCount[s] += 1;
+    sponsored = [s for s in sponsored if sponsoredCount[s]<=3]
+    fields.append(",".join(map(str,sponsored)));
+
+    line = "('" + "', '".join(fields) + "'),";
+    if (i==len(otherNames)-1):
+      line = re.sub(r',$', ";", line);
+    outfile.write(line + '\n');
+
+
 #====================================================================
 # Main Processing
 #--------------------------------------------------------------------
 outfile = open('testData.sql', 'w')
 generateStudents(outfile);
 generateGrades(outfile);
+generateSponsors(outfile);

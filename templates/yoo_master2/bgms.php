@@ -305,13 +305,18 @@ function deleteSponsor($id)
 	}
 }
 
+function getAgeQuery()
+{
+	return "YEAR(CURDATE()) - YEAR(STR_TO_DATE(dateOfBirth,'%d/%m/%Y')) - (DATE_FORMAT(CURDATE(), '%m%d') < DATE_FORMAT(STR_TO_DATE(dateOfBirth,'%d/%m/%Y'), '%m%d')) AS age";
+}
+
 function showStudent($id)
 {
 	echo "<table class=studentPageTitle><tr>";
 	echo "<td><h2>Viewing Student Details</h2></td>";
 
 	$result = getTableData("#__studentform",
-							 "name,dateOfBirth,age,sex,admissionNumber,studentUid,class,`group`,parent,guardian,sponsor",
+							 "name,dateOfBirth,".getAgeQuery().",sex,admissionNumber,studentUid,class,`group`,parent,guardian",
 							 "id='$id'",
 							 1);
 
@@ -335,12 +340,27 @@ function showStudent($id)
 	for ($i=0; $i<count($headings); $i++) {
 		if ($i==0) { // first cell is for photo
 			echo "<tr><td style='border:0px; vertical-align:top; width:256px' rowspan='"
-				.strval(count($headings)+2) . "'>".getPhotoCode($id)."</td><th>" // 2 rows added at the end
+				.strval(count($headings)+2) . "'>".getPhotoCode($id,"style='width:240px'")."</td><th>" // 2 rows added at the end
 				.$headings[$i]."</th><td>$result[$i]</td></tr>";
 		}
 		else {
 			if ($i==6) { // class: convert to Roman numerals for display
 				$currRes = getClassDisplayText($result[$i]);
+			}
+			else if ($i==count($headings)-1) {
+				$sponsorLink = preg_replace("/students\/view-students\??.*/","sponsors/view-sponsors",$_SERVER['REQUEST_URI']);
+				$sponsors = getTableData("#__sponsorform","id,name,sponsorUid,CONCAT(',',sponsoredStudents,',')","1 ORDER BY name");
+				if ($sponsors) {
+					$currRes = "<ol>";
+					foreach ($sponsors as $sponsor) {
+						if (preg_match("/,$id,/",$sponsor[3])) {
+							$currRes .= "<li><a href='$sponsorLink?id=$sponsor[0]'>$sponsor[1]</a></li>";
+						}
+					}
+					$currRes .= "</ol>";
+					$currRes = preg_replace("/<ol><\/ol>/","&nbsp;",$currRes);
+				}
+				else $currRes = '&nbsp;';
 			}
 			else $currRes = $result[$i];
 			echo "<tr><th>".$headings[$i]."</th><td>$currRes</td></tr>";
@@ -661,7 +681,7 @@ function showStudentGrades($id)
 		$fieldVal = $result[$j+1];
 		if ($i==0) { // first cell is for photo
 			echo "<tr><td style='border:0px; vertical-align:top; width:256px' rowspan='"
-				.strval(count($headings)+6) . "'>" . getPhotoCode($id)."</td><th>" // 6 rows are added for separation and total marks
+				.strval(count($headings)+6) . "'>" . getPhotoCode($result[0],"style='width:240px'")."</td><th>" // 6 rows are added for separation and total marks
 				. $headings[$i]."</th><td colspan=3><a href='$studentLink'>$fieldVal</a></td></tr>";
 		}
 		else if ($i==1 || $i==2)  {
@@ -1078,7 +1098,7 @@ function showStudentFormTitle()
 		echo "<table class=studentPageTitle><tr>";
 		echo "<td><h2>Editing Student Details</h2></td>";
 		echo "</tr></table>";
-		echo getPhotoCode($id);
+		echo getPhotoCode($id,"style='width:240px'");
 		return array('id' => $id);
 	}
 
@@ -1134,9 +1154,10 @@ function showStudentList()
 
 	$allPhotoStr = '/'.implode('/',readPhotoDir()).'/';
 	$itemLink = preg_replace("/view-students\??.*/","view-students",$_SERVER['REQUEST_URI']);
+	$sponsorLink = preg_replace("/students\/view-students\??.*/","sponsors/view-sponsors",$_SERVER['REQUEST_URI']);
 	$columnHeadings = array('Photo','Student ID','Admission No.','Name','Class','Group','Sex','Parent','Guardian','Sponsor');
 	$students = getTableData("#__studentform",
-							 "id,studentUid,admissionNumber,name,class,`group`,sex,parent,guardian,sponsor",
+							 "id,studentUid,admissionNumber,name,class,`group`,sex,parent,guardian",
 							 "1 ORDER BY name ASC"
 				);
 
@@ -1162,6 +1183,7 @@ function showStudentList()
 		return;
 	}
 
+	$sponsors = getTableData("#__sponsorform","id,name,sponsorUid,CONCAT(',',sponsoredStudents,',')","1 ORDER BY name");
 	foreach ($students as $student) {
 		$id = $student[0];
 		echo "<tr>";
@@ -1181,6 +1203,19 @@ function showStudentList()
 				echo "<td>".getClassDisplayText($student[$i])."</td>";
 			}
 			else echo "<td>".$student[$i]."</td>";
+			if ($i==count($student)-1) {
+				if ($sponsors) {
+					$outStr = "<td><ol>";
+					foreach ($sponsors as $sponsor) {
+						if (preg_match("/,$student[0],/",$sponsor[3])) {
+							$outStr .= "<li><a href='$sponsorLink?id=$sponsor[0]'>$sponsor[1]</a></li>";
+						}
+					}
+					$outStr .= "</ol></td>";
+					echo preg_replace("/<td><ol><\/ol><\/td>/","<td>&nbsp;</td>",$outStr);
+				}
+				else echo "<td>&nbsp;</td>";
+			}
 		}
 		echo "</tr>";
 	}
@@ -1463,7 +1498,7 @@ function reportStudentProfile($currtime, $pathPrefix)
 
 	echo "<div class=graphTitle><h3>Age Profile</h3></div>";
 	$csvFile = "dataAgeHist-$currtime.csv";
-	$results = getTableData("#__studentform", "age,SUM(CASE WHEN sex='Female' THEN 1 ELSE 0 END),SUM(CASE WHEN sex='Male' THEN 1 ELSE 0 END)", "1 GROUP BY age ORDER BY age+0");
+	$results = getTableData("#__studentform", getAgeQuery().",SUM(CASE WHEN sex='Female' THEN 1 ELSE 0 END),SUM(CASE WHEN sex='Male' THEN 1 ELSE 0 END)", "1 GROUP BY age ORDER BY age+0");
 	printToFile($csvFile, "Age,Female,Male", getCsvFormat($results, true));
 	echo "<ageHist src='/$csvFile'></ageHist>\n";
 
@@ -1491,25 +1526,43 @@ function reportStudentProfile($currtime, $pathPrefix)
 
 function reportSponsorship($currtime, $pathPrefix)
 {
+	$numStudents = getTableData("#__studentform","COUNT(*)","1",0);
+	$sponsored = getTableData("#__sponsorform","sponsoredStudents");
+	$allSponsoredStr = '';
+	foreach ($sponsored as $spd) $allSponsoredStr .= ','.$spd[0];
+	$allSponsoredStr = trim(preg_replace("/,+/",",",$allSponsoredStr),",");
+	$allSponsored = explode(',',$allSponsoredStr);
+	$sponsoredHist = array_count_values($allSponsored);
+	$sponsoredCount = array_count_values($sponsoredHist);
+	$sponsoredCount['0'] = $numStudents - array_sum($sponsoredCount);
+	
 	echo "<h3>Sponsorship Summary</h3>";
-	$csvFile = "dataSponsorhip-$currtime.csv";
+	$csvFile = "dataSponsorship-$currtime.csv";
 	$results = array();
-	array_push($results, getTableData("#__studentform", "'Sponsored-Female',COUNT(*)", "sex='Female' AND sponsor REGEXP '[a-zA-Z]'", 1));
-	array_push($results, getTableData("#__studentform", "'Sponsored-Male',COUNT(*)", "sex='Male' AND sponsor REGEXP '[a-zA-Z]'", 1));
-	array_push($results, getTableData("#__studentform", "'Unsponsored-Female',COUNT(*)", "sex='Female' AND sponsor NOT REGEXP '[a-zA-Z]'", 1));
-	array_push($results, getTableData("#__studentform", "'Unsponsored-Male',COUNT(*)", "sex='Male' AND sponsor NOT REGEXP '[a-zA-Z]'", 1));
+	ksort($sponsoredCount);
+	foreach ($sponsoredCount as $key => $value) {
+		array_push($results, array("$key Sponsors",$value)); 
+	}
 	printToFile($csvFile, "group,count", getCsvFormat($results, false));
 	echo "<sponsorship src='/$csvFile'></sponsorship>\n";
 
 	echo "<div class=graphTitle><h3>Age Profile of Sponsored Students</h3></div>";
 	$csvFile = "dataSponsoredAgeHist-$currtime.csv";
-	$results = getTableData("#__studentform", "age,SUM(CASE WHEN sex='Female' AND sponsor REGEXP '[a-zA-Z]' THEN 1 ELSE 0 END),SUM(CASE WHEN sex='Male' AND sponsor REGEXP '[a-zA-Z]' THEN 1 ELSE 0 END)", "1 GROUP BY age ORDER BY age+0");
+	$results = getTableData("#__studentform",
+							getAgeQuery()
+							.",SUM(CASE WHEN sex='Female' AND id IN ($allSponsoredStr) THEN 1 ELSE 0 END)"
+							.",SUM(CASE WHEN sex='Male' AND id IN ($allSponsoredStr) THEN 1 ELSE 0 END)",
+							"1 GROUP BY age ORDER BY age+0");
 	printToFile($csvFile, "Age,Female,Male", getCsvFormat($results, true));
 	echo "<sponsored src='/$csvFile'></sponsored>\n";
 
-	echo "<div class=graphTitle><h3>Age Profile of Students Waiting Sponsorship</h3></div>";
+	echo "<div class=graphTitle><h3>Age Profile of Students with No Sponsors</h3></div>";
 	$csvFile = "dataUnsponsoredAgeHist-$currtime.csv";
-	$results = getTableData("#__studentform", "age,SUM(CASE WHEN sex='Female' AND sponsor NOT REGEXP '[a-zA-Z]' THEN 1 ELSE 0 END),SUM(CASE WHEN sex='Male' AND sponsor NOT REGEXP '[a-zA-Z]' THEN 1 ELSE 0 END)", "1 GROUP BY age ORDER BY age+0");
+	$results = getTableData("#__studentform", 
+							getAgeQuery()
+							.",SUM(CASE WHEN sex='Female' AND id NOT IN ($allSponsoredStr) THEN 1 ELSE 0 END)"
+							.",SUM(CASE WHEN sex='Male' AND id NOT IN ($allSponsoredStr) THEN 1 ELSE 0 END)",
+							"1 GROUP BY age ORDER BY age+0");
 	printToFile($csvFile, "Age,Female,Male", getCsvFormat($results, true));
 	echo "<unsponsored src='/$csvFile'></unsponsored>\n";
 
