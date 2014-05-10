@@ -1721,14 +1721,14 @@ studentTimePerf { font: 11px sans-serif; }
 </style>
 <?php
 	$examOptStr = "'".implode("','",getExamOptions('DESC'))."'";
-	$results = getTableData("#__studentform,#__gradesform","name,year,examType,kannadaMarks,englishMarks,hindiMarks,mathMarks,generalScienceMarks,socialStudiesMarks,computerScience","studentId='$studentId' AND #__studentform.id=studentId ORDER BY year DESC, FIELD(examType,$examOptStr) LIMIT 1", 1);
+	$results = getTableData("#__studentform,#__gradesform","name,year,examType,kannadaMarks,englishMarks,hindiMarks,mathMarks,generalScienceMarks,socialStudiesMarks,computerScience,#__gradesform.class","studentId='$studentId' AND #__studentform.id=studentId ORDER BY year DESC, FIELD(examType,$examOptStr) LIMIT 1", 1);
 
 	if (count($results)==0) {
 		echo "<div class=message>No grades have been recorded for this combination of student, year and assessment type.</div>";
 		return;
 	}
 
-	$classAvg = getTableData("#__gradesform","kannadaMarks,englishMarks,hindiMarks,mathMarks,generalScienceMarks,socialStudiesMarks","class='$class' AND year='".$results[1]."' AND examType='".$results[2]."'");
+	$classAvg = getTableData("#__gradesform","kannadaMarks,englishMarks,hindiMarks,mathMarks,generalScienceMarks,socialStudiesMarks,computerScience","class='$results[10]' AND year='".$results[1]."' AND examType='".$results[2]."'");
 	$maxMarks = preg_replace("/.*\((\d+) marks.*/","$1",$results[2]);
 	$allSubjects = array('Kannada','English','Hindi','Math','Science','Social','Computer');
 	$classGrades = array();
@@ -1745,9 +1745,9 @@ studentTimePerf { font: 11px sans-serif; }
 			$classGrades[$key]['Avg'] =  $val['Total']/$val['Count'];
 	}
 	echo "<h3>Recent Grades for $results[0]</h3>";
-	echo "Class ".getClassDisplayText($class)." / $results[1] / $results[2]<br>";
+	echo "Class ".getClassDisplayText($results[10])." / $results[1] / $results[2]<br>";
 	$arr = array();
-	for ($i=0; $i<count($allSubjects); $i++) {
+	for ($i=0; $i<count($allSubjects) && $results[10]>=6 || $i<count($allSubjects)-1 && $results[10]<6; $i++) {
 		$studentPercent = floor(0.5+100*$results[$i+3]/$maxMarks);
 		$classPercent = floor(0.5+100*$classGrades[$allSubjects[$i]]['Avg']/$maxMarks);
 		array_push($arr, array($allSubjects[$i],$studentPercent,$classPercent));
@@ -1758,18 +1758,24 @@ studentTimePerf { font: 11px sans-serif; }
 
 	echo "<div class=graphTitle><h3>Student's Performance Over Time</h3></div>";
 	// Limit to recent 6 tests, consider only those where at least one subject has recorded marks
-	$results = getTableData("#__gradesform","CONCAT(year,'/',examType),kannadaMarks,englishMarks,hindiMarks,mathMarks,generalScienceMarks,socialStudiesMarks,computerScience","studentId='$studentId' AND (kannadaMarks+englishMarks+hindiMarks+mathMarks+generalScienceMarks+socialStudiesMarks)>0 ORDER BY year DESC, FIELD(examType,$examOptStr) LIMIT 6");
+	// TODO For a particular subject, all grades are missing
+	$results = getTableData("#__gradesform","CONCAT(year,'/',examType),kannadaMarks,englishMarks,hindiMarks,mathMarks,generalScienceMarks,socialStudiesMarks,computerScience","studentId='$studentId' AND (kannadaMarks+englishMarks+hindiMarks+mathMarks+generalScienceMarks+socialStudiesMarks+computerScience)>0 ORDER BY year DESC, FIELD(examType,$examOptStr) LIMIT 6");
 	$arr = array();
+	$compSciPresent = 0;
+	for ($i=count($results)-1; $i>=0; $i--) {
+		if ($results[$i][7]) $compSciPresent = 1;
+	}
 	for ($i=count($results)-1, $j=0; $i>=0; $i--, $j++) {
 		$maxMarks = preg_replace("/.*\((\d+) marks.*/","$1",$results[$i][0]);
 		$arr[$j][0] = preg_replace("/ \(.*/","",$results[$i][0]);
 		$arr[$j][0] = preg_replace("/Test (\d)/","Test$1",$arr[$j][0]);
 		$arr[$j][0] = preg_replace("/ Exam/","",$arr[$j][0]);
-		for ($k=1; $k<count($results[$i]); $k++) {
+		for ($k=1; $compSciPresent && $k<count($results[$i]) || $compSciPresent==0 && $k<count($results[$i])-1; $k++) {
 			$arr[$j][$k] = floor(0.5+100*$results[$i][$k]/$maxMarks);
 		}
 	}
 	$csvFile = "dataStudentTimePerf-$currtime.csv";
+	if ($compSciPresent==0) array_pop($allSubjects);
 	printToFile($csvFile, "quarter,".implode(",",$allSubjects), getCsvFormat($arr, false));
 	echo "<studentTimePerf src='/$csvFile'></studentTimePerf>\n";
 
