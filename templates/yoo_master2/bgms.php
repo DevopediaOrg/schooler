@@ -802,7 +802,7 @@ function printCustomCodeGradesForm()
 	}
 	insertGradesFormJS();
 	echo "<div id=classStudentMap style='display:none'>".implode('/',$options)."</div>\n";
-	echo "<img src='".preg_replace("/index\.php.*/","images/blank.gif",$_SERVER['REQUEST_URI'])."' onload='loadStudentNames(\"init\")' />\n";
+	echo "<img src='".preg_replace("/index\.php.*/","images/blank.gif",$_SERVER['REQUEST_URI'])."' onload='onLoadGradesForm()' />\n";
 }
 
 function printCustomCodeReportsForm()
@@ -866,16 +866,68 @@ window.addEvent('domready', function() {
     loadStudentNames('onchange');
   });
 
+  $('class').addEvent('change', function() {
+    updateComputerScience();
+  });
+
   $('studentName').addEvent('change', function() {
     setStudentId();
   });
 
   $('gradesSubmit').addEvent('click', function() {
-    return validateForm();
+    computerScienceElem.disabled = false; // so that DB is cleared
+    return true;
   });
+  
 });
 
-function validateForm()
+function onLoadGradesForm()
+{
+	loadStudentNames('init');
+	updateComputerScience();
+}
+
+function updateComputerScience()
+{
+	classElem = document.getElementById('class');
+    computerScienceElem = document.getElementById('computerScience');
+    if (classElem.value>=6) computerScienceElem.disabled = false;
+    else {
+    	computerScienceElem.disabled = true;
+    	computerScienceElem.value = '';
+    }
+}
+
+function validateClass()
+{
+	currentClassElem = document.getElementById('currentClass');
+	classElem = document.getElementById('class');
+	if (classElem.value > currentClassElem.value) {
+		alert("INPUT ERROR. Class for recording grades must be <= current class.");
+		return false;
+	}
+	return true;
+}
+
+function validateKannadaMarks() { return validateMarks('kannadaMarks'); }
+function validateEnglishMarks() { return validateMarks('englishMarks'); }
+function validateHindiMarks() { return validateMarks('hindiMarks'); }
+function validateMathMarks() { return validateMarks('mathMarks'); }
+function validateGeneralScienceMarks() { return validateMarks('generalScienceMarks'); }
+function validateSocialStudiesMarks() { return validateMarks('socialStudiesMarks'); }
+function validateComputerScienceMarks() { return validateMarks('computerScience'); }
+function validateMarks(subject)
+{
+	elem = document.getElementById('examType');
+	var maxMarks = elem.value.replace(/.*\((\d+) marks.*/g,"$1");
+	if (parseInt(document.getElementById(subject).value) > parseInt(maxMarks)) {
+		alert("INPUT ERROR. Marks must not exceed the maximum of " + maxMarks + ".");
+		return false;
+	}
+	return true;
+}
+
+function validateAttendance()
 {
 	elem = document.getElementById('attendance');
 	var str = elem.value.replace(/ /g,'');
@@ -885,12 +937,15 @@ function validateForm()
 	re = new RegExp('[0-9]+');
 	if (fields.length!=2 ||
 		fields[0].match(re)==null ||
-		fields[1].match(re)==null ||
-		parseInt(fields[0]) > parseInt(fields[1])) {
+		fields[1].match(re)==null) {
 		alert("INPUT ERROR. Attendance input format: attended days / total days. Example, 24/30.");
-		elem.value = '';
 		return false;
 	}
+	else if (parseInt(fields[0]) > parseInt(fields[1])) {
+		alert("INPUT ERROR. Attended days must be <= total days.");
+		return false;
+	}
+	elem.value = str; // after removal of spaces, if any.
 	return true;
 }
 
