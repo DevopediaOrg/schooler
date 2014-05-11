@@ -843,10 +843,15 @@ function printCustomCodeSponsorForm()
 	}
 
 	$options = array();
-	if ($showStr) $filter = "id IN ($showStr) OR";
-	else $filter = '';
-	// TODO: $hideStr is also null
-	$results = getTableData("#__studentform", "id,name", "$filter id NOT IN ($hideStr) ORDER BY name");
+	if ($showStr) {
+		if($hideStr) $filter = "id IN ($showStr) OR id NOT IN ($hideStr)";
+		else $filter = "id IN ($showStr)";
+	}
+	else {
+		if($hideStr) $filter = "id NOT IN ($hideStr)";
+		else $filter = '1';
+	}
+	$results = getTableData("#__studentform", "id,name", "$filter ORDER BY name");
 	foreach ($results as $result) {
 		array_push($options, "$result[0]:$result[1]");
 	}
@@ -1477,7 +1482,7 @@ function showReports()
 	}
 	else {
 		$class = 1;
-		$studentId = getTableData("#__studentform","id","class='$class' ORDER BY name LIMIT 1");
+		$studentId = getTableData("#__studentform","id","class='$class' ORDER BY name LIMIT 1",0);
 	}
 
 	// Display form for user selection
@@ -1551,7 +1556,7 @@ function getCsvFormat($arr, $fillZeros=false)
 
 function printToFile($filename, $header, $str)
 {
-	$basePath = "/home/iedf/www/bgms"; // "C:\wamp\www"; // /var/www /home/iedf/www/bgms
+	$basePath = "C:\wamp\www\bgms"; // "C:\wamp\www\bgms"; // /var/www /home/iedf/www/bgms
 	$fh = fopen("$basePath/$filename", 'w') or die("Can't open file for saving data into CSV file.");
 	fwrite($fh, "$header\n$str");
 	fclose($fh);
@@ -1624,6 +1629,11 @@ function reportSponsorship($currtime, $pathPrefix)
 	$sponsoredHist = array_count_values($allSponsored);
 	$sponsoredCount = array_count_values($sponsoredHist);
 	$sponsoredCount['0'] = $numStudents - array_sum($sponsoredCount);
+
+	if (!preg_match("/[1-9]/",$allSponsoredStr)) {
+		echo "<div class=message>No sponsors have been entered into the system.</div>";
+		return;
+	}
 	
 	echo "<h3>Sponsorship Summary</h3>";
 	$csvFile = "dataSponsorship-$currtime.csv";
@@ -1670,11 +1680,11 @@ function reportGrades($currtime, $pathPrefix, $year, $examType)
 	$grades = array(); $allGrades = array('A+','A','B+','B','C+','C');
 	foreach ($allGrades as $grade) $grades[$grade] = 0;
 	$subjects = array(); $allSubjects = array('Kannada','English','Hindi','Math','Science','Social','Computer');
-	foreach ($allSubjects as $subject) $subjects[$subject] = array();
+	foreach ($allSubjects as $subject) $subjects[$subject] = array('A/A+'=>0,'B/B+'=>0,'C/C+'=>0);
 	$classes = array(); $allClasses = array('I','II','III','IV','V','VI','VII','VIII','IX','X');
-	foreach ($allClasses as $class) $classes[$class] = array();
+	foreach ($allClasses as $class) $classes[$class] = array('A/A+'=>0,'B/B+'=>0,'C/C+'=>0);
 	$groups = array(); $allGroups = array('Azad','Bhagath','Subhash','Vivek');
-	foreach ($allGroups as $group) $groups[$group] = array();
+	foreach ($allGroups as $group) $groups[$group] = array('A/A+'=>0,'B/B+'=>0,'C/C+'=>0);
 	foreach ($results as $result) {
 		for ($j=3; $j<10; $j++) {
 			if ($result[$j]>0) { // grade is recorded for this subject
@@ -1809,6 +1819,8 @@ studentTimePerf { font: 11px sans-serif; }
 	foreach ($classAvg as $avg) {
 		for ($j=0; $j<count($avg); $j++) {
 			if ($avg[$j]>0) {
+				if (!isset($classGrades[$allSubjects[$j]]['Total'])) $classGrades[$allSubjects[$j]]['Total'] = 0;
+				if (!isset($classGrades[$allSubjects[$j]]['Count'])) $classGrades[$allSubjects[$j]]['Count'] = 0;
 				$classGrades[$allSubjects[$j]]['Total'] += $avg[$j];
 				$classGrades[$allSubjects[$j]]['Count']++;
 			}
