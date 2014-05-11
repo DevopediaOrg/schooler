@@ -108,7 +108,7 @@ def generateGrades(outfile):
         totalCount += len(examYear);
         continue;
       for k in range(len(examYear)):
-        if (j==skipStudentOneYear and k==0):
+        if ((j==skipStudentOneYear and k==0) or classes[j]-k>10):
           if (i==0):
             print("Skipping grades for", names[j], "["+str(j+1)+"]:", examYear[k], ", all exams");
           totalCount += 1;
@@ -128,10 +128,7 @@ def generateGrades(outfile):
             fields.append(str(currdatetime)[:19]);
           else:
             fields.append("");
-          if (classes[j]-k<=10):
-            fields.append(str(classes[j]-k));
-          else:
-            fields.append("");
+          fields.append(str(classes[j]-k));
           fields.append(str(j+1));
           fields.append(examYear[k]);
           fields.append(examType[i]);
