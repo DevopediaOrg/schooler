@@ -1042,6 +1042,14 @@ window.addEvent('domready', function() {
   $('reportTypeId').addEvent('change', function() {
     processFilters();
   });
+
+  $('reportsSubmit').addEvent('click', function() {
+  	reportTypeElem = document.getElementById('reportTypeId');
+  	if (parseInt(reportTypeElem.value)==6) {
+      return confirm('CAUTION: This will promote ALL students to the next higher class. This should be done only at the start of an academic year. Are you sure you want to do this?');
+    }
+    return true;
+  });
 });
 
 function onLoadReportsForm()
@@ -1075,7 +1083,13 @@ function processFilters()
 			classElem.style.display = 'block';
 			studentNameElem.style.display = 'block';
 			break;
-		default: // includes 0 and 1
+		case 5:
+			reportYearElem.style.display = 'none';
+			reportExamTypeElem.style.display = 'none';
+			classElem.style.display = 'block';
+			studentNameElem.style.display = 'none';
+			break;
+		default: // includes 0, 1, 6
 			reportYearElem.style.display = 'none';
 			reportExamTypeElem.style.display = 'none';
 			classElem.style.display = 'none';
@@ -1359,7 +1373,7 @@ function showGradesList()
 	$maxMarks = preg_replace("/.*\((\d+) marks.*/","$1",$examType);
 
 	echo "<table class=studentPageTitle><tr>";
-	echo "<td><h2>Viewing Recent Grades</h2></td>";
+	echo "<td><h2>Viewing Grades</h2></td>";
 	echo "</tr></table>";
 
 	$allPhotoStr = '/'.implode('/',readPhotoDir()).'/';
@@ -1465,14 +1479,16 @@ function showReports()
 	echo "</tr></table>";
 
 	$graphs = array('View student profile','View student sponsorship','View grades from an assessment','View top students from an assessment','View a student\'s performance over time');
-
+	$actions = array('Generate class progress reports','Promote students to next class');
+	$reports = array_merge($graphs,$actions);
+	
 	if (isset($_REQUEST['reportType'])) {
 		$reportTypeKey = $_REQUEST['reportType'];
 	}
 	else {
 		$reportTypeKey = 0;
 	}
-	$reportType = $graphs[$reportTypeKey];
+	$reportType = $reports[$reportTypeKey];
 
 	if (isset($_REQUEST['year'])) {
 		$year = $_REQUEST['year'];
@@ -1500,11 +1516,15 @@ function showReports()
 	}
 
 	// Display form for user selection
+	$user = JFactory::getUser();
 	echo "<table class=studentList>";
 	echo "<tr style='border:0px'><td style='border:0px'>";
 	$actionUrl = preg_replace("/[?].*/","",$_SERVER['REQUEST_URI']);
 	echo "<form id=reportSelForm method=get onsubmit='return true;' action='$actionUrl'>";
-	echo "<select id=reportTypeId style='width:320px;margin-right:5px;float:left' name=reportType>".getOptStr($graphs,true,0,$reportType)."</select>";
+	echo "<select id=reportTypeId style='width:320px;margin-right:5px;float:left' name=reportType>";
+	echo "<optgroup label=Graphs>".getOptStr($graphs,true,0,$reportType)."</optgroup>";
+	if (!$user->guest) echo "<optgroup label=Actions>".getOptStr($actions,true,count($graphs),$reportType)."</optgroup>";
+	echo "</select>";
 	echo "<select id=class style='margin-right:5px;display:none;float:left' name=class>".getOptStr($classes,true,1,$classes[$class-1])."</select>";
 	echo "<input id=studentIdLoad type=hidden disabled=disabled value='$studentId' />";
 	echo "<select id=studentId style='margin-right:5px;display:none;float:left' name=studentId></select>"; # leave options to JS
@@ -1513,7 +1533,7 @@ function showReports()
 	#foreach ($years as $yr) array_push($yrsArr,$yr[0]);
 	echo "<select id=reportYearId style='width:100px;margin-right:5px;display:none;float:left' name=year>".getOptStr($yrsArr,false,0,$year)."</select>";
 	echo "<select id=reportExamTypeId style='margin-right:5px;display:none;float:left' name=examType>".getOptStr(getExamOptions('DESC'),false,0,$examType)."</select>";
-	echo "<input type=submit value='View Report' />";
+	echo "<input type=submit id=reportsSubmit value='View Report' />";
 	echo "</form>";
 	echo "</td></tr>";
 	echo "</table>";
@@ -1547,6 +1567,31 @@ function showReports()
 		case 4:
 			reportStudentPerformance($currtime,$pathPrefix,$class,$studentId);
 			break;
+		case 5:
+			generateClassReport($currtime,$pathPrefix,$class);
+			break;
+		case 6:
+			promoteStudents($currtime,$pathPrefix);
+			break;
+	}
+}
+
+function generateClassReport($currtime, $pathPrefix, $class)
+{
+	return;
+}
+
+function promoteStudents($currtime, $pathPrefix)
+{
+	$user = JFactory::getUser();
+	if (!$user->guest) {
+		executeQuery("UPDATE #__studentform SET class=class+1");
+		echo "<div class=message>All students have been promoted to the next higher class.<br>";
+		echo "Class X students were marked as <i>Graduates</i>.<br>";
+		echo "For special cases such as students who have not passed, update via their individual pages.</div>";
+	}
+	else {
+		echo "<div class='error message'>You do not have permissions to promote students to the next higher class.<div>";
 	}
 }
 
