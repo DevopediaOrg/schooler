@@ -117,7 +117,7 @@ def generateGrades(outfile):
         totalCount += 1;
         if ((random.randint(0,9) > 0 or                 # skip 10%
              totalCount==totalPossibleRecords) and      # to keep end code simple: semi-colon termination
-             not(classes[j]==1 and k>0)):               # no grades for prev years, if current year is class 1
+             not(k>classes[j]-1)):    # eg. no grades for prev years, if current year is class 1
           fields = []; uniqueIndex += 1;
           fields.append(str(uniqueIndex));
           fields.append("");

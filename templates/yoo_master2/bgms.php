@@ -146,6 +146,11 @@ if (false) { // Noted here for reference only
 	require_once ( JPATH_BASE.DS.'templates'.DS.'yoo_master2'.DS.'bgms.php' );
 }
 
+function getYears()
+{	// also to update ChronoForms gradesForm in Joomla admin view.
+	return array('2014-15','2013-14');
+}
+
 function getRecordId($formname)
 {
 	$user = JFactory::getUser();
@@ -1374,7 +1379,7 @@ function showGradesList()
 	$actionUrl = preg_replace("/[?].*/","",$_SERVER['REQUEST_URI']);
 	echo "<form id=gradeSelForm method=get onsubmit='return true;' action='$actionUrl'>";
 	#$years = getTableData("#__gradesform","DISTINCT(year)","1 ORDER BY year DESC");
-	$yrsArr = array('2014-15','2013-14');
+	$yrsArr = getYears();
 	#foreach ($years as $yr) array_push($yrsArr,$yr[0]);
 	echo "<select style='width:100px;margin-right:5px' name=year>".getOptStr($yrsArr,false,0,$year)."</select>";
 	echo "<select style='margin-right:5px' name=examType>".getOptStr(getExamOptions('DESC'),false,0,$examType)."</select>";
@@ -1504,7 +1509,7 @@ function showReports()
 	echo "<input id=studentIdLoad type=hidden disabled=disabled value='$studentId' />";
 	echo "<select id=studentId style='margin-right:5px;display:none;float:left' name=studentId></select>"; # leave options to JS
 	#$years = getTableData("#__gradesform","DISTINCT(year)","1 ORDER BY year DESC");
-	$yrsArr = array('2014-15','2013-14');
+	$yrsArr = getYears();
 	#foreach ($years as $yr) array_push($yrsArr,$yr[0]);
 	echo "<select id=reportYearId style='width:100px;margin-right:5px;display:none;float:left' name=year>".getOptStr($yrsArr,false,0,$year)."</select>";
 	echo "<select id=reportExamTypeId style='margin-right:5px;display:none;float:left' name=examType>".getOptStr(getExamOptions('DESC'),false,0,$examType)."</select>";
