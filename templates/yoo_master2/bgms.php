@@ -59,12 +59,9 @@ function takeDbBackup($dbBackupFile, $currtime)
   Export DB tables to a file and FTP the file.
 ----------------------------------------------------------*/
 function backup_tables($host,$user,$pass,$name,$file,$tables = '*')
-{ // Source: http://davidwalsh.name/backup-mysql-database-php
-
+{	// Source: http://davidwalsh.name/backup-mysql-database-php
 	$link = mysql_connect($host,$user,$pass);
 	mysql_select_db($name,$link);
-
-	//get all of the tables
 	if($tables == '*')
 	{
 		$tables = array();
@@ -79,38 +76,13 @@ function backup_tables($host,$user,$pass,$name,$file,$tables = '*')
 		$tables = is_array($tables) ? $tables : explode(',',$tables);
 	}
 
-	//cycle through
-	foreach($tables as $table)
-	{
-		$result = mysql_query('SELECT * FROM '.$table);
-		$num_fields = mysql_num_fields($result);
-
-		$return.= 'DROP TABLE IF EXISTS '.$table.';';
-		$row2 = mysql_fetch_row(mysql_query('SHOW CREATE TABLE IF NOT EXISTS '.$table));
-		$return.= "\n\n".$row2[1].";\n\n";
-
-		for ($i = 0; $i < $num_fields; $i++)
-		{
-			while($row = mysql_fetch_row($result))
-			{
-				$return.= 'INSERT INTO '.$table.' VALUES(';
-				for($j=0; $j<$num_fields; $j++)
-				{
-					$row[$j] = addslashes($row[$j]);
-					$row[$j] = ereg_replace("\n","\\n",$row[$j]);
-					if (isset($row[$j])) { $return.= '"'.$row[$j].'"' ; } else { $return.= '""'; }
-					if ($j<($num_fields-1)) { $return.= ','; }
-				}
-				$return.= ");\n";
-			}
-		}
-		$return.="\n\n\n";
+	$allTables = '';
+	foreach ($tables as $table) {
+		if ($allTables!='') $allTables .= " $table";
+		else $allTables .= "$table";
 	}
 
-	//save file
-	$handle = fopen($file,'w+');
-	fwrite($handle,$return);
-	fclose($handle);
+	$result = exec("C:\wamp2.4\bin\mysql\mysql5.6.12\bin\mysqldump.exe -u$user $name $allTables > $file");
 }
 
 function ftp_file($ftp_server, $ftp_user_name, $ftp_user_pass, $file)
@@ -1593,7 +1565,7 @@ function getCsvFormat($arr, $fillZeros=false)
 
 function printToFile($filename, $header, $str)
 {
-	$basePath = "C:\wamp\www\bgms"; // "C:\wamp\www\bgms"; // /var/www /home/iedf/www/bgms
+	$basePath = "C:\wamp2.4\www\bgms"; // "C:\wamp2.4\www\bgms"; // /var/www /home/iedf/www/bgms
 	$fh = fopen("$basePath/$filename", 'w') or die("Can't open file for saving data into CSV file.");
 	fwrite($fh, "$header\n$str");
 	fclose($fh);
