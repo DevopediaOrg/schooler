@@ -35,7 +35,7 @@ if (!$warp) {
 	// check if we need to backup and ftp the DB
 	require_once(__DIR__.'/bgms.php');
 	$currtime = time();
-	if ($currtime > get_backup_timestamp() + 3600*24*2) {
+	if (0 && $currtime > get_backup_timestamp() + 3600*24*2) { // TODO Backup commented: do it externally
 		// backup about once in 2 days (when page is accessed)
 		takeDbBackup("bgmsDb-$currtime.sql", $currtime);
 	}
