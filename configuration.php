@@ -9,8 +9,8 @@ class JConfig {
 	public $captcha = '0';
 	public $list_limit = '20';
 	public $access = '1';
-	public $debug = '1';
-	public $debug_lang = '1';
+	public $debug = '0';
+	public $debug_lang = '0';
 	public $dbtype = 'mysql';
 	public $host = 'localhost';
 	public $user = 'root';
@@ -54,8 +54,8 @@ class JConfig {
 	public $sef_suffix = '0';
 	public $unicodeslugs = '0';
 	public $feed_limit = '10';
-	public $log_path = 'C:\\wamp\\www\\bgms/logs';
-	public $tmp_path = 'C:\\wamp\\www\\bgms/tmp';
+	public $log_path = 'C:\\wamp2.4\\www\\bgms/logs';
+	public $tmp_path = 'C:\\wamp2.4\\www\\bgms/tmp';
 	public $lifetime = '60';
 	public $session_handler = 'database';
 	public $MetaRights = '';
