@@ -411,7 +411,11 @@ function showSponsor($id)
 function showSponsorList()
 {
 	if (isset($_REQUEST['id'])) {
-		if (isset($_REQUEST['action']) && $_REQUEST['action']=='delete') deleteSponsor($_REQUEST['id']);
+		if (isset($_REQUEST['action'])) {
+			if ($_REQUEST['action']=='report') generateSponsorReport($_REQUEST['id']);
+			else if ($_REQUEST['action']=='delete') deleteSponsor($_REQUEST['id']);
+			else showSponsor($_REQUEST['id']);
+		}
 		else showSponsor($_REQUEST['id']);
 		return;
 	}
@@ -423,7 +427,7 @@ function showSponsorList()
 	$itemLink = preg_replace("/view-sponsors\??.*/","view-sponsors",$_SERVER['REQUEST_URI']);
 	$studentLink = preg_replace("/\/sponsors\/view-sponsors[?]?.*$/","/students/view-students",$_SERVER['REQUEST_URI'],1);
 	$graduateLink = preg_replace("/\/sponsors\/view-sponsors[?]?.*$/","/students/view-graduates",$_SERVER['REQUEST_URI'],1);
-	$columnHeadings = array('Sponsor ID','Name','Sponsored Students');
+	$columnHeadings = array('Sponsor ID','Name','Sponsored Students','Actions');
 	$sponsors = getTableData("#__sponsorform","id,sponsorUid,name,sponsoredStudents","1 ORDER BY name ASC");
 
 	# Find duplicates in sponsorUid
@@ -469,10 +473,11 @@ function showSponsorList()
 							else echo "<li><a href='$studentLink?id=$student[0]'>$student[1]</a> / Class ".getClassDisplayText($student[2])." / Group $student[3]</li>";
 						}
 						echo "</ol></td>";
+						echo "<td><a href='$itemLink?id=$id&action=report'>Download Reports</a></td>";
 					}
-					else echo "<td>&nbsp;</td>";
+					else echo "<td>&nbsp;</td><td>&nbsp;</td>";
 				}
-				else echo "<td>&nbsp;</td>";
+				else echo "<td>&nbsp;</td><td>&nbsp;</td>";
 			}
 			else echo "<td>".$sponsor[$i]."</td>";
 		}
@@ -607,7 +612,7 @@ function showStudentAllGrades($id)
 
 	if (count($results)==0) {
 		echo "<table class=studentView>";
-		echo "<tr><td><div class=message style='margin-top:50px'>No grades have been recorded for this student.</div></td></tr></table>";
+		echo "<tr><td><div class=message style='margin-top:50px'>No grades have been recorded for this student.</div></td></tr>";
 		echo "</table>";
 		return;
 	}
@@ -1587,7 +1592,7 @@ function showReports()
 	}
 }
 
-function saveToPdf($data, $filename)
+function saveToPdf($data, $path, $filename)
 {
 	require_once('libraries/fpdf/fpdf.php');
 	
@@ -1718,7 +1723,9 @@ function saveToPdf($data, $filename)
 
 	$pdf->Image(findPhoto($data['studentId']),$pageWidth-40,40,24);
 	
-	$pdf->Output($filename,'F');
+	$absPath = JPATH_BASE.DS.$path;
+	if (!is_dir($absPath)) mkdir($absPath);
+	$pdf->Output($absPath.DS.$filename,'F');
 }
 
 function generateClassReport($currtime, $pathPrefix, $class, $year)
@@ -1731,16 +1738,17 @@ function generateClassReport($currtime, $pathPrefix, $class, $year)
 
 	if (count($results)==0) {
 		echo "<table class=studentView>";
-		echo "<tr><td><div class=message style='margin-top:50px'>No grades have been recorded for class ".getClassDisplayText($class)." in year $year.</div></td></tr></table>";
+		echo "<tr><td><div class=message style='margin-top:50px'>No grades have been recorded for class ".getClassDisplayText($class)." in year $year.</div></td></tr>";
 		echo "</table>";
 		return;
 	}
 	
+	$currtime = time();
 	$studentId = ''; $data = $gradedClass = $skippedStudents = $files = array();
 	for ($i=0; $i<count($results); $i++) {
 		$res = $results[$i];
 		if ($studentId!='' && $res[0]!=$studentId) { // start of another student, save processed one
-			saveToPdf($data, $filename);
+			saveToPdf($data, $currtime, $filename);
 			array_push($files, $filename);
 			$data = $gradedClass = array();
 		}
@@ -1751,46 +1759,86 @@ function generateClassReport($currtime, $pathPrefix, $class, $year)
 			array_push($skippedStudents, $data['name']);
 		}
 		else {
-			array_push($gradedClass,$class);
+			array_push($gradedClass, $class);
 		}
 	}
 	if ($studentId!='') {
-		saveToPdf($data, $filename);
+		saveToPdf($data, $currtime, $filename);
 		array_push($files, $filename);
-		$zipName = "ClassReport.".getClassDisplayText($class).".$year.zip";
-		if (!zipAllFiles($zipName, $files))
-		{
-			echo "<div class='error message'>There was an error in creating the ZIP file.<br>Please try again.</div>";
-		}
-		else {
-			$path = JURI::root();
-			echo "<div class='message'>Requested report has been generated.<br>Please download the file: <a href='$path/$zipName'>$zipName</a></div>";
-		}
+		zipAllFiles($currtime, "ClassReport.".getClassDisplayText($class).".$year.zip", $files);
+		deletePdfReports($currtime);
 	}
 	
-	$pdffiles = scandir(JPATH_BASE);
-	foreach($pdffiles as $file) {
-		$filePattern = "\\.".getClassDisplayText($class)."\\.$year\\..*\\.pdf$";
-		if(preg_match("/$filePattern/",$file) && is_file($file)) {
-			unlink($file);
-		}
-	}
-
 	return;
 }
 
-function zipAllFiles($zipname, $files)
+function generateSponsorReport($id)
 {
+	$sponsorInfo = getTableData("#__sponsorform","name,sponsoredStudents","id=$id",1);
+	$years = getYears();
+	$examOptStr = "'".implode("','",getExamOptions('DESC'))."'";
+	$results = getTableData("#__studentform,#__gradesform",
+		 					"studentId,year,examType,DATE_FORMAT(#__gradesform.created,'%d %M %Y'),DATE_FORMAT(#__gradesform.modified,'%d %M %Y'),kannadaMarks,englishMarks,hindiMarks,mathMarks,generalScienceMarks,socialStudiesMarks,computerScience,physicalEducation,conduct,attendance,remarks,#__gradesform.id,#__gradesform.class,name,dateOfBirth,studentUid",
+		 					"year='$years[0]' AND studentId IN ($sponsorInfo[1]) AND #__studentform.id=studentId ORDER BY studentId, FIELD(examType,$examOptStr)");
+	if (count($results)==0) {
+		echo "<table class=studentView>";
+		echo "<tr><td><div class=message style='margin-top:50px'>No grades have been recorded for students sponsored by $sponsorInfo[0] in year $year.</div></td></tr>";
+		echo "</table>";
+		return;
+	}
+	
+	$currtime = time();
+	$studentId = ''; $data = $gradedClass = $skippedStudents = $files = array();
+	for ($i=0; $i<count($results); $i++) {
+		$res = $results[$i];
+		if ($studentId!='' && $res[0]!=$studentId) { // start of another student, save processed one
+			saveToPdf($data, $currtime, $filename);
+			array_push($files, $filename);
+			$data = $gradedClass = array();
+		}
+		saveGradesData($data, $res);
+		$studentId = $data['studentId'];
+		$filename = $data['studentUid'].".".getClassDisplayText($data['class']).".$years[0].".preg_replace("/ /","",$data['name']).".pdf";
+		if (count($gradedClass) && !in_array($data['class'],$gradedClass)) {
+			array_push($skippedStudents, $data['name']);
+		}
+		else {
+			array_push($gradedClass, $data['class']);
+		}
+	}
+	if ($studentId!='') {
+		saveToPdf($data, $currtime, $filename);
+		array_push($files, $filename);
+		zipAllFiles($currtime, "SponsorReport.".preg_replace("/ /","",$sponsorInfo[0]).".$years[0].zip", $files);
+		deletePdfReports($currtime);
+	}
+}
+
+function deletePdfReports($path)
+{
+	$absPath = JPATH_BASE.DS.$path;
+	$files = scandir($absPath);
+	foreach($files as $file) {
+		if (preg_match("/\.pdf$/",$file))
+			unlink($absPath.DS.$file);
+	}
+	rmdir($absPath);
+}
+
+function zipAllFiles($path, $zipname, $files)
+{
+	$absPath = JPATH_BASE.DS.$path;
 	$zip = new ZipArchive;
-	if ($zip->open($zipname, ZIPARCHIVE::OVERWRITE) === TRUE) {
+	if ($zip->open(JPATH_BASE.DS.$zipname, ZIPARCHIVE::OVERWRITE) === TRUE) {
 		foreach ($files as $file) {
-	    	$zip->addFile($file, $file);
+	    	$zip->addFile($absPath.DS.$file, $file);
 		}
     	$zip->close();
-    	return true;
-	}
+		$path = JURI::root();
+		echo "<div class='message'>Requested report has been generated.<br>Please download the file: <a href='$path/$zipname'>$zipname</a></div>";
+   	}
 	else {
-    	return false;
+		echo "<div class='error message'>There was an error in creating the ZIP file.<br>Please try again.</div>";
 	}
 }
 
