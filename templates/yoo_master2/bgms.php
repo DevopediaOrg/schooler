@@ -486,7 +486,7 @@ function showSponsorList()
 	echo "</table>";
 }
 
-function printAllGradesTable($data, $inconsistent=0)
+function printAllGradesTable($data, $inconsistent=0, $first=0)
 {
 	if ($data['class']>=6 || $inconsistent) {
 		$numSubjects = 7;
@@ -498,12 +498,19 @@ function printAllGradesTable($data, $inconsistent=0)
 	}
 	if ($inconsistent) array_push($rows, 'Graded for Class');
 	$cols = array_merge(array('Subject'),getExamOptions('ASC'));
+	$pdflink = preg_replace("/\/view-grades\?.*/","/view-grades?studentId=".$data['studentId'],$_SERVER['REQUEST_URI']);
 	echo "<table style='width:100%'><tr>";
-	if ($inconsistent) {
+	if ($inconsistent) { // no PDF download when there are errors
 		echo "<td><h3 style='margin-top:40px;'>".$data['year']." / Class <span class=error>?</span></h3></td>";
 		echo "<td style='text-align:right;vertical-align:bottom'><span class=duplicateErr>*</span> Grades recorded against different classes in the same year. Please correct.</td>";
 	}
-	else echo "<td><h3 style='margin-top:40px;'>".$data['year']." / Class ".getClassDisplayText($data['class'])."</h3></td>";
+	else {
+		echo "<td><h3 style='margin-top:40px;'>".$data['year']." / Class ".getClassDisplayText($data['class'])."</h3></td>";
+		echo "<td style='text-align:right;vertical-align:bottom'>";
+		if ($first) echo "<a href='$pdflink&action=pdfall'>PDF All</a> | "; // suppressed if first table is inconsistent
+		echo "<a href='$pdflink&action=pdf&year=".$data['year']."'>PDF</a>";
+		echo "</td>";		
+	}
 	echo "</tr></table>";
 	echo "<table class=studentAllGrades>";
 
@@ -611,26 +618,29 @@ function showStudentAllGrades($id)
 							 "#__studentform.id=studentId AND studentId=$id ORDER BY year DESC, FIELD(examType,$examOptStr)");
 
 	if (count($results)==0) {
-		echo "<table class=studentView>";
+		echo "<table class=studentView><tr>";
 		echo "<tr><td><div class=message style='margin-top:50px'>No grades have been recorded for this student.</div></td></tr>";
 		echo "</table>";
 		return;
 	}
 
-	$year = ''; $data = $gradedClass = array(); $inconsistent = 0;
+	$year = ''; $data = $gradedClass = array();
+	$inconsistent = 0;
+	$firstTable = 1;
 	for ($i=0; $i<count($results); $i++) {
 		$res = $results[$i];
 		if ($year!='' && $res[1]!=$year) { // start of a new year, print processed one
-			printAllGradesTable($data, $inconsistent);
+			printAllGradesTable($data, $inconsistent, $firstTable);
 			$data = $gradedClass = array();
 			$inconsistent = 0;
+			$firstTable = 0;
 		}
 		saveGradesData($data, $res);
 		$year = $data['year'];
 		if (count($gradedClass) && !in_array($data['class'],$gradedClass)) $inconsistent = 1;
 		else array_push($gradedClass,$data['class']);
 	}
-	if ($year!='') printAllGradesTable($data, $inconsistent);
+	if ($year!='') printAllGradesTable($data, $inconsistent, $firstTable);
 }
 
 
@@ -1371,6 +1381,11 @@ function showGradesList()
 		return;
 	}
 	else if (isset($_REQUEST['studentId'])) {
+		if (isset($_REQUEST['action'])) {
+			if ($_REQUEST['action']=='pdfall') generateStudentGradesReport($_REQUEST['studentId']);
+			else if ($_REQUEST['action']=='pdf' && $_REQUEST['year']) generateStudentGradesReport($_REQUEST['studentId'],$_REQUEST['year']);
+			return;
+		}
 		showStudentAllGrades($_REQUEST['studentId']);
 		return;
 	}
@@ -1730,6 +1745,8 @@ function saveToPdf($data, $path, $filename)
 
 function generateClassReport($currtime, $pathPrefix, $class, $year)
 {
+	deleteOldReports();
+	
 	// Fields obtained should be in line with saveGradesData
 	$examOptStr = "'".implode("','",getExamOptions('DESC'))."'";
 	$results = getTableData("#__studentform,#__gradesform",
@@ -1737,43 +1754,105 @@ function generateClassReport($currtime, $pathPrefix, $class, $year)
 							 "#__gradesform.class='$class' AND year='$year' AND #__studentform.id=studentId ORDER BY studentId, year DESC, FIELD(examType,$examOptStr)");
 
 	if (count($results)==0) {
-		echo "<table class=studentView>";
-		echo "<tr><td><div class=message style='margin-top:50px'>No grades have been recorded for class ".getClassDisplayText($class)." in year $year.</div></td></tr>";
-		echo "</table>";
+		echo "<div class=message style='margin-top:50px'>No grades have been recorded for class ".getClassDisplayText($class)." in year $year.</div>";
 		return;
 	}
 	
-	$currtime = time();
-	$studentId = ''; $data = $gradedClass = $skippedStudents = $files = array();
+	$savePath = "data.".time();
+	$studentId = ''; $data = $gradedClass = $skipped = $files = array();
 	for ($i=0; $i<count($results); $i++) {
 		$res = $results[$i];
 		if ($studentId!='' && $res[0]!=$studentId) { // start of another student, save processed one
-			saveToPdf($data, $currtime, $filename);
-			array_push($files, $filename);
+			if (!in_array($data['name'],$skipped)) {
+				saveToPdf($data, $savePath, $filename);
+				array_push($files, $filename);
+			}
 			$data = $gradedClass = array();
 		}
 		saveGradesData($data, $res);
 		$studentId = $data['studentId'];
 		$filename = $data['studentUid'].".".getClassDisplayText($class).".$year.".preg_replace("/ /","",$data['name']).".pdf";
 		if (count($gradedClass) && !in_array($class,$gradedClass)) {
-			array_push($skippedStudents, $data['name']);
+			array_push($skipped, $data['name']);
 		}
 		else {
 			array_push($gradedClass, $class);
 		}
 	}
 	if ($studentId!='') {
-		saveToPdf($data, $currtime, $filename);
-		array_push($files, $filename);
-		zipAllFiles($currtime, "ClassReport.".getClassDisplayText($class).".$year.zip", $files);
-		deletePdfReports($currtime);
+		if (!in_array($data['name'],$skipped)) {
+			saveToPdf($data, $savePath, $filename);
+			array_push($files, $filename);
+		}
+		zipAllFiles($savePath, "ClassReport.".getClassDisplayText($class).".$year.zip", $files);
 	}
 	
+	// TODO: skipping here is useless since we have filtered by class
+	// Inconsistent data will simply be missing in individual reports
+	printSkippedRecords($skipped);
+
 	return;
+}
+
+function generateStudentGradesReport($id, $yearReq='*')
+{
+	deleteOldReports();
+
+	// Fields obtained should be in line with saveGradesData
+	if ($yearReq=='*') { $yearFilter = ''; $msg = ""; }
+	else { $yearFilter = "year='$yearReq' AND"; $msg = " in year $yearReq"; }
+	$examOptStr = "'".implode("','",getExamOptions('DESC'))."'";
+	$results = getTableData("#__studentform,#__gradesform",
+		 					"studentId,year,examType,DATE_FORMAT(#__gradesform.created,'%d %M %Y'),DATE_FORMAT(#__gradesform.modified,'%d %M %Y'),kannadaMarks,englishMarks,hindiMarks,mathMarks,generalScienceMarks,socialStudiesMarks,computerScience,physicalEducation,conduct,attendance,remarks,#__gradesform.id,#__gradesform.class,name,dateOfBirth,studentUid",
+		 					"$yearFilter studentId=$id AND #__studentform.id=studentId ORDER BY year, FIELD(examType,$examOptStr)");
+	if (count($results)==0) {
+		echo "<div class=message style='margin-top:50px'>No grades have been recorded for this student$msg.</div>";
+		return;
+	}
+	
+	$savePath = "data.".time();
+	$year = ''; $data = $gradedClass = $skipped = $files = array();
+	for ($i=0; $i<count($results); $i++) {
+		$res = $results[$i];
+		if ($year!='' && $res[1]!=$year) { // start of another student, save processed one
+			if (!in_array($data['year'],$skipped)) {
+				saveToPdf($data, $savePath, $filename);
+				array_push($files, $filename);
+			}
+			$data = $gradedClass = array();
+		}
+		saveGradesData($data, $res);
+		$year = $data['year'];
+		$filename = $data['studentUid'].".".getClassDisplayText($data['class']).".$year.".preg_replace("/ /","",$data['name']).".pdf";
+		if (count($gradedClass) && !in_array($data['class'],$gradedClass)) {
+			array_push($skipped, $data['year']);
+		}
+		else {
+			array_push($gradedClass, $data['class']);
+		}
+	}
+	if ($year!='') {
+		if (!in_array($data['year'],$skipped)) {
+			saveToPdf($data, $savePath, $filename);
+			array_push($files, $filename);
+		}
+		if ($yearReq=='*') {
+			zipAllFiles($savePath, $data['studentUid'].".".$data['name'].".zip", $files);
+		}
+		else { // single PDF
+			$path = JURI::root();
+			if (count($skipped)==0) echo "<div class='message'>Requested report has been generated.<br>Please download the file: <a href='$path/$savePath/$filename'>$filename</a></div>";	
+			else echo "<div class='message'>Unable to generate report.<br>Please check if grades are correctly recorded.</div>";
+		}
+	}
+	
+	printSkippedRecords($skipped);
 }
 
 function generateSponsorReport($id)
 {
+	deleteOldReports();
+	
 	$sponsorInfo = getTableData("#__sponsorform","name,sponsoredStudents","id=$id",1);
 	$years = getYears();
 	$examOptStr = "'".implode("','",getExamOptions('DESC'))."'";
@@ -1781,61 +1860,85 @@ function generateSponsorReport($id)
 		 					"studentId,year,examType,DATE_FORMAT(#__gradesform.created,'%d %M %Y'),DATE_FORMAT(#__gradesform.modified,'%d %M %Y'),kannadaMarks,englishMarks,hindiMarks,mathMarks,generalScienceMarks,socialStudiesMarks,computerScience,physicalEducation,conduct,attendance,remarks,#__gradesform.id,#__gradesform.class,name,dateOfBirth,studentUid",
 		 					"year='$years[0]' AND studentId IN ($sponsorInfo[1]) AND #__studentform.id=studentId ORDER BY studentId, FIELD(examType,$examOptStr)");
 	if (count($results)==0) {
-		echo "<table class=studentView>";
-		echo "<tr><td><div class=message style='margin-top:50px'>No grades have been recorded for students sponsored by $sponsorInfo[0] in year $year.</div></td></tr>";
-		echo "</table>";
+		echo "<div class=message style='margin-top:50px'>No grades have been recorded for students sponsored by $sponsorInfo[0] in year $years[0].</div>";
 		return;
 	}
 	
-	$currtime = time();
-	$studentId = ''; $data = $gradedClass = $skippedStudents = $files = array();
+	$savePath = "data.".time();
+	$studentId = ''; $data = $gradedClass = $skipped = $files = array();
 	for ($i=0; $i<count($results); $i++) {
 		$res = $results[$i];
 		if ($studentId!='' && $res[0]!=$studentId) { // start of another student, save processed one
-			saveToPdf($data, $currtime, $filename);
-			array_push($files, $filename);
+			if (!in_array($data['name'],$skipped)) {
+				saveToPdf($data, $savePath, $filename);
+				array_push($files, $filename);
+			}
 			$data = $gradedClass = array();
 		}
 		saveGradesData($data, $res);
 		$studentId = $data['studentId'];
 		$filename = $data['studentUid'].".".getClassDisplayText($data['class']).".$years[0].".preg_replace("/ /","",$data['name']).".pdf";
 		if (count($gradedClass) && !in_array($data['class'],$gradedClass)) {
-			array_push($skippedStudents, $data['name']);
+			array_push($skipped, $data['name']);
 		}
 		else {
 			array_push($gradedClass, $data['class']);
 		}
 	}
 	if ($studentId!='') {
-		saveToPdf($data, $currtime, $filename);
-		array_push($files, $filename);
-		zipAllFiles($currtime, "SponsorReport.".preg_replace("/ /","",$sponsorInfo[0]).".$years[0].zip", $files);
-		deletePdfReports($currtime);
+		if (!in_array($data['name'],$skipped)) {
+			saveToPdf($data, $savePath, $filename);
+			array_push($files, $filename);
+		}
+		zipAllFiles($savePath, "SponsorReport.".preg_replace("/ /","",$sponsorInfo[0]).".$years[0].zip", $files);
 	}
+	
+	printSkippedRecords($skipped);
 }
 
-function deletePdfReports($path)
+function printSkippedRecords($skipped)
 {
-	$absPath = JPATH_BASE.DS.$path;
-	$files = scandir($absPath);
-	foreach($files as $file) {
-		if (preg_match("/\.pdf$/",$file))
-			unlink($absPath.DS.$file);
+	if (count($skipped)==0) return;
+	
+	echo "<div class=message>Skipped reporting for the following since data was not consistent:</div>";
+	echo "<ul>";
+	foreach ($skipped as $skip) {
+		echo "<li>$skip</li>";			
 	}
-	rmdir($absPath);
+	echo "</ul>";
+}
+
+function deleteOldReports()
+{
+	// Delete old files: 10 minutes
+	$datafiles = scandir(JPATH_BASE);
+	foreach($datafiles as $file) {
+		if(preg_match("/^data\./",$file) && is_dir($file)
+			&& time() - filemtime($file) >= 10*60) {
+				$innerfiles = scandir(JPATH_BASE.DS.$file);
+				foreach($innerfiles as $inner)
+					if (is_file(JPATH_BASE.DS.$file.DS.$inner))
+						unlink(JPATH_BASE.DS.$file.DS.$inner);
+				rmdir(JPATH_BASE.DS.$file);
+		}
+	}
 }
 
 function zipAllFiles($path, $zipname, $files)
 {
+	if (count($files)==0) {
+		echo "<div class='message'>Unable to generate report.<br>Please check if grades are correctly recorded.</div>";
+		return;
+	}
+	
 	$absPath = JPATH_BASE.DS.$path;
 	$zip = new ZipArchive;
-	if ($zip->open(JPATH_BASE.DS.$zipname, ZIPARCHIVE::OVERWRITE) === TRUE) {
+	if ($zip->open($absPath.DS.$zipname, ZIPARCHIVE::OVERWRITE) === TRUE) {
 		foreach ($files as $file) {
 	    	$zip->addFile($absPath.DS.$file, $file);
 		}
     	$zip->close();
-		$path = JURI::root();
-		echo "<div class='message'>Requested report has been generated.<br>Please download the file: <a href='$path/$zipname'>$zipname</a></div>";
+		echo "<div class='message'>Requested report has been generated.<br>Please download the file: <a href='".JURI::root()."/$path/$zipname'>$zipname</a></div>";
    	}
 	else {
 		echo "<div class='error message'>There was an error in creating the ZIP file.<br>Please try again.</div>";
