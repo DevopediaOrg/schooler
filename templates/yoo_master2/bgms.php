@@ -148,6 +148,8 @@ if (false) { // Noted here for reference only
 
 function getYears()
 {	// also to update ChronoForms gradesForm in Joomla admin view.
+	#$years = getTableData("#__gradesform","DISTINCT(year)","1 ORDER BY year DESC");
+	#foreach ($years as $yr) array_push($yrsArr,$yr[0]);
 	return array('2014-15','2013-14');
 }
 
@@ -479,9 +481,9 @@ function showSponsorList()
 	echo "</table>";
 }
 
-function printAllGradesTable($data, $year, $class, $inconsistent=0)
+function printAllGradesTable($data, $inconsistent=0)
 {
-	if ($class>=6 || $inconsistent) {
+	if ($data['class']>=6 || $inconsistent) {
 		$numSubjects = 7;
 		$rows = array('Kannada','English','Hindi','Mathematics','General Science','Social Studies','Computer Science','Total','Physical Education','Attendance','Conduct','Remarks','Date');	
 	}
@@ -493,16 +495,16 @@ function printAllGradesTable($data, $year, $class, $inconsistent=0)
 	$cols = array_merge(array('Subject'),getExamOptions('ASC'));
 	echo "<table style='width:100%'><tr>";
 	if ($inconsistent) {
-		echo "<td><h3 style='margin-top:40px;'>$year / Class <span class=error>?</span></h3></td>";
+		echo "<td><h3 style='margin-top:40px;'>".$data['year']." / Class <span class=error>?</span></h3></td>";
 		echo "<td style='text-align:right;vertical-align:bottom'><span class=duplicateErr>*</span> Grades recorded against different classes in the same year. Please correct.</td>";
 	}
-	else echo "<td><h3 style='margin-top:40px;'>$year / Class ".getClassDisplayText($class)."</h3></td>";
+	else echo "<td><h3 style='margin-top:40px;'>".$data['year']." / Class ".getClassDisplayText($data['class'])."</h3></td>";
 	echo "</tr></table>";
 	echo "<table class=studentAllGrades>";
 
 	echo "<tr rowspan=2><th>$cols[0]</th>";
 	for ($i=1; $i<count($cols); $i++) {
-		if (isset($data[$cols[$i]]['link']) && $data[$cols[$i]]['link']) echo "<th colspan=3><a href='".$data[$cols[$i]]['link']."'>".preg_replace("/ \(/","<br>(",$cols[$i])."</a></th>";
+		if (isset($data['link'][$cols[$i]]) && $data['link'][$cols[$i]]) echo "<th colspan=3><a href='".$data['link'][$cols[$i]]."'>".preg_replace("/ \(/","<br>(",$cols[$i])."</a></th>";
 		else echo "<th colspan=3>".preg_replace("/ \(/","<br>(",$cols[$i])."</th>";
 	}
 	echo "</tr>";
@@ -539,6 +541,43 @@ function printAllGradesTable($data, $year, $class, $inconsistent=0)
 	echo "</table>";
 }
 
+function saveGradesData(&$data, $res)
+{
+	$data['studentId'] = $res[0];
+	$data['name'] = $res[18];
+	$data['dateOfBirth'] = $res[19];
+	$data['studentUid'] = $res[20];
+	$data['year'] = $res[1];
+	$class = $data['class'] = $res[17];
+	$examType = $res[2];
+	$maxMarks = preg_replace("/.*\((\d+) marks.*/","$1",$examType);
+	$numSubjects = 0;
+	$data['Graded for Class'][$examType] = getClassDisplayText($class);
+	if (setGrade($data['Kannada'][$examType], $res[5], $maxMarks)) $numSubjects++;
+	if (setGrade($data['English'][$examType], $res[6], $maxMarks)) $numSubjects++;
+	if (setGrade($data['Hindi'][$examType], $res[7], $maxMarks)) $numSubjects++;
+	if (setGrade($data['Mathematics'][$examType], $res[8], $maxMarks)) $numSubjects++;
+	if (setGrade($data['General Science'][$examType], $res[9], $maxMarks)) $numSubjects++;
+	if (setGrade($data['Social Studies'][$examType], $res[10], $maxMarks)) $numSubjects++;
+	if (setGrade($data['Computer Science'][$examType], $res[11], $maxMarks)) $numSubjects++;
+	setGrade($data['Total'][$examType], $res[5]+$res[6]+$res[7]+$res[8]+$res[9]+$res[10]+$res[11], $numSubjects*$maxMarks);
+	$data['Physical Education'][$examType] = $res[12];
+	$attendanceFields = explode('/',preg_replace("/ /","",$res[14]));
+	if (count($attendanceFields)==2 && $attendanceFields[1]) {
+		$percentage = floor(0.5+100*$attendanceFields[0]/$attendanceFields[1]);
+		$data['Attendance'][$examType] = $res[14]." ($percentage %)";
+	}
+	else {
+		$data['Attendance'][$examType] = $res[14];
+	}
+	$data['Conduct'][$examType] = $res[13];
+	$data['Remarks'][$examType] = $res[15];
+	if (preg_match("/[1-9]/",$res[4])) $data['Date'][$examType] = $res[4];
+	else $data['Date'][$examType] = $res[3];
+	$gradesLink = preg_replace("/\/grades\/.*/","/grades/view-grades?id=".$res[16],$_SERVER['REQUEST_URI']);
+	$data['link'][$examType] = $gradesLink; // we will have id per exam
+}
+
 function showStudentAllGrades($id)
 {	// $id is with reference to studentsform
 	echo "<table class=studentPageTitle><tr>";
@@ -560,9 +599,10 @@ function showStudentAllGrades($id)
 	echo "<tr><th>Group</th><td>".$studentDetails[3]."</td></tr>";
 	echo "</table>";
 
+	// Fields obtained should be in line with saveGradesData
 	$examOptStr = "'".implode("','",getExamOptions('DESC'))."'";
 	$results = getTableData("#__studentform,#__gradesform",
-							 "studentId,year,examType,DATE_FORMAT(#__gradesform.created,'%d %M %Y'),DATE_FORMAT(#__gradesform.modified,'%d %M %Y'),kannadaMarks,englishMarks,hindiMarks,mathMarks,generalScienceMarks,socialStudiesMarks,computerScience,physicalEducation,conduct,attendance,remarks,#__gradesform.id,#__gradesform.class",
+							 "studentId,year,examType,DATE_FORMAT(#__gradesform.created,'%d %M %Y'),DATE_FORMAT(#__gradesform.modified,'%d %M %Y'),kannadaMarks,englishMarks,hindiMarks,mathMarks,generalScienceMarks,socialStudiesMarks,computerScience,physicalEducation,conduct,attendance,remarks,#__gradesform.id,#__gradesform.class,name,dateOfBirth,studentUid",
 							 "#__studentform.id=studentId AND studentId=$id ORDER BY year DESC, FIELD(examType,$examOptStr)");
 
 	if (count($results)==0) {
@@ -572,48 +612,22 @@ function showStudentAllGrades($id)
 		return;
 	}
 
-	$year = ''; $gradesId=-1; $data = $gradedClass = array(); $inconsistent = 0;
+	$year = ''; $data = $gradedClass = array(); $inconsistent = 0;
 	for ($i=0; $i<count($results); $i++) {
 		$res = $results[$i];
 		if ($year!='' && $res[1]!=$year) { // start of a new year, print processed one
-			printAllGradesTable($data, $year, $class, $inconsistent);
+			printAllGradesTable($data, $inconsistent);
 			$data = $gradedClass = array();
 			$inconsistent = 0;
 		}
-		$year = $res[1];
-		$class = $res[17];
-		if (count($gradedClass) && !in_array($class,$gradedClass)) $inconsistent = 1;
-		else array_push($gradedClass,$class);
-		$examType = $res[2];
-		$maxMarks = preg_replace("/.*\((\d+) marks.*/","$1",$examType);
-		$numSubjects = 0;
-		$data['Graded for Class'][$examType] = getClassDisplayText($class);
-		if (setGrade($data['Kannada'][$examType], $res[5], $maxMarks)) $numSubjects++;
-		if (setGrade($data['English'][$examType], $res[6], $maxMarks)) $numSubjects++;
-		if (setGrade($data['Hindi'][$examType], $res[7], $maxMarks)) $numSubjects++;
-		if (setGrade($data['Mathematics'][$examType], $res[8], $maxMarks)) $numSubjects++;
-		if (setGrade($data['General Science'][$examType], $res[9], $maxMarks)) $numSubjects++;
-		if (setGrade($data['Social Studies'][$examType], $res[10], $maxMarks)) $numSubjects++;
-		if (setGrade($data['Computer Science'][$examType], $res[11], $maxMarks)) $numSubjects++;
-		setGrade($data['Total'][$examType], $res[5]+$res[6]+$res[7]+$res[8]+$res[9]+$res[10]+$res[11], $numSubjects*$maxMarks);
-		$data['Physical Education'][$examType] = $res[12];
-		$attendanceFields = explode('/',preg_replace("/ /","",$res[14]));
-		if (count($attendanceFields)==2 && $attendanceFields[1]) {
-			$percentage = floor(0.5+100*$attendanceFields[0]/$attendanceFields[1]);
-			$data['Attendance'][$examType] = $res[14]." ($percentage %)";
-		}
-		else {
-			$data['Attendance'][$examType] = $res[14];
-		}
-		$data['Conduct'][$examType] = $res[13];
-		$data['Remarks'][$examType] = $res[15];
-		if (preg_match("/[1-9]/",$res[4])) $data['Date'][$examType] = $res[4];
-		else $data['Date'][$examType] = $res[3];
-		$gradesLink = preg_replace("/\/grades\/.*/","/grades/view-grades?id=".$res[16],$_SERVER['REQUEST_URI']);
-		$data[$examType]['link'] = $gradesLink; // we will have id per exam
+		saveGradesData($data, $res);
+		$year = $data['year'];
+		if (count($gradedClass) && !in_array($data['class'],$gradedClass)) $inconsistent = 1;
+		else array_push($gradedClass,$data['class']);
 	}
-	if ($year!='') printAllGradesTable($data, $year, $class, $inconsistent);
+	if ($year!='') printAllGradesTable($data, $inconsistent);
 }
+
 
 function setGrade(&$data, $marks, $maxMarks)
 {
@@ -1084,7 +1098,7 @@ function processFilters()
 			studentNameElem.style.display = 'block';
 			break;
 		case 5:
-			reportYearElem.style.display = 'none';
+			reportYearElem.style.display = 'block';
 			reportExamTypeElem.style.display = 'none';
 			classElem.style.display = 'block';
 			studentNameElem.style.display = 'none';
@@ -1392,9 +1406,7 @@ function showGradesList()
 	echo "<tr style='border:0px'><td colspan=".count($columnHeadings)." style='text-align:right;border:0px'>";
 	$actionUrl = preg_replace("/[?].*/","",$_SERVER['REQUEST_URI']);
 	echo "<form id=gradeSelForm method=get onsubmit='return true;' action='$actionUrl'>";
-	#$years = getTableData("#__gradesform","DISTINCT(year)","1 ORDER BY year DESC");
 	$yrsArr = getYears();
-	#foreach ($years as $yr) array_push($yrsArr,$yr[0]);
 	echo "<select style='width:100px;margin-right:5px' name=year>".getOptStr($yrsArr,false,0,$year)."</select>";
 	echo "<select style='margin-right:5px' name=examType>".getOptStr(getExamOptions('DESC'),false,0,$examType)."</select>";
 	echo "<input type=submit value='Get Grades' />";
@@ -1508,13 +1520,14 @@ function showReports()
 	$classes = array('I','II','III','IV','V','VI','VII','VIII','IX','X');
 	if (isset($_REQUEST['class'])) {
 		$class = $_REQUEST['class'];
+	}
+	else $class = 1;
+
+	if (isset($_REQUEST['studentId'])) {
 		$studentId = $_REQUEST['studentId'];
 	}
-	else {
-		$class = 1;
-		$studentId = getTableData("#__studentform","id","class='$class' ORDER BY name LIMIT 1",0);
-	}
-
+	else $studentId = getTableData("#__studentform","id","class='1' ORDER BY name LIMIT 1",0);;
+	
 	// Display form for user selection
 	$user = JFactory::getUser();
 	echo "<table class=studentList>";
@@ -1528,9 +1541,7 @@ function showReports()
 	echo "<select id=class style='margin-right:5px;display:none;float:left' name=class>".getOptStr($classes,true,1,$classes[$class-1])."</select>";
 	echo "<input id=studentIdLoad type=hidden disabled=disabled value='$studentId' />";
 	echo "<select id=studentId style='margin-right:5px;display:none;float:left' name=studentId></select>"; # leave options to JS
-	#$years = getTableData("#__gradesform","DISTINCT(year)","1 ORDER BY year DESC");
 	$yrsArr = getYears();
-	#foreach ($years as $yr) array_push($yrsArr,$yr[0]);
 	echo "<select id=reportYearId style='width:100px;margin-right:5px;display:none;float:left' name=year>".getOptStr($yrsArr,false,0,$year)."</select>";
 	echo "<select id=reportExamTypeId style='margin-right:5px;display:none;float:left' name=examType>".getOptStr(getExamOptions('DESC'),false,0,$examType)."</select>";
 	echo "<input type=submit id=reportsSubmit value='View Report' />";
@@ -1568,7 +1579,7 @@ function showReports()
 			reportStudentPerformance($currtime,$pathPrefix,$class,$studentId);
 			break;
 		case 5:
-			generateClassReport($currtime,$pathPrefix,$class);
+			generateClassReport($currtime,$pathPrefix,$class,$year);
 			break;
 		case 6:
 			promoteStudents($currtime,$pathPrefix);
@@ -1576,9 +1587,211 @@ function showReports()
 	}
 }
 
-function generateClassReport($currtime, $pathPrefix, $class)
+function saveToPdf($data, $filename)
 {
+	require_once('libraries/fpdf/fpdf.php');
+	
+	$pdf = new FPDF('L');
+	$pdf->AddPage();
+	$pageNum = 1;
+	$pageWidth = 297; $pageHeight = 210; // A4 in mm
+	$pdf->SetDrawColor(100,100,100);
+	$pdf->SetFillColor(220,220,220);
+	
+	$inconsistent = 0;
+	if ($data['class']>=6 || $inconsistent) {
+		$numSubjects = 7;
+		$rows = array('Kannada','English','Hindi','Mathematics','General Science','Social Studies','Computer Science','Total','Physical Education','Attendance','Conduct','Date');	
+	}
+	else {
+		$numSubjects = 6;
+		$rows = array('Kannada','English','Hindi','Mathematics','General Science','Social Studies','Total','Physical Education','Attendance','Conduct','Date');	
+	}
+	$examTypes = getExamOptions('ASC');
+	$examTypesStr = implode(',',$examTypes);
+	$examTitles = explode(',',preg_replace("/\s*(Exam)?\s*\(.*?\)/","",$examTypesStr));
+	$cols = array_merge(array('SUBJECT'),$examTypes,array('Remarks'));
+
+	$xoff =10; $yoff = 10;
+	$pdf->Image('templates/yoo_master2/apple_touch_icon.png',$pdf->GetX(),$pdf->GetY(),24);
+	$pdf->Image('templates/yoo_master2/apple_touch_icon.png',$pageWidth-40,$pdf->GetY(),24);
+	$pdf->SetFont('Helvetica','B',30); $yoff += 10;
+	$pdf->Text($pageWidth/4, $yoff, "BGMS Shishukunj Vidyalaya"); $yoff += 10;
+	$pdf->SetFont('Helvetica','B',20);
+	$pdf->Text($pageWidth/6, $yoff, "18th Cross, Ramesh Nagar, Vibhutipura, Bangalore 560037"); $yoff += 10;
+	$pdf->SetFont('Helvetica','B',20);
+	$pdf->Text($pageWidth/2-40, $yoff, "Progress Report ".$data['year']); $yoff += 5;
+
+	$pdf->SetFont('Helvetica','B',12);
+	$pdf->Text($xoff, $yoff, "ID: ".$data['studentUid']); $yoff += 5;
+	$pdf->Text($xoff, $yoff, "Name: ".$data['name']); $yoff += 5;
+	$pdf->Text($xoff, $yoff, "Date of Birth: ".$data['dateOfBirth']); $yoff += 5;
+	$pdf->Text($xoff, $yoff, "Standard: ".getClassDisplayText($data['class'])); $yoff += 5;
+	
+	$headColWidth = 60; $headRowHeight = 15; $indent = 2;
+	$pdf->Rect($xoff,$yoff,$headColWidth,$headRowHeight);
+	$pdf->SetFont('Helvetica','B',14);
+	$pdf->Text($xoff+$indent,$yoff+5,$cols[0]);
+
+	$xoff += $headColWidth;
+	$examTypeColWidth = 27; $subColWidth = $examTypeColWidth/3;
+	for ($i=1; $i<count($cols)-1; $i++, $xoff+=$examTypeColWidth) {
+		$pdf->Rect($xoff,$yoff,$examTypeColWidth,$headRowHeight);
+		$pdf->SetFont('Helvetica','B',11);
+		$examType = preg_replace("/ Exam /","",$cols[$i]);
+		$pdf->Text($xoff+$indent,$yoff+4,preg_replace("/\s*\(.*/","",$examType));
+		$pdf->Text($xoff+$indent,$yoff+8,preg_replace("/.*\(/","(",$examType));
+		$pdf->SetFont('Helvetica','',8);
+		$pdf->SetXY($xoff,$yoff+10);
+		$pdf->Cell($subColWidth,5,'Grade',1,0,'C');
+		$pdf->Cell($subColWidth,5,'%',1,0,'C');
+		$pdf->Cell($subColWidth,5,'Marks',1,0,'C');
+	}
+	
+	$lastColWidth = $pageWidth-$xoff-10;
+	$pdf->Rect($xoff,$yoff,$lastColWidth,$headRowHeight);
+	$pdf->SetFont('Helvetica','B',14);
+	$pdf->Text($xoff+$indent,$yoff+5,$cols[count($cols)-1]);
+	
+	$rowHeight = 8; $yoff += 7+$rowHeight;
+	for ($i=0; $i<count($rows); $i++, $yoff+=$rowHeight) {
+		$xoff = 10;
+		if ($i==count($rows)-1 && $data['class']<6) $rowHgt = 2*$rowHeight;
+		else $rowHgt = $rowHeight;
+		if ($rows[$i]=='Total') { $fillrect = 'FD'; $fillcell = true; }
+		else { $fillrect = 'D'; $fillcell = false; }
+		$pdf->Rect($xoff,$yoff,$headColWidth,$rowHgt,$fillrect);
+		$pdf->SetFont('Helvetica','B',14);
+		$cell = $rows[$i];
+		if ($cell=='Total') $cell = 'TOTAL'; 
+		$pdf->Text($xoff+$indent,$yoff+5,$cell);
+		$pdf->SetFont('Helvetica','',11);			
+		for ($j=1, $xoff+=$headColWidth; $j<count($cols); $j++, $xoff+=$examTypeColWidth) {
+			if ($j==count($cols)-1) {
+				if ($i%2!=0) continue;
+				else if (!isset($data['Remarks'][$cols[1+$i/2]])) $cell = '';
+				else $cell = $data['Remarks'][$cols[1+$i/2]];
+			}
+			else if (!isset($data[$rows[$i]][$cols[$j]])) {
+				if ($i<=$numSubjects) $cell = array('grade'=>'','%'=>'','marks'=>'');
+				else $cell = '';
+			}
+			else $cell = $data[$rows[$i]][$cols[$j]];
+
+			if ($j==count($cols)-1) {
+				if ($i%2==0) {
+					$pdf->Rect($xoff,$yoff,$lastColWidth,$rowHeight*2);
+					$pdf->Text($xoff+$indent,$yoff+5,$examTitles[$i/2].": ");
+					$pdf->SetFont('Helvetica','',10);
+					$cell .= ' ';
+					$firstLine = preg_replace("/(.{1,18}) .*/","$1",$cell);
+					$pdf->Text($xoff+$lastColWidth/3+$indent,$yoff+5,$firstLine);
+					preg_match_all("/(.{1,32}) /",substr($cell,strlen($firstLine)+1),$matches);
+					$k = 1;
+					foreach ($matches[0] as $match) {
+						$pdf->Text($xoff+$indent,$yoff+5+$k*5,$match);
+						$k++; if ($k>=3) break;
+					}
+				}
+			}
+			else if ($i<=$numSubjects) {
+				$pdf->SetXY($xoff,$yoff);
+				$pdf->Cell($subColWidth,$rowHeight,$cell['grade'],1,0,'L',$fillcell);
+				$pdf->Cell($subColWidth,$rowHeight,$cell['%'],1,0,'R',$fillcell);
+				$pdf->Cell($subColWidth,$rowHeight,$cell['marks'],1,0,'R',$fillcell);
+			}
+			else {
+				$cell = preg_replace("/Needs to improve/","To improve",$cell);
+				$pdf->Rect($xoff,$yoff,$examTypeColWidth,$rowHgt);
+				$pdf->Text($xoff+$indent,$yoff+5,$cell);
+			}
+		}
+	}
+
+	$pdf->Text(10, $pageHeight-10, "GRADE");
+	$pdf->Text($pageWidth/7, $pageHeight-10, "A+ >=90%");
+	$pdf->Text(2*$pageWidth/7, $pageHeight-10, "A 75-89%");
+	$pdf->Text(3*$pageWidth/7, $pageHeight-10, "B+ 65-74%");
+	$pdf->Text(4*$pageWidth/7, $pageHeight-10, "B 50-64%");
+	$pdf->Text(5*$pageWidth/7, $pageHeight-10, "C+ 35-49%");
+	$pdf->Text(6*$pageWidth/7, $pageHeight-10, "C <35%");
+
+	$pdf->Image(findPhoto($data['studentId']),$pageWidth-40,40,24);
+	
+	$pdf->Output($filename,'F');
+}
+
+function generateClassReport($currtime, $pathPrefix, $class, $year)
+{
+	// Fields obtained should be in line with saveGradesData
+	$examOptStr = "'".implode("','",getExamOptions('DESC'))."'";
+	$results = getTableData("#__studentform,#__gradesform",
+							 "studentId,year,examType,DATE_FORMAT(#__gradesform.created,'%d %M %Y'),DATE_FORMAT(#__gradesform.modified,'%d %M %Y'),kannadaMarks,englishMarks,hindiMarks,mathMarks,generalScienceMarks,socialStudiesMarks,computerScience,physicalEducation,conduct,attendance,remarks,#__gradesform.id,#__gradesform.class,name,dateOfBirth,studentUid",
+							 "#__gradesform.class='$class' AND year='$year' AND #__studentform.id=studentId ORDER BY studentId, year DESC, FIELD(examType,$examOptStr)");
+
+	if (count($results)==0) {
+		echo "<table class=studentView>";
+		echo "<tr><td><div class=message style='margin-top:50px'>No grades have been recorded for class ".getClassDisplayText($class)." in year $year.</div></td></tr></table>";
+		echo "</table>";
+		return;
+	}
+	
+	$studentId = ''; $data = $gradedClass = $skippedStudents = $files = array();
+	for ($i=0; $i<count($results); $i++) {
+		$res = $results[$i];
+		if ($studentId!='' && $res[0]!=$studentId) { // start of another student, save processed one
+			saveToPdf($data, $filename);
+			array_push($files, $filename);
+			$data = $gradedClass = array();
+		}
+		saveGradesData($data, $res);
+		$studentId = $data['studentId'];
+		$filename = $data['studentUid'].".".getClassDisplayText($class).".$year.".preg_replace("/ /","",$data['name']).".pdf";
+		if (count($gradedClass) && !in_array($class,$gradedClass)) {
+			array_push($skippedStudents, $data['name']);
+		}
+		else {
+			array_push($gradedClass,$class);
+		}
+	}
+	if ($studentId!='') {
+		saveToPdf($data, $filename);
+		array_push($files, $filename);
+		$zipName = "ClassReport.".getClassDisplayText($class).".$year.zip";
+		if (!zipAllFiles($zipName, $files))
+		{
+			echo "<div class='error message'>There was an error in creating the ZIP file.<br>Please try again.</div>";
+		}
+		else {
+			$path = JURI::root();
+			echo "<div class='message'>Requested report has been generated.<br>Please download the file: <a href='$path/$zipName'>$zipName</a></div>";
+		}
+	}
+	
+	$pdffiles = scandir(JPATH_BASE);
+	foreach($pdffiles as $file) {
+		$filePattern = "\\.".getClassDisplayText($class)."\\.$year\\..*\\.pdf$";
+		if(preg_match("/$filePattern/",$file) && is_file($file)) {
+			unlink($file);
+		}
+	}
+
 	return;
+}
+
+function zipAllFiles($zipname, $files)
+{
+	$zip = new ZipArchive;
+	if ($zip->open($zipname, ZIPARCHIVE::OVERWRITE) === TRUE) {
+		foreach ($files as $file) {
+	    	$zip->addFile($file, $file);
+		}
+    	$zip->close();
+    	return true;
+	}
+	else {
+    	return false;
+	}
 }
 
 function promoteStudents($currtime, $pathPrefix)
