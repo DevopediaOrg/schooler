@@ -430,6 +430,9 @@ function showSponsorList()
 	$columnHeadings = array('Sponsor ID','Name','Sponsored Students','Actions');
 	$sponsors = getTableData("#__sponsorform","id,sponsorUid,name,sponsoredStudents","1 ORDER BY name ASC");
 
+	$user = JFactory::getUser();
+	if ($user->guest) array_pop($columnHeadings);
+	
 	# Find duplicates in sponsorUid
 	$dups = array(); $uids = array();
 	foreach ($sponsors as $sponsor) array_push($uids, $sponsor[1]);
@@ -473,11 +476,13 @@ function showSponsorList()
 							else echo "<li><a href='$studentLink?id=$student[0]'>$student[1]</a> / Class ".getClassDisplayText($student[2])." / Group $student[3]</li>";
 						}
 						echo "</ol></td>";
-						echo "<td><a href='$itemLink?id=$id&action=report'>Download Reports</a></td>";
+						if (!$user->guest) echo "<td><a href='$itemLink?id=$id&action=report'>Download Reports</a></td>";
 					}
-					else echo "<td>&nbsp;</td><td>&nbsp;</td>";
+					else if (!$user->guest) echo "<td>&nbsp;</td><td>&nbsp;</td>";
+					else echo "<td>&nbsp;</td>";
 				}
-				else echo "<td>&nbsp;</td><td>&nbsp;</td>";
+				else if (!$user->guest) echo "<td>&nbsp;</td><td>&nbsp;</td>";
+				else echo "<td>&nbsp;</td>";
 			}
 			else echo "<td>".$sponsor[$i]."</td>";
 		}
@@ -500,16 +505,19 @@ function printAllGradesTable($data, $inconsistent=0, $first=0)
 	$cols = array_merge(array('Subject'),getExamOptions('ASC'));
 	$pdflink = preg_replace("/\/view-grades\?.*/","/view-grades?studentId=".$data['studentId'],$_SERVER['REQUEST_URI']);
 	echo "<table style='width:100%'><tr>";
+	$user = JFactory::getUser();
 	if ($inconsistent) { // no PDF download when there are errors
 		echo "<td><h3 style='margin-top:40px;'>".$data['year']." / Class <span class=error>?</span></h3></td>";
 		echo "<td style='text-align:right;vertical-align:bottom'><span class=duplicateErr>*</span> Grades recorded against different classes in the same year. Please correct.</td>";
 	}
 	else {
 		echo "<td><h3 style='margin-top:40px;'>".$data['year']." / Class ".getClassDisplayText($data['class'])."</h3></td>";
-		echo "<td style='text-align:right;vertical-align:bottom'>";
-		if ($first) echo "<a href='$pdflink&action=pdfall'>PDF All</a> | "; // suppressed if first table is inconsistent
-		echo "<a href='$pdflink&action=pdf&year=".$data['year']."'>PDF</a>";
-		echo "</td>";		
+		if (!$user->guest) {
+			echo "<td style='text-align:right;vertical-align:bottom'>";
+			if ($first) echo "<a href='$pdflink&action=pdfall'>PDF All</a> | "; // suppressed if first table is inconsistent
+			echo "<a href='$pdflink&action=pdf&year=".$data['year']."'>PDF</a>";
+			echo "</td>";
+		}
 	}
 	echo "</tr></table>";
 	echo "<table class=studentAllGrades>";
@@ -1077,6 +1085,9 @@ window.addEvent('domready', function() {
   	if (parseInt(reportTypeElem.value)==6) {
       return confirm('CAUTION: This will promote ALL students to the next higher class. This should be done only at the start of an academic year. Are you sure you want to do this?');
     }
+    else if (parseInt(reportTypeElem.value)==5) {
+      return confirm('INFO: This will up to a minute. Click OK to proceed.');
+    }
     return true;
   });
 });
@@ -1512,6 +1523,8 @@ function showReports()
 
 	$graphs = array('View student profile','View student sponsorship','View grades from an assessment','View top students from an assessment','View a student\'s performance over time');
 	$actions = array('Generate class progress reports','Promote students to next class');
+	$user = JFactory::getUser();
+	if (!$user->get('isRoot')) array_pop($actions);
 	$reports = array_merge($graphs,$actions);
 	
 	if (isset($_REQUEST['reportType'])) {
@@ -1549,7 +1562,6 @@ function showReports()
 	else $studentId = getTableData("#__studentform","id","class='1' ORDER BY name LIMIT 1",0);;
 	
 	// Display form for user selection
-	$user = JFactory::getUser();
 	echo "<table class=studentList>";
 	echo "<tr style='border:0px'><td style='border:0px'>";
 	$actionUrl = preg_replace("/[?].*/","",$_SERVER['REQUEST_URI']);
@@ -1633,8 +1645,8 @@ function saveToPdf($data, $path, $filename)
 	$cols = array_merge(array('SUBJECT'),$examTypes,array('Remarks'));
 
 	$xoff =10; $yoff = 10;
-	$pdf->Image('templates/yoo_master2/apple_touch_icon.png',$pdf->GetX(),$pdf->GetY(),24);
-	$pdf->Image('templates/yoo_master2/apple_touch_icon.png',$pageWidth-40,$pdf->GetY(),24);
+	$pdf->Image('images/BGMS-Shishukung-Logo-Small.png',$pdf->GetX(),$pdf->GetY()-5,30);
+	$pdf->Image('images/ShishukunjInternational-Small.png',$pageWidth-40,$pdf->GetY()-5,30);
 	$pdf->SetFont('Helvetica','B',30); $yoff += 10;
 	$pdf->Text($pageWidth/4, $yoff, "BGMS Shishukunj Vidyalaya"); $yoff += 10;
 	$pdf->SetFont('Helvetica','B',20);
