@@ -30,6 +30,8 @@ scaleRating = ['Excellent', 'Good', 'Needs to improve'];
 descText = ['Can do better.', 'Congratulations. Potential to do even better.', 'Well done.'];
 remarks = ['Can do better.', 'Need to work independently.', 'Well done. Concentrate on maths.', 'Good job in English and Kannada.', 'Need to work hard.', 'Need to work hard in Hindi. All the best.', 'Good work.', 'Congratulations. Potential to do even better.', 'Need assistance in languages. Well done in social.', 'Concentrate. Too playful.']
 timeoffset = 13*3600; # server may be on a different TZ than where this script runs
+parentStatus = ['Both parents are alive', 'Only father is alive', 'Only mother is alive', 'Both parents are deceased'];
+economicStatus = ['Family is below poverty line', 'Family is above poverty line'];
 classes = []; # we need to use the same for students and grades
 for name in personNames:
   if(random.randint(0,19) > 1): # 5% graduates
@@ -43,7 +45,7 @@ for name in personNames:
 #--------------------------------------------------------------------
 def generateStudents(outfile):
   outfile.write("DELETE FROM `ek5d2_studentform`;\n");
-  outfile.write("INSERT INTO `ek5d2_studentform` (`id`, `uniq_id`, `user_id`, `created`, `modified`, `name`, `dateOfBirth`, `sex`, `admissionNumber`, `studentUid`, `class`, `group`, `parent`, `guardian`) VALUES\n");
+  outfile.write("INSERT INTO `ek5d2_studentform` (`id`, `uniq_id`, `user_id`, `created`, `modified`, `name`, `dateOfBirth`, `sex`, `admissionNumber`, `studentUid`, `class`, `group`, `parentStatus`, `parent`, `guardian`, `economicStatus`) VALUES\n");
 
   random.shuffle(personNames);
   for i in range(len(personNames)):
@@ -75,12 +77,14 @@ def generateStudents(outfile):
     fields.append(uid);
     fields.append(str(classes[i]));
     fields.append(random.choice(group));
+    fields.append(random.choice(parentStatus));
     if (random.randint(0,1)):
       fields.append("");
       fields.append(random.choice(otherNames));
     else:
       fields.append(random.choice(otherNames));
       fields.append("");
+    fields.append(random.choice(economicStatus));
 
     line = "('" + "', '".join(fields) + "'),";
     if (i==len(personNames)-1):

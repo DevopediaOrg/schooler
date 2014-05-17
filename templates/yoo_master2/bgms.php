@@ -166,7 +166,6 @@ function getRecordId($formname)
 		$id = getTableData("#__$formname", "id", "user_id='$userId' ORDER BY created DESC LIMIT 1", 0);
 		//$id = getTableData("#__gradesform,#__studentform", "#__studentform.id", "#__gradesform.user_id='$userId' AND studentId=#__studentform.id ORDER BY #__gradesform.created DESC LIMIT 1", 0);
 	}
-
 	return $id;
 }
 
@@ -234,15 +233,19 @@ function msgPostFormSubmit($linkType)
 	}
 	else {
 		$id = getRecordId('studentform');
-		$class = getTableData("#__studentform","class","id=$id",0);
+		$class = getTableData("#__studentform","class","id='$id'",0);
 		if ($class>10) $aliasname = 'view-graduates';
 		else $aliasname = 'view-students';
 	}
 
-	$itemLink = preg_replace("/(view-students|view-graduates|view-sponsors|view-grades|add-student|add-sponsor|add-grades)[?]?.*$/","$aliasname?id=$id",$_SERVER['REQUEST_URI'],1);
-
-	echo "<div class=message>Details have been saved.<br>";
-	echo "You may wish to <a href='$itemLink'>review them</a>.</div>";
+	if ($id=='' || $id<0) {
+		echo "<div class='error message'>Unable to save the details submitted. Please try again.<br>";
+	}
+	else {
+		$itemLink = preg_replace("/(view-students|view-graduates|view-sponsors|view-grades|add-student|add-sponsor|add-grades)[?]?.*$/","$aliasname?id=$id",$_SERVER['REQUEST_URI'],1);
+		echo "<div class=message>Details have been saved.<br>";
+		echo "You may wish to <a href='$itemLink'>review them</a>.</div>";
+	}
 }
 
 function getPhotoCode($id, $attr='')
@@ -298,7 +301,7 @@ function showStudent($id, $who='student')
 	echo "<td><h2>Viewing Student Details</h2></td>";
 
 	$result = getTableData("#__studentform",
-							 "name,dateOfBirth,".getAgeQuery().",sex,admissionNumber,studentUid,class,`group`,parent,guardian",
+							 "name,dateOfBirth,".getAgeQuery().",sex,admissionNumber,studentUid,class,`group`,parentStatus,parent,guardian,economicStatus",
 							 "id='$id'",
 							 1);
 
@@ -317,7 +320,7 @@ function showStudent($id, $who='student')
 
 	echo "</tr></table>";
 
-	$headings = array('Name','Date of Birth','Age','Sex','Admission No.','Student ID','Class','Group','Parent','Guardian','Sponsor');
+	$headings = array('Name','Date of Birth','Age','Sex','Admission No.','Student ID','Class','Group','Parent Status','Parent','Guardian','Economic Status','Sponsor');
 	echo "<table class=studentView>";
 	for ($i=0; $i<count($headings); $i++) {
 		if ($i==0) { // first cell is for photo
