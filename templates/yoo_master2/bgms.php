@@ -1089,7 +1089,7 @@ window.addEvent('domready', function() {
       return confirm('CAUTION: This will promote ALL students to the next higher class. This should be done only at the start of an academic year. Are you sure you want to do this?');
     }
     else if (parseInt(reportTypeElem.value)==5) {
-      return confirm('INFO: This will up to a minute. Click OK to proceed.');
+      return confirm('INFO: This take will up to a minute. Click OK to proceed.');
     }
     return true;
   });
@@ -1295,6 +1295,22 @@ function showGradesFormTitle()
 	return array('id' => '99999999');
 }
 
+function getUserClassPermissions()
+{
+	$classStr = ['I','II','III','IV','V','VI','VII','VIII','IX','X'];
+	$classes = array();
+	$user = JFactory::getUser();
+	$groups = implode(',',$user->getAuthorisedGroups());
+	$results = getTableData("#__usergroups", "title", "id IN ($groups)");
+	foreach ($results as $row) {
+		if (preg_match("/Teacher Class (\S+)/",$row[0], $matches)) {
+			$classes[] = array_search($matches[1], $classStr) + 1;
+		}
+	}
+	if (count($classes)==0) return 0;
+	return implode(',',$classes);
+}
+
 function showStudentList($who='student')
 {
 	if ($who=='graduate') {
@@ -1302,7 +1318,9 @@ function showStudentList($who='student')
 		$title = 'Graduates';
 	}
 	else {
-		$filter = 'class<=10';
+		$classes = getUserClassPermissions();
+		if ($classes==0) $filter = 'class<=10';
+		else $filter = "class IN ($classes)";
 		$title = 'Students';
 	}
 	
@@ -1427,11 +1445,16 @@ function showGradesList()
 	$allPhotoStr = '/'.implode('/',readPhotoDir()).'/';
 	$columnHeadings = array('Photo','Current Class','Grades for Class','Student ID','Name','Kannada','English','Hindi','Maths','General Science','Social Studies','Computer Science','Total','Details');
 
+	# Filtering based on login permissions
+	$classes = getUserClassPermissions();
+	if ($classes==0) $filter = '#__gradesform.class<=10';
+	else $filter = "#__gradesform.class IN ($classes)";
+	
 	# Get only current class, not the class where the student was in the past
 	# If there are no grades for a combination of year and examType, the student will not be displayed
 	$students = getTableData("#__studentform,#__gradesform",
 							 "studentId,#__studentform.class,#__gradesform.class,studentUid,name,kannadaMarks,englishMarks,hindiMarks,mathMarks,generalScienceMarks,socialStudiesMarks,computerScience",
-							 "#__studentform.class<=10 AND #__studentform.id=studentId AND year='$year' AND examType='$examType' ORDER BY #__studentform.class+0, name"
+							 "$filter AND #__studentform.id=studentId AND year='$year' AND examType='$examType' ORDER BY #__studentform.class+0, name"
 				);
 
 	echo "<table class=studentList>";
@@ -1553,11 +1576,22 @@ function showReports()
 		$examType = getTableData("#__gradesform","examType","1 ORDER BY FIELD(examType,$examOptStr) LIMIT 1",0);
 	}
 
-	$classes = array('I','II','III','IV','V','VI','VII','VIII','IX','X');
 	if (isset($_REQUEST['class'])) {
 		$class = $_REQUEST['class'];
 	}
-	else $class = 1;
+	else $class = -1;
+
+	# Filtering based on login permissions
+	$allclasses = array('I','II','III','IV','V','VI','VII','VIII','IX','X');
+	$myclasses = getUserClassPermissions();
+	$clss = explode(',',$myclasses);
+	if ($class==-1 || !in_array($class,$myclasses)) $class = $myclasses[0];
+	$classOptStr = '';
+	foreach ($clss as $cls) {
+		$classes[] = $allclasses[$cls-1];
+		if ($class==$cls) $classOptStr .= "<option selected=selected value='$cls'>".$allclasses[$cls-1]."</option>";
+		else $classOptStr .= "<option value='$cls'>".$allclasses[$cls-1]."</option>";
+	}	
 
 	if (isset($_REQUEST['studentId'])) {
 		$studentId = $_REQUEST['studentId'];
@@ -1573,7 +1607,9 @@ function showReports()
 	echo "<optgroup label=Graphs>".getOptStr($graphs,true,0,$reportType)."</optgroup>";
 	if (!$user->guest) echo "<optgroup label=Actions>".getOptStr($actions,true,count($graphs),$reportType)."</optgroup>";
 	echo "</select>";
+		
 	echo "<select id=class style='margin-right:5px;display:none;float:left' name=class>".getOptStr($classes,true,1,$classes[$class-1])."</select>";
+	
 	echo "<input id=studentIdLoad type=hidden disabled=disabled value='$studentId' />";
 	echo "<select id=studentId style='margin-right:5px;display:none;float:left' name=studentId></select>"; # leave options to JS
 	$yrsArr = getYears();
@@ -1994,8 +2030,8 @@ function getCsvFormat($arr, $fillZeros=false)
 
 function printToFile($filename, $header, $str)
 {
-	$basePath = "C:\wamp2.4\www\bgms"; // "C:\wamp2.4\www\bgms"; // /var/www /home/iedf/www/bgms
-	$fh = fopen("$basePath/$filename", 'w') or die("Can't open file for saving data into CSV file.");
+	$basePath = "/var/www/html/bgms"; // "C:\wamp2.4\www\bgms"; // /var/www /home/iedf/www/bgms
+	$fh = fopen("$basePath/$filename", 'w') or die("Can't open file $basePath/$filename for saving data into CSV file.");
 	fwrite($fh, "$header\n$str");
 	fclose($fh);
 }
