@@ -822,6 +822,13 @@ function isGradesFormToBeShown()
 	}
 }
 
+function printCustomCodeStudentForm()
+{
+	insertStudentFormJS();
+	echo "<div id=allowedClasses style='display:none'>".getUserClassPermissions()."</div>\n";
+	echo "<img src='".preg_replace("/index\.php.*/","images/blank.gif",$_SERVER['REQUEST_URI'])."' onload='onLoadStudentForm()' />\n";
+}
+
 function printCustomCodeGradesForm()
 {
 	$options = array();
@@ -891,6 +898,35 @@ function printCustomCodeSponsorForm()
 	insertSponsorFormJS();
 	echo "<div id=idStudentMap style='display:none'>".implode('/',$options)."</div>\n";
 	echo "<img src='".preg_replace("/index\.php.*/","images/blank.gif",$_SERVER['REQUEST_URI'])."' onload='onLoadSponsorForm()' />\n";
+}
+
+function insertStudentFormJS()
+{
+?>
+<script type='text/javascript'>
+//<![CDATA[
+
+function onLoadStudentForm()
+{
+	filterClassOptions();
+}
+
+function filterClassOptions()
+{
+	classElem = document.getElementById('class');
+	allowedClasses = document.getElementById('allowedClasses').innerHTML.split(',');
+	if (allowedClasses!=0) { // restricted access
+		for (var i=0; i<classElem.length; i++) {
+			if (allowedClasses.indexOf(classElem.options[i].value)==-1) {
+				classElem.remove(i);
+				i--;
+			}
+		}
+	}
+}
+//]]>
+</script>
+<?php
 }
 
 function insertGradesFormJS()
@@ -1370,7 +1406,7 @@ function showStudentList($who='student')
 	$columnHeadings = array('Photo','Student ID','Admission No.','Name','Class','Group','Sex','Parent','Guardian','Sponsor');
 	$students = getTableData("#__studentform",
 							 "id,studentUid,admissionNumber,name,class,`group`,sex,parent,guardian",
-							 "$filter ORDER BY name ASC"
+							 "$filter ORDER BY class+0, name ASC"
 				);
 
 	# Find duplicates in studentUid
