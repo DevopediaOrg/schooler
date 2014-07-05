@@ -830,6 +830,7 @@ function printCustomCodeGradesForm()
 		array_push($options, "$result[0]:$result[1]:$result[2]");
 	}
 	insertGradesFormJS();
+	echo "<div id=allowedClasses style='display:none'>".getUserClassPermissions()."</div>\n";
 	echo "<div id=classStudentMap style='display:none'>".implode('/',$options)."</div>\n";
 	echo "<img src='".preg_replace("/index\.php.*/","images/blank.gif",$_SERVER['REQUEST_URI'])."' onload='onLoadGradesForm()' />\n";
 }
@@ -927,12 +928,12 @@ function onLoadGradesForm()
 function updateComputerScience()
 {
 	classElem = document.getElementById('class');
-    computerScienceElem = document.getElementById('computerScience');
-    if (parseInt(classElem.value)>=6) computerScienceElem.disabled = false;
-    else {
-    	computerScienceElem.disabled = true;
-    	computerScienceElem.value = '';
-    }
+	computerScienceElem = document.getElementById('computerScience');
+	if (parseInt(classElem.value)>=6) computerScienceElem.disabled = false;
+	else {
+		computerScienceElem.disabled = true;
+		computerScienceElem.value = '';
+	}
 }
 
 function validateClass()
@@ -993,18 +994,36 @@ function setStudentId()
 	studentIdElem.value = studentName.options[studentName.selectedIndex].value;
 }
 
-function loadClassOptions()
+function loadClassYearOptions()
 {
 	currentClassElem = document.getElementById('currentClass');
 	classElem = document.getElementById('class');
 	while(classElem.options.length > 0) classElem.remove(0);
+
 	var classes = ['I','II','III','IV','V','VI','VII','VIII','IX','X'];
+	allowedClasses = document.getElementById('allowedClasses').innerHTML.split(',');
+	if (allowedClasses!=0) { // restricted access
+		// Show only current class 
+		var option = document.createElement("option");
+		option.value = currentClassElem.options[currentClassElem.selectedIndex].value;
+		option.text = classes[option.value-1];
+		classElem.add(option);
+		updateComputerScience();
+		
+		// Show only latest year
+		yearElem = document.getElementById('year');
+		while(yearElem.options.length > 1) yearElem.remove(1);
+		
+		return;
+	}
+
 	for (var i=0; i<currentClassElem.length && i<=currentClassElem.selectedIndex; i++) {
 		var option = document.createElement("option");
 		option.value = i+1;
 		option.text = classes[i];
 		classElem.add(option);
 	}
+	updateComputerScience();
 }
 
 function loadStudentNames(context)
@@ -1012,7 +1031,18 @@ function loadStudentNames(context)
 	studentNameElem = document.getElementById('studentName');
 	while(studentNameElem.options.length > 0) studentNameElem.remove(0);
 
+	// Filter based on user permissions
+	allowedClasses = document.getElementById('allowedClasses').innerHTML.split(',');
 	currentClassElem = document.getElementById('currentClass');
+	var classes = ['I','II','III','IV','V','VI','VII','VIII','IX','X'];
+	for (var i=0; i<currentClassElem.length; i++) {
+		classNum = classes.indexOf(currentClassElem[i].innerHTML)+1;
+		if (allowedClasses!='0' && (classNum==-1 || allowedClasses.indexOf(classNum.toString())==-1)) {
+			currentClassElem.remove(i);
+			i--;
+		}
+	}
+		
 	classElem = document.getElementById('class');
 	mapElem = document.getElementById('classStudentMap');
 	if (context == 'init') {
@@ -1032,12 +1062,12 @@ function loadStudentNames(context)
 		}
 
 		var savedClassVal = classElem.options[classElem.selectedIndex].value;
-		loadClassOptions();
+		loadClassYearOptions();
 		classElem.value = savedClassVal;
 	}
 	else {
 		// when current class is changed, update class
-		loadClassOptions();
+		loadClassYearOptions();
 		classElem.value = currentClassElem.options[currentClassElem.selectedIndex].value;		
 	}
 
