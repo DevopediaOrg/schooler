@@ -225,13 +225,22 @@ function msgPostFormSubmit($linkType)
 { // To be called only after the form is saved in DB
 	if ($linkType=='grades') {
 		$aliasname = 'view-grades';
+		$idname = 'id';
 		$id = getRecordId('gradesform');
+	}
+	if ($linkType=='skills') {
+		$aliasname = 'view-grades';
+		$gradesId = $_REQUEST['gradesId'];
+		$idname = "id=".$gradesId."&skillsId";
+		$id = getRecordId('skillsform');
 	}
 	else if ($linkType=='sponsor') {
 		$aliasname = 'view-sponsors';
+		$idname = 'id';
 		$id = getRecordId('sponsorform');
 	}
 	else {
+		$idname = 'id';
 		$id = getRecordId('studentform');
 		$class = getTableData("#__studentform","class","id='$id'",0);
 		if ($class>10) $aliasname = 'view-graduates';
@@ -242,7 +251,7 @@ function msgPostFormSubmit($linkType)
 		echo "<div class='error message'>Unable to save the details submitted. Please try again.<br>";
 	}
 	else {
-		$itemLink = preg_replace("/(view-students|view-graduates|view-sponsors|view-grades|add-student|add-sponsor|add-grades)[?]?.*$/","$aliasname?id=$id",$_SERVER['REQUEST_URI'],1);
+		$itemLink = preg_replace("/(view-students|view-graduates|view-sponsors|view-grades|add-student|add-sponsor|add-grades|add-skills)[?]?.*$/","$aliasname?".$idname."=$id",$_SERVER['REQUEST_URI'],1);
 		echo "<div class=message>Details have been saved.<br>";
 		echo "You may wish to <a href='$itemLink'>review them</a>.</div>";
 	}
@@ -498,11 +507,11 @@ function printAllGradesTable($data, $inconsistent=0, $first=0)
 {
 	if ($data['class']>=6 || $inconsistent) {
 		$numSubjects = 7;
-		$rows = array('Kannada','English','Hindi','Mathematics','General Science','Social Studies','Computer Science','Total','Physical Education','Attendance','Conduct','Remarks','Date');	
+		$rows = array('Kannada','English','Hindi','Mathematics','General Science','Social Studies','Computer Science','Total','Physical Education','Attendance','Conduct','Skills','Remarks','Date');	
 	}
 	else {
 		$numSubjects = 6;
-		$rows = array('Kannada','English','Hindi','Mathematics','General Science','Social Studies','Total','Physical Education','Attendance','Conduct','Remarks','Date');	
+		$rows = array('Kannada','English','Hindi','Mathematics','General Science','Social Studies','Total','Physical Education','Attendance','Conduct','Skills','Remarks','Date');	
 	}
 	if ($inconsistent) array_push($rows, 'Graded for Class');
 	$cols = array_merge(array('Subject'),getExamOptions('ASC'));
@@ -525,6 +534,7 @@ function printAllGradesTable($data, $inconsistent=0, $first=0)
 	echo "</tr></table>";
 	echo "<table class=studentAllGrades>";
 
+	// Table header is printed first
 	echo "<tr rowspan=2><th>$cols[0]</th>";
 	for ($i=1; $i<count($cols); $i++) {
 		if (isset($data['link'][$cols[$i]]) && $data['link'][$cols[$i]]) echo "<th colspan=3><a href='".$data['link'][$cols[$i]]."'>".preg_replace("/ \(/","<br>(",$cols[$i])."</a></th>";
@@ -532,6 +542,7 @@ function printAllGradesTable($data, $inconsistent=0, $first=0)
 	}
 	echo "</tr>";
 
+	// Table content
 	echo "<tr><td>&nbsp;</td>".str_repeat("<td class=gradeHead>Grade</td><td class=gradeHead>%</td><td class=gradeHead>Marks</td>",count($cols)-1)."</tr>";
 	for ($i=0; $i<count($rows); $i++) {
 		if ($rows[$i]=='Total') echo "<tr><td><b>".$rows[$i]."</b></td>";
@@ -564,7 +575,7 @@ function printAllGradesTable($data, $inconsistent=0, $first=0)
 	echo "</table>";
 }
 
-function saveGradesData(&$data, $res)
+function saveGradesData(&$data, $res, $skillsRes)
 {
 	$data['studentId'] = $res[0];
 	$data['name'] = $res[18];
@@ -599,6 +610,15 @@ function saveGradesData(&$data, $res)
 	else $data['Date'][$examType] = $res[3];
 	$gradesLink = preg_replace("/\/grades\/.*/","/grades/view-grades?id=".$res[16],$_SERVER['REQUEST_URI']);
 	$data['link'][$examType] = $gradesLink; // we will have id per exam
+	
+	// Finally, save the skills
+	foreach ($skillsRes as $row) {
+		if ($row[1]==$res[16]) {
+			$data['Skills'][$examType] = "<a href='".preg_replace("/\/grades\/.*/","/grades/view-grades?id=$res[16]&skillsId=$row[0]",$_SERVER['REQUEST_URI'])."'>Skills</a>";
+		}
+	}
+	if (!isset($data['Skills'][$examType]) && preg_match("/100 marks/",$examType))
+		$data['Skills'][$examType] = "<a href='".preg_replace("/\/grades\/.*/","/grades/add-skills?gradesId=$res[16]",$_SERVER['REQUEST_URI'])."'>Add</a>";
 }
 
 function showStudentAllGrades($id)
@@ -628,6 +648,13 @@ function showStudentAllGrades($id)
 							 "studentId,year,examType,DATE_FORMAT(#__gradesform.created,'%d %M %Y'),DATE_FORMAT(#__gradesform.modified,'%d %M %Y'),kannadaMarks,englishMarks,hindiMarks,mathMarks,generalScienceMarks,socialStudiesMarks,computerScience,physicalEducation,conduct,attendance,remarks,#__gradesform.id,#__gradesform.class,name,dateOfBirth,studentUid",
 							 "#__studentform.id=studentId AND studentId=$id ORDER BY year DESC, FIELD(examType,$examOptStr)");
 
+	// To improve performance, we do a single query for skills across all years and exams
+	$gradesIds = array();
+	foreach ($results as $res) {
+		if (!in_array($res[16],$gradesIds)) $gradesIds[] = $res[16];
+	}
+	$skillsResults = getTableData("#__skillsform","id,gradesId","gradesId IN (".implode(',',$gradesIds).")");
+
 	if (count($results)==0) {
 		echo "<table class=studentView><tr>";
 		echo "<tr><td><div class=message style='margin-top:50px'>No grades have been recorded for this student.</div></td></tr>";
@@ -646,7 +673,7 @@ function showStudentAllGrades($id)
 			$inconsistent = 0;
 			$firstTable = 0;
 		}
-		saveGradesData($data, $res);
+		saveGradesData($data, $res, $skillsResults);
 		$year = $data['year'];
 		if (count($gradedClass) && !in_array($data['class'],$gradedClass)) $inconsistent = 1;
 		else array_push($gradedClass,$data['class']);
@@ -683,6 +710,12 @@ function getOptStr($opts, $autoVal=true, $startVal=0, $sel='')
 function deleteStudentGrades($id)
 {
 	executeQuery("DELETE FROM #__gradesform WHERE id=$id", 0); // will delete nothing if id doesn't exist
+	echo "<div class=message>Entry has been deleted.<br>";
+}
+
+function deleteStudentSkills($id)
+{
+	executeQuery("DELETE FROM #__skillsform WHERE id=$id", 0); // will delete nothing if id doesn't exist
 	echo "<div class=message>Entry has been deleted.<br>";
 }
 
@@ -791,21 +824,100 @@ function showStudentGrades($id)
 	echo "</table>";
 }
 
+function showStudentSkills($id)
+{ // $id is with reference to skillsform
+	echo "<table class=studentPageTitle><tr>";
+	echo "<td><h2>Viewing Student Skills</h2></td>";
+
+	$skillsEntryExists = getTableData("#__skillsform","COUNT(*)","id=$id", 0);
+	if ($skillsEntryExists==0) {
+		echo "</tr><tr><td><div class='error message'>The requested entry does not exist.</td></tr></table>";
+		return;
+	}
+
+	$result = getTableData("#__studentform,#__gradesform,#__skillsform",
+							"studentId,name,#__studentform.class,#__gradesform.class,year,examType,DATE_FORMAT(#__skillsform.created,'%d %M %Y'),DATE_FORMAT(#__skillsform.modified,'%d %M %Y'),kannadaReadingSkills,kannadaWritingSkills,kannadaSpeakingSkills,englishReadingSkills,englishWritingSkills,englishSpeakingSkills,hindiReadingSkills,hindiWritingSkills,hindiSpeakingSkills,mathSkills,scienceSkills,socialStudiesSkills,otherInterests,behaviour,#__skillsform.remarks",
+							 "#__studentform.id=studentId AND #__gradesform.id=gradesId AND #__skillsform.id=$id",
+							 1);
+	if (count($result)==0) {
+		echo "</tr><tr><td><div class='error message'>The requested student or grades do not exist. Grades cannot be displayed.</td></tr></table>";
+		return;
+	}
+
+	$user = JFactory::getUser();
+	if (!$user->guest) {
+		echo "<td style='text-align:right'>";
+		$editLink = preg_replace("/view-grades\?id=(\d+)&skillsId=(\w+)/","add-skills?id=$2&gradesId=$1",$_SERVER['REQUEST_URI']);
+		echo "<b><a href='".$editLink."'>Edit</a></b>";
+		echo " | <b><a onclick='return confirm(\"Are you sure you want to delete this entry?\")' href='".preg_replace("/view-grades\?.*/","view-grades?action=delete&skillsId=$id",$_SERVER['REQUEST_URI'])."'>Delete</a></b>";
+		echo "</td>";
+	}
+	echo "</tr></table>";
+
+	$studentLink = preg_replace("/\/grades[?]?.*$/","/students/view-students?id=$result[0]",$_SERVER['REQUEST_URI'],1);
+	$studentGradesLink = preg_replace("/\/grades[?]?.*$/","/grades/view-grades?studentId=$result[0]",$_SERVER['REQUEST_URI'],1);
+	$headings = array('Student Name','Current','This Grade For','Year','Assessment','Date','Kannada Reading Skills','Kannada Writing Skills','Kannada Speaking Skills','English Reading Skills','English Writing Skills','English Speaking Skills','Hindi Reading Skills','Hindi Writing Skills','Hindi Speaking Skills','Mathematics','Sciences','Social Studies','Other Interests','Behaviour','Remarks & Suggestions');
+	$maxMarks = preg_replace("/.*\((\d+) marks.*/","$1",$result[5]);
+	$totalMarks = 0; $numSubjects = 0;
+	echo "<table class=studentView>";
+	for ($i=$j=0; $i<count($headings); $i++, $j++) {
+		$fieldVal = $result[$j+1];
+		if ($i==0) { // first cell is for photo
+			echo "<tr><td style='border:0px; vertical-align:top; width:256px' rowspan='"
+				.strval(count($headings)+4) . "'>" . getPhotoCode($result[0],"style='width:240px'")."</td><th>"
+				. $headings[$i]."</th><td><a href='$studentLink'>$fieldVal</a></td></tr>";
+		}
+		else if ($i==1 || $i==2)  {
+			echo "<tr><th>".$headings[$i]."</th><td>Class ".getClassDisplayText($fieldVal)."</td></tr>";
+		}
+		else if ($i==5) {
+			if (preg_match("/[1-9]/",$result[7])) $fieldVal = $result[7]; // use modified datetime
+			echo "<tr><th>".$headings[$i]."</th><td>$fieldVal</td></tr>";
+			$j++;
+		}
+		else echo "<tr><th>".$headings[$i]."</th><td>$fieldVal</td></tr>";
+		
+		// Add blank row as separator
+		if ($i==5 || $i==14) echo "<tr><td colspan=3>&nbsp;</td></tr>";
+		
+		if ($i==count($headings)-1){ // end of processing
+			echo "<tr><td colspan=3>&nbsp;</td></tr>";
+			echo "<tr><td>&nbsp;</td><td style='border:0px'><a href='$studentGradesLink'>View all grades</a> of this student.</td></tr>";
+		}
+	}
+	echo "</table>";
+}
+
 function validateGradesForm($form)
 {
 	$studentId = $form->data['studentId'];
 	$year = $form->data['year'];
 	$examType = $form->data['examType'];
 
-	$user = JFactory::getUser();
-	$userId = $user->get('id');
 	$id = getTableData("#__gradesform", "id",
-					"user_id='$userId' AND studentId='$studentId' AND year='$year' AND examType='$examType' ORDER BY modified DESC, created DESC LIMIT 1", 0);
+					"studentId='$studentId' AND year='$year' AND examType='$examType' ORDER BY modified DESC, created DESC LIMIT 1", 0);
 
 	if ($id!=0 && (!isset($_REQUEST['id']) || $id!=$_REQUEST['id'])) {
 		// either adding a new record or editing an existing one: clash with record in table ($id)
 		$itemLink = preg_replace("/(view-students|view-graduates|view-sponsors|view-grades|add-student|add-sponsor|add-grades)[?]?.*$/","add-grades?id=$id",$_SERVER['REQUEST_URI'],1);
 		echo "<div class='error message'>Grades for this student were already entered earlier.<br>";
+		echo "You may wish to <a href='$itemLink'>edit them</a>.</div>";
+		return 'fail';
+	}
+	return 'success';
+}
+
+function validateSkillsForm($form)
+{
+	$gradesId = $form->data['gradesId'];
+
+	$id = getTableData("#__skillsform", "id",
+					"gradesId='$gradesId' ORDER BY modified DESC, created DESC LIMIT 1", 0);
+
+	if ($id!=0 && (!isset($_REQUEST['id']) || $id!=$_REQUEST['id'])) {
+		// either adding a new record or editing an existing one: clash with record in table ($id)
+		$itemLink = preg_replace("/(view-students|view-graduates|view-sponsors|view-grades|add-student|add-sponsor|add-grades|add-skills)[?]?.*$/","add-skills?id=$id&gradesId=$gradesId",$_SERVER['REQUEST_URI'],1);
+		echo "<div class='error message'>Skills for this student and assessment were already entered earlier.<br>";
 		echo "You may wish to <a href='$itemLink'>edit them</a>.</div>";
 		return 'fail';
 	}
@@ -820,6 +932,18 @@ function isGradesFormToBeShown()
 		echo "<div class=message>Can't add grades because no students have been entered into the system.<br>";
 		return 'fail';
 	}
+}
+
+function isSkillsFormToBeShown()
+{
+	if (isset($_REQUEST['gradesId'])) {
+		$gradesId = $_REQUEST['gradesId'];
+		$id = getTableData("#__gradesform", "id", "id='$gradesId'", 0);
+		if ($id) return 'success';
+	}
+
+	echo "<div class=message>Please add skills via the Grades page with respect to a specific exam.<br>";
+	return 'fail';
 }
 
 function printCustomCodeStudentForm()
@@ -840,6 +964,29 @@ function printCustomCodeGradesForm()
 	echo "<div id=allowedClasses style='display:none'>".getUserClassPermissions()."</div>\n";
 	echo "<div id=classStudentMap style='display:none'>".implode('/',$options)."</div>\n";
 	echo "<img src='".preg_replace("/index\.php.*/","images/blank.gif",$_SERVER['REQUEST_URI'])."' onload='onLoadGradesForm()' />\n";
+}
+
+function printCustomCodeSkillsForm()
+{
+	insertSkillsFormJS();
+	$gradesId = $_REQUEST['gradesId'];
+	$result = getTableData("#__studentform,#__gradesform,#__skillsform",
+							"studentId,name,#__studentform.class,#__gradesform.class,year,examType",
+							 "#__studentform.id=studentId AND #__gradesform.id='$gradesId'",
+							 1);
+	$headings = array('Student Name','Current','This Grade For','Year','Assessment');
+	echo "<table class=studentView>";
+	for ($i=$j=0; $i<count($headings); $i++, $j++) {
+		$fieldVal = $result[$j+1];
+		if ($i==1 || $i==2)  {
+			echo "<tr><th>".$headings[$i]."</th><td>Class ".getClassDisplayText($fieldVal)."</td></tr>";
+			}
+		else echo "<tr><th>".$headings[$i]."</th><td>$fieldVal</td></tr>";
+	}
+	echo "</table>";
+	
+	echo "<div id=gradesRefId style='display:none'>$gradesId</div>\n";
+	echo "<img src='".preg_replace("/index\.php.*/","images/blank.gif",$_SERVER['REQUEST_URI'])."' onload='onLoadSkillsForm()' />\n";
 }
 
 function printCustomCodeReportsForm()
@@ -1134,6 +1281,27 @@ function loadStudentNames(context)
 <?php
 }
 
+function insertSkillsFormJS()
+{
+?>
+<script type='text/javascript'>
+//<![CDATA[
+
+function onLoadSkillsForm()
+{
+	formElem = document.getElementById('chronoform-skillsForm');
+	gradesRefIdElem = document.getElementById('gradesRefId');
+	if (gradesRefIdElem.innerHTML!='') {
+		gradesIdElem = formElem.getElementById('gradesId');
+		gradesIdElem.value = gradesRefIdElem.innerHTML;
+	}
+}
+
+//]]>
+</script>
+<?php
+}
+
 function insertReportsFormJS()
 {
 ?>
@@ -1361,6 +1529,22 @@ function showGradesFormTitle()
 	return array('id' => '99999999');
 }
 
+function showSkillsFormTitle()
+{
+	if (isset($_REQUEST['id'])) {
+		$id = $_REQUEST['id'];
+		echo "<table class=studentPageTitle><tr>";
+		echo "<td><h2>Editing Student Skills</h2></td>";
+		echo "</tr></table>";
+		return array('id' => $id);
+	}
+
+	echo "<table class=studentPageTitle><tr>";
+	echo "<td><h2>Adding New Skills</h2></td>";
+	echo "</tr></table>";
+	return array('id' => '99999999');
+}
+
 function getUserClassPermissions()
 {
 	$classStr = ['I','II','III','IV','V','VI','VII','VIII','IX','X'];
@@ -1473,7 +1657,12 @@ function showStudentList($who='student')
 
 function showGradesList()
 {
-	if (isset($_REQUEST['id'])) {
+	if (isset($_REQUEST['skillsId'])) {
+		if (isset($_REQUEST['action']) && $_REQUEST['action']=='delete') deleteStudentSkills($_REQUEST['skillsId']);
+		else showStudentSkills($_REQUEST['skillsId']);
+		return;
+	}
+	else if (isset($_REQUEST['id'])) {
 		if (isset($_REQUEST['action']) && $_REQUEST['action']=='delete') deleteStudentGrades($_REQUEST['id']);
 		else showStudentGrades($_REQUEST['id']);
 		return;

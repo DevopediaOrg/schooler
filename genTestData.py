@@ -96,6 +96,8 @@ def generateGrades(outfile):
   outfile.write("DELETE FROM `ek5d2_gradesform`;\n");
   outfile.write("INSERT INTO `ek5d2_gradesform` (`id`, `uniq_id`, `user_id`, `created`, `modified`, `class`, `studentId`, `year`, `examType`, `kannadaMarks`, `englishMarks`, `hindiMarks`, `mathMarks`, `generalScienceMarks`, `socialStudiesMarks`, `computerScience`, `physicalEducation`, `conduct`, `attendance`, `remarks`) VALUES\n");
 
+  skills = []; # output written at the end
+
   names = personNames; # make a copy since we are going to edit it
   random.shuffle(examType);
   
@@ -128,7 +130,7 @@ def generateGrades(outfile):
           fields.append("40");
           currdatetime = datetime.datetime.now()-datetime.timedelta(seconds=timeoffset);
           fields.append(str(currdatetime-datetime.timedelta(seconds=random.randint(3700*25*0.5,3700*25*5.5)))[:19]);
-          if(random.randint(0,9) > 1): # skip 10%
+          if(random.randint(0,9) > 0): # skip 10%
             fields.append(str(currdatetime)[:19]);
           else:
             fields.append("");
@@ -136,38 +138,44 @@ def generateGrades(outfile):
           fields.append(str(j+1));
           fields.append(examYear[k]);
           fields.append(examType[i]);
-          if(random.randint(0,99) < 1): # skip 1% all data
+          if(random.randint(0,99) == 0): # skip 1% all data
             print("Skipping optional items in grades ["+str(uniqueIndex)+"] for", names[j], "["+str(j+1)+"]:", examYear[k], ",", examType[i]);
             for l in range(11):
               fields.append("");
           else:
             for l in range(6):
               fields.append(generateGrade(maxMarks));
-            if(classes[j]-k>=6 and random.randint(0,19) > 1): # skip 5%; computerScience for only for class 6 and above
+            if(classes[j]-k>=6 and random.randint(0,19) > 0): # skip 5%; computerScience for only for class 6 and above
               fields.append(generateGrade(maxMarks));
             else:
               fields.append("");          
-            if(random.randint(0,19) > 1): # skip 5%
+            if(random.randint(0,19) > 0): # skip 5%
               fields.append(random.choice(scaleRating));
             else:
               fields.append("");          
-            if(random.randint(0,19) > 1): # skip 5%
+            if(random.randint(0,19) > 0): # skip 5%
               fields.append(random.choice(scaleRating));
             else:
               fields.append("");          
-            if(random.randint(0,19) > 1): # skip 5%
+            if(random.randint(0,19) > 0): # skip 5%
               fields.append(str(random.randint(26,36)) + '/36');
             else:
               fields.append("");          
-            if(random.randint(0,19) > 1): # skip 5%
+            if(random.randint(0,19) > 0): # skip 5%
               fields.append(random.choice(remarks));
             else:
-              fields.append("");          
+              fields.append("");
+            if(re.search(r'100 marks',examType[i]) and random.randint(0,1) > 0): # skip 50%
+	           skills.append(generateSkills(len(skills)+1, uniqueIndex));
           
           line = "('" + "', '".join(fields) + "'),";
           if (totalCount==totalPossibleRecords):
             line = re.sub(r',$', ";", line);
           outfile.write(line + '\n');
+
+  outfile.write("DELETE FROM `ek5d2_skillsform`;\n");
+  outfile.write("INSERT INTO `ek5d2_skillsform` (`id`, `uniq_id`, `user_id`, `created`, `modified`, `gradesId`, `kannadaReadingSkills`, `kannadaWritingSkills`, `kannadaSpeakingSkills`, `englishReadingSkills`, `englishWritingSkills`, `englishSpeakingSkills`, `hindiReadingSkills`, `hindiWritingSkills`, `hindiSpeakingSkills`, `mathSkills`, `scienceSkills`, `socialStudiesSkills`, `otherInterests`, `behaviour`, `remarks`) VALUES\n");
+  outfile.write(",\n".join(skills)+';\n')
 
 
 def generateGrade(maxMarks):
@@ -175,6 +183,23 @@ def generateGrade(maxMarks):
     return str(int(random.randint(25,100)*maxMarks/100));
   return "";
 
+
+def generateSkills(nextId, gradesId):
+  fields = [];
+  fields.append(str(nextId));
+  fields.append("");
+  fields.append("40");
+  currdatetime = datetime.datetime.now()-datetime.timedelta(seconds=timeoffset);
+  fields.append(str(currdatetime-datetime.timedelta(seconds=random.randint(3700*25*0.5,3700*25*5.5)))[:19]);
+  if(random.randint(0,9) > 1): # skip 10%
+    fields.append(str(currdatetime)[:19]);
+  else:
+    fields.append("");
+  fields.append(str(gradesId));
+  for l in range(15):
+    fields.append(random.choice(remarks));
+
+  return "('" + "', '".join(fields) + "')";
 
 def generateSponsors(outfile):
   outfile.write("DELETE FROM `ek5d2_sponsorform`;\n");
