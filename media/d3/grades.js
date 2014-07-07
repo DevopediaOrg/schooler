@@ -270,7 +270,7 @@ d3.csv(datafile, function(error, data) {
 
 /*===================================================================
 	Grouped barchart showing grades grouped by group.
--------------------------------------------------------------------*/
+
 var gradesGroup = document.getElementsByTagName('gradesGroup')[0];
 var datafile = gradesGroup.getAttribute('src');
 
@@ -369,3 +369,4 @@ d3.csv(datafile, function(error, data) {
       .text(function(d) { return d; });
 
 });
+-------------------------------------------------------------------*/

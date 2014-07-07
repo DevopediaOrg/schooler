@@ -214,6 +214,12 @@ function findPhoto($id)
 	return $latestPhoto;
 }
 
+function deletePhoto($id)
+{
+	$urlpath = 'components/com_chronoforms5/chronoforms/uploads/studentForm';
+	array_map('unlink', glob("$urlpath/Photo-$id.*"));
+}
+
 function getExamOptions($order='ASC')
 {
 	$exams = array('Test 1 (25 marks)','Test 2 (25 marks)','Midterm Exam (100 marks)','Test 3 (25 marks)','Test 4 (25 marks)','Final Exam (100 marks)');
@@ -228,7 +234,7 @@ function msgPostFormSubmit($linkType)
 		$idname = 'id';
 		$id = getRecordId('gradesform');
 	}
-	if ($linkType=='skills') {
+	else if ($linkType=='skills') {
 		$aliasname = 'view-grades';
 		$gradesId = $_REQUEST['gradesId'];
 		$idname = "id=".$gradesId."&skillsId";
@@ -283,6 +289,7 @@ function getClassDisplayText($myclass)
 
 function deleteStudent($id, $who='student')
 {	// Do not delete the grades of this student.
+	deletePhoto($id);
 	executeQuery("DELETE FROM #__studentform WHERE id=$id", 0); // will delete nothing if id doesn't exist
 	echo "<div class=message>Entry has been deleted.<br>";
 }
@@ -310,7 +317,7 @@ function showStudent($id, $who='student')
 	echo "<td><h2>Viewing Student Details</h2></td>";
 
 	$result = getTableData("#__studentform",
-							 "name,dateOfBirth,".getAgeQuery().",sex,admissionNumber,studentUid,class,`group`,parentStatus,parent,guardian,economicStatus",
+							 "name,dateOfBirth,".getAgeQuery().",sex,admissionNumber,studentUid,class,parentStatus,economicStatus",
 							 "id='$id'",
 							 1);
 
@@ -329,7 +336,7 @@ function showStudent($id, $who='student')
 
 	echo "</tr></table>";
 
-	$headings = array('Name','Date of Birth','Age','Sex','Admission No.','Student ID','Class','Group','Parent Status','Parent','Guardian','Economic Status','Sponsor');
+	$headings = array('Name','Date of Birth','Age','Sex','Admission No.','Student ID','Class','Parent Status','Economic Status');
 	echo "<table class=studentView>";
 	for ($i=0; $i<count($headings); $i++) {
 		if ($i==0) { // first cell is for photo
@@ -341,7 +348,7 @@ function showStudent($id, $who='student')
 			if ($i==6) { // class: convert to Roman numerals for display
 				$currRes = getClassDisplayText($result[$i]);
 			}
-			else if ($i==count($headings)-1) {
+			else if (false && $i==count($headings)-1) { // Sponsors no longer shown
 				$sponsorLink = preg_replace("/students\/view-students\??.*/","sponsors/view-sponsors",$_SERVER['REQUEST_URI']);
 				$sponsors = getTableData("#__sponsorform","id,name,sponsorUid,CONCAT(',',sponsoredStudents,',')","1 ORDER BY name");
 				if ($sponsors) {
@@ -617,8 +624,11 @@ function saveGradesData(&$data, $res, $skillsRes)
 			$data['Skills'][$examType] = "<a href='".preg_replace("/\/index\.php\/.*/","/index.php/grades/view-grades?id=$res[16]&skillsId=$row[0]",$_SERVER['REQUEST_URI'])."'>Skills</a>";
 		}
 	}
-	if (!isset($data['Skills'][$examType]) && preg_match("/100 marks/",$examType))
-		$data['Skills'][$examType] = "<a href='".preg_replace("/\/index\.php\/.*/","/index.php/grades/add-skills?gradesId=$res[16]",$_SERVER['REQUEST_URI'])."'>Add</a>";
+	$user = JFactory::getUser();
+	if (!$user->guest) {
+		if (!isset($data['Skills'][$examType]) && preg_match("/100 marks/",$examType))
+			$data['Skills'][$examType] = "<a href='".preg_replace("/\/index\.php\/.*/","/index.php/grades/add-skills?gradesId=$res[16]",$_SERVER['REQUEST_URI'])."'>Add</a>";
+	}
 }
 
 function showStudentAllGrades($id)
@@ -639,7 +649,7 @@ function showStudentAllGrades($id)
 	echo "  <th>Student Name</th><td><a href='".$studentLink."'>".$studentDetails[0]."</a></td></tr>";
 	echo "<tr><th>Student ID</th><td>".$studentDetails[1]."</td></tr>";
 	echo "<tr><th>Class</th><td>".getClassDisplayText($studentDetails[2])."</td></tr>";
-	echo "<tr><th>Group</th><td>".$studentDetails[3]."</td></tr>";
+	//echo "<tr><th>Group</th><td>".$studentDetails[3]."</td></tr>";
 	echo "</table>";
 
 	// Fields obtained should be in line with saveGradesData
@@ -648,9 +658,6 @@ function showStudentAllGrades($id)
 							 "studentId,year,examType,DATE_FORMAT(#__gradesform.created,'%d %M %Y'),DATE_FORMAT(#__gradesform.modified,'%d %M %Y'),kannadaMarks,englishMarks,hindiMarks,mathMarks,generalScienceMarks,socialStudiesMarks,computerScience,physicalEducation,conduct,attendance,remarks,#__gradesform.id,#__gradesform.class,name,dateOfBirth,studentUid",
 							 "#__studentform.id=studentId AND studentId=$id ORDER BY year DESC, FIELD(examType,$examOptStr)");
 
-	// To improve performance, we do a single query for skills across all years and exams
-	$skillsResults = getSkills($results);
-	
 	if (count($results)==0) {
 		echo "<table class=studentView><tr>";
 		echo "<tr><td><div class=message style='margin-top:50px'>No grades have been recorded for this student.</div></td></tr>";
@@ -658,6 +665,9 @@ function showStudentAllGrades($id)
 		return;
 	}
 
+	// To improve performance, we do a single query for skills across all years and exams
+	$skillsResults = getSkills($results);
+	
 	$year = ''; $data = $gradedClass = array();
 	$inconsistent = 0;
 	$firstTable = 1;
@@ -714,6 +724,7 @@ function getOptStr($opts, $autoVal=true, $startVal=0, $sel='')
 
 function deleteStudentGrades($id)
 {
+	executeQuery("DELETE FROM #__skillsform WHERE gradesId=$id", 0); // will delete nothing if id doesn't exist
 	executeQuery("DELETE FROM #__gradesform WHERE id=$id", 0); // will delete nothing if id doesn't exist
 	echo "<div class=message>Entry has been deleted.<br>";
 }
@@ -745,7 +756,9 @@ function showStudentGrades($id)
 	}
 
 	$user = JFactory::getUser();
-	if (!$user->guest) {
+	$allowedClasses = getUserClassPermissions();
+	if (!$user->guest && ($allowedClasses==0 || $result[2]==$result[3])) {
+		// permission to all classes or current class = graded class
 		echo "<td style='text-align:right'>";
 		echo "<b><a href='".preg_replace("/view-grades/","add-grades",$_SERVER['REQUEST_URI'])."'>Edit</a></b>";
 		echo " | <b><a onclick='return confirm(\"Are you sure you want to delete this entry?\")' href='".preg_replace("/view-grades\?.*/","view-grades?action=delete&id=$id",$_SERVER['REQUEST_URI'])."'>Delete</a></b>";
@@ -998,6 +1011,8 @@ function printCustomCodeReportsForm()
 {
 	$options = array();
 	$results = getTableData("#__studentform", "class,id,name", "class<=10 ORDER BY class+0, name");
+	if (count($results)==0) return; // user informed via showReports()
+	
 	foreach ($results as $result) {
 		array_push($options, "$result[0]:$result[1]:$result[2]");
 	}
@@ -1196,11 +1211,14 @@ function loadClassYearOptions()
 		option.value = currentClassElem.options[currentClassElem.selectedIndex].value;
 		option.text = classes[option.value-1];
 		classElem.add(option);
+		classElem.selectedIndex = 0;
 		updateComputerScience();
 		
 		// Show only latest year
 		yearElem = document.getElementById('year');
 		while(yearElem.options.length > 1) yearElem.remove(1);
+		
+		updateComputerScience();
 		
 		return;
 	}
@@ -1257,6 +1275,7 @@ function loadStudentNames(context)
 		// when current class is changed, update class
 		loadClassYearOptions();
 		classElem.value = currentClassElem.options[currentClassElem.selectedIndex].value;		
+		updateComputerScience();
 	}
 
 	students = mapElem.innerHTML.split('/');
@@ -1324,10 +1343,10 @@ window.addEvent('domready', function() {
 
   $('reportsSubmit').addEvent('click', function() {
   	reportTypeElem = document.getElementById('reportTypeId');
-  	if (parseInt(reportTypeElem.value)==6) {
+  	if (parseInt(reportTypeElem.value)==5) {
       return confirm('CAUTION: This will promote ALL students to the next higher class. This should be done only at the start of an academic year. Are you sure you want to do this?');
     }
-    else if (parseInt(reportTypeElem.value)==5) {
+    else if (parseInt(reportTypeElem.value)==4) {
       return confirm('INFO: This take will up to a minute. Click OK to proceed.');
     }
     return true;
@@ -1352,26 +1371,26 @@ function processFilters()
 	studentNameElem = document.getElementById('studentId');
 
 	switch (parseInt(reportTypeElem.value)) {
+		case 1:
 		case 2:
-		case 3:
 			reportYearElem.style.display = 'block';
 			reportExamTypeElem.style.display = 'block';
 			classElem.style.display = 'none';
 			studentNameElem.style.display = 'none';
 			break;
-		case 4:
+		case 3:
 			reportYearElem.style.display = 'none';
 			reportExamTypeElem.style.display = 'none';
 			classElem.style.display = 'block';
 			studentNameElem.style.display = 'block';
 			break;
-		case 5:
+		case 4:
 			reportYearElem.style.display = 'block';
 			reportExamTypeElem.style.display = 'none';
 			classElem.style.display = 'block';
 			studentNameElem.style.display = 'none';
 			break;
-		default: // includes 0, 1, 6
+		default: // includes 0, 5
 			reportYearElem.style.display = 'none';
 			reportExamTypeElem.style.display = 'none';
 			classElem.style.display = 'none';
@@ -1592,9 +1611,9 @@ function showStudentList($who='student')
 	$allPhotoStr = '/'.implode('/',readPhotoDir()).'/';
 	$itemLink = preg_replace("/view-(students|graduates)\??.*/","view-$1",$_SERVER['REQUEST_URI']);
 	$sponsorLink = preg_replace("/students\/view-(students|graduates)\??.*/","sponsors/view-sponsors",$_SERVER['REQUEST_URI']);
-	$columnHeadings = array('Photo','Student ID','Admission No.','Name','Class','Group','Sex','Parent','Guardian','Sponsor');
+	$columnHeadings = array('Photo','Student ID','Admission No.','Name','Class','Sex');
 	$students = getTableData("#__studentform",
-							 "id,studentUid,admissionNumber,name,class,`group`,sex,parent,guardian",
+							 "id,studentUid,admissionNumber,name,class,sex",
 							 "$filter ORDER BY class+0, name ASC"
 				);
 
@@ -1621,7 +1640,7 @@ function showStudentList($who='student')
 		return;
 	}
 
-	$sponsors = getTableData("#__sponsorform","id,name,sponsorUid,CONCAT(',',sponsoredStudents,',')","1 ORDER BY name");
+	$sponsors = false; //getTableData("#__sponsorform","id,name,sponsorUid,CONCAT(',',sponsoredStudents,',')","1 ORDER BY name");
 	foreach ($students as $student) {
 		$id = $student[0];
 		echo "<tr>";
@@ -1641,7 +1660,7 @@ function showStudentList($who='student')
 				echo "<td>".getClassDisplayText($student[$i])."</td>";
 			}
 			else echo "<td>".$student[$i]."</td>";
-			if ($i==count($student)-1) {
+			if (false && $i==count($student)-1) { // Sponsors no longer shown
 				if ($sponsors) {
 					$outStr = "<td><ol>";
 					foreach ($sponsors as $sponsor) {
@@ -1807,7 +1826,7 @@ function showReports()
 	echo "<td><h2>Viewing School Reports</h2></td>";
 	echo "</tr></table>";
 
-	$graphs = array('View student profile','View student sponsorship','View grades from an assessment','View top students from an assessment','View a student\'s performance over time');
+	$graphs = array('View student profile','View grades from an assessment','View top students from an assessment','View a student\'s performance over time');
 	$actions = array('Generate class progress reports','Promote students to next class');
 	$user = JFactory::getUser();
 	if (!$user->get('isRoot')) array_pop($actions);
@@ -1844,14 +1863,15 @@ function showReports()
 	# Filtering based on login permissions
 	$allclasses = array('I','II','III','IV','V','VI','VII','VIII','IX','X');
 	$myclasses = getUserClassPermissions();
+	if ($myclasses==0) $myclasses = '1,2,3,4,5,6,7,8,9,10';
 	$clss = explode(',',$myclasses);
-	if ($class==-1 || !in_array($class,$myclasses)) $class = $myclasses[0];
+	if ($class==-1 || !in_array($class,$clss)) $class = $myclasses[0];
 	$classOptStr = '';
 	foreach ($clss as $cls) {
 		$classes[] = $allclasses[$cls-1];
 		if ($class==$cls) $classOptStr .= "<option selected=selected value='$cls'>".$allclasses[$cls-1]."</option>";
 		else $classOptStr .= "<option value='$cls'>".$allclasses[$cls-1]."</option>";
-	}	
+	}
 
 	if (isset($_REQUEST['studentId'])) {
 		$studentId = $_REQUEST['studentId'];
@@ -1897,22 +1917,22 @@ function showReports()
 		default:
 			reportStudentProfile($currtime,$pathPrefix);
 			break;
+		//case 1:
+			//reportSponsorship($currtime,$pathPrefix);
+			//break;
 		case 1:
-			reportSponsorship($currtime,$pathPrefix);
-			break;
-		case 2:
 			reportGrades($currtime,$pathPrefix,$year,$examType);
 			break;
-		case 3:
+		case 2:
 			reportTopStudents($currtime,$pathPrefix,$year,$examType);
 			break;
-		case 4:
+		case 3:
 			reportStudentPerformance($currtime,$pathPrefix,$class,$studentId);
 			break;
-		case 5:
+		case 4:
 			generateClassReport($currtime,$pathPrefix,$class,$year);
 			break;
-		case 6:
+		case 5:
 			promoteStudents($currtime,$pathPrefix);
 			break;
 	}
@@ -2412,12 +2432,14 @@ function reportStudentProfile($currtime, $pathPrefix)
 	printToFile($csvFile, "Age,Female,Male", getCsvFormat($results, true));
 	echo "<ageHist src='$pathPrefix/$csvFile'></ageHist>\n";
 
+	/*
 	echo "<div class=graphTitle><h3>Group Profile</h3></div>";
 	$csvFile = "dataGroupProfile-$currtime.csv";
 	$results = getTableData("#__studentform", "`group`,SUM(CASE WHEN sex='Female' THEN 1 ELSE 0 END),SUM(CASE WHEN sex='Male' THEN 1 ELSE 0 END)", "class<=10 GROUP BY `group` ORDER BY `group`");
 	printToFile($csvFile, "Group,Female,Male", getCsvFormat($results, true));
 	echo "<groupProfile src='$pathPrefix/$csvFile'></groupProfile>\n";
-
+	*/
+	
 	echo "<div class=graphTitle><h3>Class Profile</h3></div>";
 	$csvFile = "dataClassProfile-$currtime.csv";
 	$results = getTableData("#__studentform", "class,SUM(CASE WHEN sex='Female' THEN 1 ELSE 0 END),SUM(CASE WHEN sex='Male' THEN 1 ELSE 0 END)", "class<=10 GROUP BY class ORDER BY class+0");
@@ -2545,13 +2567,15 @@ function reportGrades($currtime, $pathPrefix, $year, $examType)
 	printToFile($csvFile, "Class,A/A+,B/B+,C/C+", getCsvFormat($arr, true));
 	echo "<gradesClass src='$pathPrefix/$csvFile'></gradesClass>\n";
 
+	/*
 	echo "<div class=graphTitle><h3>Grades by Group</h3></div>";
 	$csvFile = "dataGradesGroup-$currtime.csv";
 	$arr = array();
 	foreach ($allGroups as $group) array_push($arr, array($group,$groups[$group]['A/A+'],$groups[$group]['B/B+'],$groups[$group]['C/C+']));
 	printToFile($csvFile, "Group,A/A+,B/B+,C/C+", getCsvFormat($arr, true));
 	echo "<gradesGroup src='$pathPrefix/$csvFile'></gradesGroup>\n";
-
+	*/
+	
 	echo "<script src='$pathPrefix/media/d3/grades.js'></script>";
 
 	return;
@@ -2561,10 +2585,12 @@ function reportTopStudents($currtime, $pathPrefix, $year, $examType)
 {
 	$maxMarks = preg_replace("/.*\((\d+) marks.*/","$1",$examType);
 
+	/*
 	echo "<h3>Class Toppers by Group</h3>";
 	$csvFile = "dataTopStudents-$currtime.csv";
 	echo "<topStudents src='$pathPrefix/$csvFile'></topStudents>\n";
-
+	*/
+	
 	$results = getTableData("#__studentform,#__gradesform", "#__gradesform.class,name,`group`,sex,(kannadaMarks+englishMarks+hindiMarks+mathMarks+generalScienceMarks+socialStudiesMarks+computerScience) AS total,#__gradesform.id,studentId", "#__studentform.id=studentId AND year='$year' AND examType='$examType' ORDER BY #__gradesform.class+0, total DESC");
 	$prevClass = -1; $rank = $males = $females = 0; $groupmap = array();
 	foreach ($results as $result) {
@@ -2598,6 +2624,8 @@ function reportTopStudents($currtime, $pathPrefix, $year, $examType)
 	}
 	echo "</table>";
 
+	return; // skip rest of the code since group info is not shown
+	
 	$arr = array();
 	ksort($groupmap);
 	foreach ($groupmap as $key => $val) {

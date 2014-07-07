@@ -167,7 +167,7 @@ d3.csv(datafile, function(error, data) {
 /*===================================================================
 	Grouped barchart showing male and female students
 	grouped by group.
--------------------------------------------------------------------*/
+
 var groupProfile = document.getElementsByTagName('groupProfile')[0];
 var datafile = groupProfile.getAttribute('src');
 
@@ -265,6 +265,7 @@ d3.csv(datafile, function(error, data) {
       .text(function(d) { return d; });
 
 });
+-------------------------------------------------------------------*/
 
 /*===================================================================
 	Grouped barchart showing male and female students
