@@ -614,11 +614,11 @@ function saveGradesData(&$data, $res, $skillsRes)
 	// Finally, save the skills
 	foreach ($skillsRes as $row) {
 		if ($row[1]==$res[16]) {
-			$data['Skills'][$examType] = "<a href='".preg_replace("/\/grades\/.*/","/grades/view-grades?id=$res[16]&skillsId=$row[0]",$_SERVER['REQUEST_URI'])."'>Skills</a>";
+			$data['Skills'][$examType] = "<a href='".preg_replace("/\/index\.php\/.*/","/index.php/grades/view-grades?id=$res[16]&skillsId=$row[0]",$_SERVER['REQUEST_URI'])."'>Skills</a>";
 		}
 	}
 	if (!isset($data['Skills'][$examType]) && preg_match("/100 marks/",$examType))
-		$data['Skills'][$examType] = "<a href='".preg_replace("/\/grades\/.*/","/grades/add-skills?gradesId=$res[16]",$_SERVER['REQUEST_URI'])."'>Add</a>";
+		$data['Skills'][$examType] = "<a href='".preg_replace("/\/index\.php\/.*/","/index.php/grades/add-skills?gradesId=$res[16]",$_SERVER['REQUEST_URI'])."'>Add</a>";
 }
 
 function showStudentAllGrades($id)
@@ -649,12 +649,8 @@ function showStudentAllGrades($id)
 							 "#__studentform.id=studentId AND studentId=$id ORDER BY year DESC, FIELD(examType,$examOptStr)");
 
 	// To improve performance, we do a single query for skills across all years and exams
-	$gradesIds = array();
-	foreach ($results as $res) {
-		if (!in_array($res[16],$gradesIds)) $gradesIds[] = $res[16];
-	}
-	$skillsResults = getTableData("#__skillsform","id,gradesId","gradesId IN (".implode(',',$gradesIds).")");
-
+	$skillsResults = getSkills($results);
+	
 	if (count($results)==0) {
 		echo "<table class=studentView><tr>";
 		echo "<tr><td><div class=message style='margin-top:50px'>No grades have been recorded for this student.</div></td></tr>";
@@ -681,6 +677,15 @@ function showStudentAllGrades($id)
 	if ($year!='') printAllGradesTable($data, $inconsistent, $firstTable);
 }
 
+function getSkills($results)
+{
+	$gradesIds = array();
+	foreach ($results as $res) {
+		if (!in_array($res[16],$gradesIds)) $gradesIds[] = $res[16];
+	}
+	$skillsResults = getTableData("#__skillsform","id,gradesId","gradesId IN (".implode(',',$gradesIds).")");
+	return $skillsResults;
+}
 
 function setGrade(&$data, $marks, $maxMarks)
 {
@@ -1913,6 +1918,25 @@ function showReports()
 	}
 }
 
+function printPdfPageHeader($pdf, &$xoff, &$yoff, $pageWidth, $data, $firstPage=true, $examType='')
+{
+	$pdf->Image('images/BGMS-Shishukung-Logo-Small.png',$pdf->GetX(),$pdf->GetY()-5,30);
+	$pdf->Image('images/ShishukunjInternational-Small.png',$pageWidth-40,$pdf->GetY()-5,30);
+	$pdf->SetFont('Helvetica','B',30); $yoff += 10;
+	$pdf->Text($pageWidth/4, $yoff, "BGMS Shishukunj Vidyalaya"); $yoff += 10;
+	$pdf->SetFont('Helvetica','B',20);
+	$pdf->Text($pageWidth/6, $yoff, "18th Cross, Ramesh Nagar, Vibhutipura, Bangalore 560037"); $yoff += 10;
+	$pdf->SetFont('Helvetica','B',20);
+	$pdf->Text($pageWidth/2-40, $yoff, "Progress Report ".$data['year']); $yoff += 5;
+
+	$pdf->SetFont('Helvetica','B',12);
+	$pdf->Text($xoff, $yoff, "ID: ".$data['studentUid']); $yoff += 5;
+	$pdf->Text($xoff, $yoff, "Name: ".$data['name']); $yoff += 5;
+	if ($firstPage) { $pdf->Text($xoff, $yoff, "Date of Birth: ".$data['dateOfBirth']); $yoff += 5; }
+	$pdf->Text($xoff, $yoff, "Standard: ".getClassDisplayText($data['class'])); $yoff += 5;
+	if (!$firstPage) { $pdf->Text($xoff, $yoff, "Assessment: $examType"); $yoff += 5; }
+}
+
 function saveToPdf($data, $path, $filename)
 {
 	require_once('libraries/fpdf/fpdf.php');
@@ -1939,21 +1963,8 @@ function saveToPdf($data, $path, $filename)
 	$cols = array_merge(array('SUBJECT'),$examTypes,array('Remarks'));
 
 	$xoff =10; $yoff = 10;
-	$pdf->Image('images/BGMS-Shishukung-Logo-Small.png',$pdf->GetX(),$pdf->GetY()-5,30);
-	$pdf->Image('images/ShishukunjInternational-Small.png',$pageWidth-40,$pdf->GetY()-5,30);
-	$pdf->SetFont('Helvetica','B',30); $yoff += 10;
-	$pdf->Text($pageWidth/4, $yoff, "BGMS Shishukunj Vidyalaya"); $yoff += 10;
-	$pdf->SetFont('Helvetica','B',20);
-	$pdf->Text($pageWidth/6, $yoff, "18th Cross, Ramesh Nagar, Vibhutipura, Bangalore 560037"); $yoff += 10;
-	$pdf->SetFont('Helvetica','B',20);
-	$pdf->Text($pageWidth/2-40, $yoff, "Progress Report ".$data['year']); $yoff += 5;
+	printPdfPageHeader($pdf, $xoff, $yoff, $pageWidth, $data);
 
-	$pdf->SetFont('Helvetica','B',12);
-	$pdf->Text($xoff, $yoff, "ID: ".$data['studentUid']); $yoff += 5;
-	$pdf->Text($xoff, $yoff, "Name: ".$data['name']); $yoff += 5;
-	$pdf->Text($xoff, $yoff, "Date of Birth: ".$data['dateOfBirth']); $yoff += 5;
-	$pdf->Text($xoff, $yoff, "Standard: ".getClassDisplayText($data['class'])); $yoff += 5;
-	
 	$headColWidth = 60; $headRowHeight = 15; $indent = 2;
 	$pdf->Rect($xoff,$yoff,$headColWidth,$headRowHeight);
 	$pdf->SetFont('Helvetica','B',14);
@@ -2042,7 +2053,77 @@ function saveToPdf($data, $path, $filename)
 	$pdf->Text(5*$pageWidth/7, $pageHeight-10, "C+ 35-49%");
 	$pdf->Text(6*$pageWidth/7, $pageHeight-10, "C <35%");
 
+	// Although part of page header, this is included last so that
+	// comes on top of table border
 	$pdf->Image(findPhoto($data['studentId']),$pageWidth-40,40,24);
+	
+	// Print skills if they are present
+	foreach ($data as $key=>$val) {
+		if ($key!='Skills') continue;
+		foreach ($val as $k=>$v) {
+			if (preg_match("/view-grades\?id=\d+&skillsId=(\d+)/",$v,$matches)) {
+				$skillsId = $matches[1];
+				$pdf->AddPage();
+				$xoff =10; $yoff = 10;
+				printPdfPageHeader($pdf, $xoff, $yoff, $pageWidth, $data, false, $k);
+
+				$result = getTableData("#__skillsform",
+							"kannadaReadingSkills,kannadaWritingSkills,kannadaSpeakingSkills,englishReadingSkills,englishWritingSkills,englishSpeakingSkills,hindiReadingSkills,hindiWritingSkills,hindiSpeakingSkills,mathSkills,scienceSkills,socialStudiesSkills,otherInterests,behaviour,#__skillsform.remarks",
+							 "id=$skillsId",1);
+
+				$headColWidth = 60; $headRowHeight = 5; $indent = 2;
+				$pdf->Rect($xoff,$yoff,$headColWidth,$headRowHeight);
+				$pdf->SetFont('Helvetica','B',12);			
+				$colWidth = ($pageWidth - $headColWidth - 20)/3;
+				$rowHeight = 10;
+				
+				$pdf->SetXY($xoff+$headColWidth,$yoff);
+				$pdf->Cell($colWidth,$headRowHeight,'Reading Skills',1,0,'C',true);
+				$pdf->Cell($colWidth,$headRowHeight,'Writing Skills',1,0,'C',true);
+				$pdf->Cell($colWidth,$headRowHeight,'Speaking Skills',1,0,'C',true);
+
+				$RowHeading = array('Kannada','English','Hindi','Mathematics','Science','Social Studies','Other Interests','Behaviour','Remarks & Suggestions');
+				for ($i=0; $i<count($RowHeading); $i++) {
+					if ($i<3) {
+						if ($i==0) $yoff += 0.5*$rowHeight;
+						else $yoff += 1.7*$rowHeight;
+						$pdf->SetXY($xoff,$yoff);
+						$pdf->SetFont('Helvetica','B',14);
+						$pdf->Cell($headColWidth,1.7*$rowHeight,$RowHeading[$i],1,0,'L');
+						$pdf->SetFont('Helvetica','',12);
+
+						for ($j=0; $j<3; $j++) {
+							$cell = $result[3*$i+$j]." ";
+							$pdf->Cell($colWidth,1.7*$rowHeight,'',1,0,'L');
+							preg_match_all("/(.{1,37}) /",$cell,$matches);
+							$k = 1;
+							foreach ($matches[0] as $match) {
+								$pdf->Text($xoff+$headColWidth+$j*$colWidth+$indent,$yoff+$k*5,$match);
+								$k++; if ($k>=4) break;
+							}
+						}
+					}
+					else {
+						if ($i==3) $yoff += 0.5*$rowHeight;
+						else $yoff += $rowHeight;
+						$pdf->SetXY($xoff,$yoff);
+						$pdf->SetFont('Helvetica','B',14);
+						$pdf->Cell($headColWidth,$rowHeight,$RowHeading[$i],1,0,'L');
+						$pdf->SetFont('Helvetica','',12);
+						$pdf->Cell($colWidth,$rowHeight,$result[6+$i],1,0,'L');
+					}
+					if ($i==2) {
+						$yoff += 2*$rowHeight;
+						$pdf->Rect($xoff,$yoff,$headColWidth,$headRowHeight);
+						$pdf->SetFont('Helvetica','B',12);		
+						$pdf->SetXY($xoff+$headColWidth,$yoff);
+						$colWidth = ($pageWidth - $headColWidth - 20);
+						$pdf->Cell($colWidth,$headRowHeight,'Observations',1,0,'C',true);
+					}
+				}
+			}
+		}
+	}
 	
 	$absPath = JPATH_BASE.DS.$path;
 	if (!is_dir($absPath)) mkdir($absPath);
@@ -2064,6 +2145,8 @@ function generateClassReport($currtime, $pathPrefix, $class, $year)
 		return;
 	}
 	
+	$skillsResults = getSkills($results);
+
 	$savePath = "data.".time();
 	$studentId = ''; $data = $gradedClass = $skipped = $files = array();
 	for ($i=0; $i<count($results); $i++) {
@@ -2075,7 +2158,7 @@ function generateClassReport($currtime, $pathPrefix, $class, $year)
 			}
 			$data = $gradedClass = array();
 		}
-		saveGradesData($data, $res);
+		saveGradesData($data, $res, $skillsResults);
 		$studentId = $data['studentId'];
 		$filename = $data['studentUid'].".".getClassDisplayText($class).".$year.".preg_replace("/ /","",$data['name']).".pdf";
 		if (count($gradedClass) && !in_array($class,$gradedClass)) {
@@ -2115,6 +2198,8 @@ function generateStudentGradesReport($id, $yearReq='*')
 		echo "<div class=message style='margin-top:50px'>No grades have been recorded for this student$msg.</div>";
 		return;
 	}
+
+	$skillsResults = getSkills($results);
 	
 	$savePath = "data.".time();
 	$year = ''; $data = $gradedClass = $skipped = $files = array();
@@ -2127,7 +2212,7 @@ function generateStudentGradesReport($id, $yearReq='*')
 			}
 			$data = $gradedClass = array();
 		}
-		saveGradesData($data, $res);
+		saveGradesData($data, $res, $skillsResults);
 		$year = $data['year'];
 		$filename = $data['studentUid'].".".getClassDisplayText($data['class']).".$year.".preg_replace("/ /","",$data['name']).".pdf";
 		if (count($gradedClass) && !in_array($data['class'],$gradedClass)) {
@@ -2170,6 +2255,8 @@ function generateSponsorReport($id)
 		return;
 	}
 	
+	$skillsResults = getSkills($results);
+
 	$savePath = "data.".time();
 	$studentId = ''; $data = $gradedClass = $skipped = $files = array();
 	for ($i=0; $i<count($results); $i++) {
@@ -2181,7 +2268,7 @@ function generateSponsorReport($id)
 			}
 			$data = $gradedClass = array();
 		}
-		saveGradesData($data, $res);
+		saveGradesData($data, $res, $skillsResults);
 		$studentId = $data['studentId'];
 		$filename = $data['studentUid'].".".getClassDisplayText($data['class']).".$years[0].".preg_replace("/ /","",$data['name']).".pdf";
 		if (count($gradedClass) && !in_array($data['class'],$gradedClass)) {
