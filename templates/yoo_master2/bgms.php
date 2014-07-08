@@ -1611,9 +1611,9 @@ function showStudentList($who='student')
 	$allPhotoStr = '/'.implode('/',readPhotoDir()).'/';
 	$itemLink = preg_replace("/view-(students|graduates)\??.*/","view-$1",$_SERVER['REQUEST_URI']);
 	$sponsorLink = preg_replace("/students\/view-(students|graduates)\??.*/","sponsors/view-sponsors",$_SERVER['REQUEST_URI']);
-	$columnHeadings = array('Photo','Student ID','Admission No.','Name','Class','Sex');
+	$columnHeadings = array('Photo','Student ID','Admission No.','Name','Class','Sex','Parent Status','Economic Status');
 	$students = getTableData("#__studentform",
-							 "id,studentUid,admissionNumber,name,class,sex",
+							 "id,studentUid,admissionNumber,name,class,sex,parentStatus,economicStatus",
 							 "$filter ORDER BY class+0, name ASC"
 				);
 
@@ -1658,6 +1658,20 @@ function showStudentList($who='student')
 			}
 			else if ($i==4) { // conversion for class
 				echo "<td>".getClassDisplayText($student[$i])."</td>";
+			}
+			else if ($i==6) { // parent status
+				if ($student[$i]=='Both parents are alive')
+					echo "<td><img style='width:32px' src='../../images/male-icon.png' /><img style='width:32px' src='../../images/female-icon.png' /></td>";
+				else if ($student[$i]=='Only father is alive')
+					echo "<td><img style='width:32px' src='../../images/male-icon.png' /></td>";
+				else if ($student[$i]=='Only mother is alive')
+					echo "<td><img style='width:32px' src='../../images/blank-parent-icon.png' /><img style='width:32px' src='../../images/female-icon.png' /></td>";
+				else echo "<td>&nbsp;</td>";
+			}
+			else if ($i==7) { // economic status
+				if ($student[$i]=='Family is above poverty line')
+					echo "<td><img style='width:32px' src='../../images/thumbs-down.png' /></td>";
+				else echo "<td>&nbsp;</td>";
 			}
 			else echo "<td>".$student[$i]."</td>";
 			if (false && $i==count($student)-1) { // Sponsors no longer shown
