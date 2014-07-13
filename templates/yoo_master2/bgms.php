@@ -1669,7 +1669,7 @@ function showStudentList($who='student')
 				else echo "<td>&nbsp;</td>";
 			}
 			else if ($i==7) { // economic status
-				if ($student[$i]=='Family is above poverty line')
+				if ($student[$i]!='Family is above poverty line')
 					echo "<td><img style='width:32px' src='../../images/thumbs-down.png' /></td>";
 				else echo "<td>&nbsp;</td>";
 			}
