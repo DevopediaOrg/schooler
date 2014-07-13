@@ -1091,6 +1091,21 @@ function filterClassOptions()
 		}
 	}
 }
+
+function validateDateOfBirth()
+{
+	numDays = new Array(0,31,29,31,30,31,30,31,31,30,31,30,31)
+	elem = document.getElementById('dateOfBirth');
+	var fields = elem.value.match(/^\s*(\d\d)\/(\d\d)\/(\d\d\d\d)\s*$/)
+	if (!fields || fields.length!=4 ||
+		parseInt(fields[3])<1980 || parseInt(fields[3])>2014 ||
+		parseInt(fields[2])<0 || parseInt(fields[2])>12 ||
+		parseInt(fields[1])>numDays[parseInt(fields[2])]) { // simplistic check for Feb
+		alert("INPUT ERROR. Please correct the date of birth.");
+		return false;
+	}
+	return true;
+}
 //]]>
 </script>
 <?php
