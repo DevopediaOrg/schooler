@@ -220,11 +220,35 @@ function deletePhoto($id)
 	array_map('unlink', glob("$urlpath/Photo-$id.*"));
 }
 
-function getExamOptions($order='ASC')
+function getExamOptions($order='ASC',$class=0)
 {
-	$exams = array('Test 1 (25 marks)','Test 2 (25 marks)','Midterm Exam (100 marks)','Test 3 (25 marks)','Test 4 (25 marks)','Final Exam (100 marks)');
+	if ($class==0)
+		$exams = array('Test 1 (25 marks)','Test 2 (25 marks)','Midterm Exam (50 marks)','Midterm Exam (100 marks)','Test 3 (25 marks)','Test 4 (25 marks)','Final Exam (50 marks)','Final Exam (100 marks)');
+	else if ($class==-1)
+		$exams = array('Test 1','Test 2','Midterm Exam','Test 3','Test 4','Final Exam');
+	else if ($class>=8)
+		$exams = array('Test 1 (25 marks)','Test 2 (25 marks)','Midterm Exam (100 marks)','Test 3 (25 marks)','Test 4 (25 marks)','Final Exam (100 marks)');
+	else
+		$exams = array('Test 1 (25 marks)','Test 2 (25 marks)','Midterm Exam (50 marks)','Test 3 (25 marks)','Test 4 (25 marks)','Final Exam (50 marks)');	
 	if ($order=='ASC') return $exams;
 	else return array_reverse($exams);
+}
+
+function getMaxMarks($class, $examType)
+{
+	if ($class>=8 && preg_match('/(Final|Midterm)/',$examType)) $maxMarks = 100;
+	else if ($class<8 && preg_match('/(Final|Midterm)/',$examType)) $maxMarks = 50;
+	else $maxMarks = 25;
+	return $maxMarks;
+}
+
+function getNumberOfSubjects($class)
+{
+	if ($class>=6) $count = 4+1+1+1; // + Computer Science
+	else if ($class>=5) $count = 4+1+1; // + Social Studies
+	else if ($class>=4) $count = 4+1; // + Hindi 
+	else $count = 4; // Kannada, English, Maths, Science
+	return $count;
 }
 
 function msgPostFormSubmit($linkType)
@@ -521,7 +545,7 @@ function printAllGradesTable($data, $inconsistent=0, $first=0)
 		$rows = array('Kannada','English','Hindi','Mathematics','General Science','Social Studies','Total','Physical Education','Attendance','Conduct','Skills','Remarks','Date');	
 	}
 	if ($inconsistent) array_push($rows, 'Graded for Class');
-	$cols = array_merge(array('Subject'),getExamOptions('ASC'));
+	$cols = array_merge(array('Subject'),getExamOptions('ASC',$data['class']));
 	$pdflink = preg_replace("/\/view-grades\?.*/","/view-grades?studentId=".$data['studentId'],$_SERVER['REQUEST_URI']);
 	echo "<table style='width:100%'><tr>";
 	$user = JFactory::getUser();
@@ -1123,7 +1147,8 @@ window.addEvent('domready', function() {
   });
 
   $('class').addEvent('change', function() {
-    updateComputerScience();
+    updateSubjects();
+    updateExamType();
   });
 
   $('studentName').addEvent('change', function() {
@@ -1131,7 +1156,10 @@ window.addEvent('domready', function() {
   });
 
   $('gradesSubmit').addEvent('click', function() {
-    computerScienceElem.disabled = false; // so that DB is cleared
+	  // so that DB is cleared for disabled fields
+	  var subjects = ['kannadaMarks','englishMarks','hindiMarks','mathMarks','generalScienceMarks','socialStudiesMarks','computerScience'];
+	  for (i=0; i<subjects.length; i++)
+		  document.getElementById(subjects[i]).disabled = false;
     return true;
   });
   
@@ -1139,19 +1167,68 @@ window.addEvent('domready', function() {
 
 function onLoadGradesForm()
 {
+	var savedExamType = document.getElementById('examType').value;
 	loadStudentNames('init');
-	updateComputerScience();
+	updateSubjects();
+	updateExamType(savedExamType);
 }
 
-function updateComputerScience()
+function updateSubjects()
 {
 	classElem = document.getElementById('class');
-	computerScienceElem = document.getElementById('computerScience');
-	if (parseInt(classElem.value)>=6) computerScienceElem.disabled = false;
-	else {
-		computerScienceElem.disabled = true;
-		computerScienceElem.value = '';
+
+	elem = document.getElementById('hindiMarks');
+	if (parseInt(classElem.value)>=4) {
+		elem.disabled = false;
+		elem.value = elem.defaultValue;
 	}
+	else {
+		elem.disabled = true;
+		elem.value = '';
+	}
+
+	elem = document.getElementById('socialStudiesMarks');
+	if (parseInt(classElem.value)>=5) {
+		elem.disabled = false;
+		elem.value = elem.defaultValue;
+	}
+	else {
+		elem.disabled = true;
+		elem.value = '';
+	}
+	
+	elem = document.getElementById('computerScience');
+	if (parseInt(classElem.value)>=6) {
+		elem.disabled = false;
+		elem.value = elem.defaultValue;
+	}
+	else {
+		elem.disabled = true;
+		elem.value = '';
+	}
+}
+
+function updateExamType(savedExamType)
+{
+	var examTypes50 = ['Test 1 (25 marks)','Test 2 (25 marks)','Midterm Exam (50 marks)','Test 3 (25 marks)','Test 4 (25 marks)','Final Exam (50 marks)'];
+	var examTypes100 = ['Test 1 (25 marks)','Test 2 (25 marks)','Midterm Exam (100 marks)','Test 3 (25 marks)','Test 4 (25 marks)','Final Exam (100 marks)'];
+
+	classElem = document.getElementById('class');
+	examTypeElem = document.getElementById('examType');
+	if (typeof(savedExamType)==='undefined')
+		savedExamType = document.getElementById('examType').value;
+	if (parseInt(classElem.value)>=8) examTypes = examTypes100;
+	else examTypes = examTypes50;
+
+	while(examTypeElem.options.length > 0) examTypeElem.remove(0);
+	for (i=0; i<examTypes.length; i++) {
+		var option = document.createElement("option");
+		option.value = examTypes[i];
+		option.text = examTypes[i];
+		examTypeElem.add(option);
+		if (savedExamType==examTypes[i]) examTypeElem.selectedIndex = i;
+	}
+
 }
 
 function validateClass()
@@ -1227,13 +1304,15 @@ function loadClassYearOptions()
 		option.text = classes[option.value-1];
 		classElem.add(option);
 		classElem.selectedIndex = 0;
-		updateComputerScience();
+		updateSubjects();
+		updateExamType();
 		
 		// Show only latest year
 		yearElem = document.getElementById('year');
 		while(yearElem.options.length > 1) yearElem.remove(1);
 		
-		updateComputerScience();
+		updateSubjects();
+		updateExamType();
 		
 		return;
 	}
@@ -1244,7 +1323,8 @@ function loadClassYearOptions()
 		option.text = classes[i];
 		classElem.add(option);
 	}
-	updateComputerScience();
+	updateSubjects();
+	updateExamType();
 }
 
 function loadStudentNames(context)
@@ -1285,12 +1365,14 @@ function loadStudentNames(context)
 		var savedClassVal = classElem.options[classElem.selectedIndex].value;
 		loadClassYearOptions();
 		classElem.value = savedClassVal;
+		updateExamType();
 	}
 	else {
 		// when current class is changed, update class
 		loadClassYearOptions();
 		classElem.value = currentClassElem.options[currentClassElem.selectedIndex].value;		
-		updateComputerScience();
+		updateSubjects();
+		updateExamType();
 	}
 
 	students = mapElem.innerHTML.split('/');
@@ -1744,8 +1826,7 @@ function showGradesList()
 		$examOptStr = "'".implode("','",getExamOptions('DESC'))."'";
 		$examType = getTableData("#__gradesform","examType","1 ORDER BY FIELD(examType,$examOptStr) LIMIT 1",0);
 	}
-	$maxMarks = preg_replace("/.*\((\d+) marks.*/","$1",$examType);
-
+	
 	echo "<table class=studentPageTitle><tr>";
 	echo "<td><h2>Viewing Grades</h2></td>";
 	echo "</tr></table>";
@@ -1762,7 +1843,7 @@ function showGradesList()
 	# If there are no grades for a combination of year and examType, the student will not be displayed
 	$students = getTableData("#__studentform,#__gradesform",
 							 "studentId,#__studentform.class,#__gradesform.class,studentUid,name,kannadaMarks,englishMarks,hindiMarks,mathMarks,generalScienceMarks,socialStudiesMarks,computerScience",
-							 "$filter AND #__studentform.id=studentId AND year='$year' AND examType='$examType' ORDER BY #__studentform.class+0, name"
+							 "$filter AND #__studentform.id=studentId AND year='$year' AND examType LIKE '%$examType%' ORDER BY #__studentform.class+0, name"
 				);
 
 	echo "<table class=studentList>";
@@ -1773,7 +1854,7 @@ function showGradesList()
 	echo "<form id=gradeSelForm method=get onsubmit='return true;' action='$actionUrl'>";
 	$yrsArr = getYears();
 	echo "<select style='width:100px;margin-right:5px' name=year>".getOptStr($yrsArr,false,0,$year)."</select>";
-	echo "<select style='margin-right:5px' name=examType>".getOptStr(getExamOptions('DESC'),false,0,$examType)."</select>";
+	echo "<select style='margin-right:5px' name=examType>".getOptStr(getExamOptions('DESC',-1),false,0,$examType)."</select>";
 	echo "<input type=submit value='Get Grades' />";
 	echo "</form>";
 	echo "</td></tr>";
@@ -1810,6 +1891,8 @@ function showGradesList()
 			echo "<td>".getPhotoCode($studentId,"style='width:64px'")."</td>";
 		}
 		else echo "<td>&nbsp;</td>";
+
+		$maxMarks = getMaxMarks($result[2], $examType);
 		for ($i=1; $i<count($student); $i++) { // ignore id
 			if ($i==1 || $i==2) {
 				echo "<td>".getClassDisplayText($student[$i])."</td>";
@@ -1923,7 +2006,7 @@ function showReports()
 	echo "<select id=studentId style='margin-right:5px;display:none;float:left' name=studentId></select>"; # leave options to JS
 	$yrsArr = getYears();
 	echo "<select id=reportYearId style='width:100px;margin-right:5px;display:none;float:left' name=year>".getOptStr($yrsArr,false,0,$year)."</select>";
-	echo "<select id=reportExamTypeId style='margin-right:5px;display:none;float:left' name=examType>".getOptStr(getExamOptions('DESC'),false,0,$examType)."</select>";
+	echo "<select id=reportExamTypeId style='margin-right:5px;display:none;float:left' name=examType>".getOptStr(getExamOptions('DESC',-1),false,0,$examType)."</select>";
 	echo "<input type=submit id=reportsSubmit value='View Report' />";
 	echo "</form>";
 	echo "</td></tr>";
@@ -2003,10 +2086,10 @@ function saveToPdf($data, $path, $filename)
 		$rows = array('Kannada','English','Hindi','Mathematics','General Science','Social Studies','Computer Science','Total','Physical Education','Attendance','Conduct','Date');	
 	}
 	else {
-		$numSubjects = 6;
+		$numSubjects = 6; // Although some subjects are not applicable for lower classes, print blank cells
 		$rows = array('Kannada','English','Hindi','Mathematics','General Science','Social Studies','Total','Physical Education','Attendance','Conduct','Date');	
 	}
-	$examTypes = getExamOptions('ASC');
+	$examTypes = getExamOptions('ASC',$data['class']);
 	$examTypesStr = implode(',',$examTypes);
 	$examTitles = explode(',',preg_replace("/\s*(Exam)?\s*\(.*?\)/","",$examTypesStr));
 	$cols = array_merge(array('SUBJECT'),$examTypes,array('Remarks'));
@@ -2539,11 +2622,9 @@ function reportSponsorship($currtime, $pathPrefix)
 
 function reportGrades($currtime, $pathPrefix, $year, $examType)
 {
-	$maxMarks = preg_replace("/.*\((\d+) marks.*/","$1",$examType);
-
 	echo "<h3>School Performance Based On Subject Grades</h3>";
 	$csvFile = "dataSchoolPerf-$currtime.csv";
-	$results = getTableData("#__studentform,#__gradesform", "#__gradesform.class,`group`,sex,kannadaMarks,englishMarks,hindiMarks,mathMarks,generalScienceMarks,socialStudiesMarks,computerScience", "#__studentform.id=studentId AND year='$year' AND examType='$examType'");
+	$results = getTableData("#__studentform,#__gradesform", "#__gradesform.class,`group`,sex,kannadaMarks,englishMarks,hindiMarks,mathMarks,generalScienceMarks,socialStudiesMarks,computerScience", "#__studentform.id=studentId AND year='$year' AND examType LIKE '%$examType%'");
 	$grades = array(); $allGrades = array('A+','A','B+','B','C+','C');
 	foreach ($allGrades as $grade) $grades[$grade] = 0;
 	$subjects = array(); $allSubjects = array('Kannada','English','Hindi','Math','Science','Social','Computer');
@@ -2553,6 +2634,7 @@ function reportGrades($currtime, $pathPrefix, $year, $examType)
 	$groups = array(); $allGroups = array('Azad','Bhagath','Subhash','Vivek');
 	foreach ($allGroups as $group) $groups[$group] = array('A/A+'=>0,'B/B+'=>0,'C/C+'=>0);
 	foreach ($results as $result) {
+		$maxMarks = getMaxMarks($result[0], $examType);
 		for ($j=3; $j<10; $j++) {
 			if ($result[$j]>0) { // grade is recorded for this subject
 				$percentage = floor(0.5+100*$result[$j]/$maxMarks);
@@ -2612,15 +2694,13 @@ function reportGrades($currtime, $pathPrefix, $year, $examType)
 
 function reportTopStudents($currtime, $pathPrefix, $year, $examType)
 {
-	$maxMarks = preg_replace("/.*\((\d+) marks.*/","$1",$examType);
-
 	/*
 	echo "<h3>Class Toppers by Group</h3>";
 	$csvFile = "dataTopStudents-$currtime.csv";
 	echo "<topStudents src='$pathPrefix/$csvFile'></topStudents>\n";
 	*/
 	
-	$results = getTableData("#__studentform,#__gradesform", "#__gradesform.class,name,`group`,sex,(kannadaMarks+englishMarks+hindiMarks+mathMarks+generalScienceMarks+socialStudiesMarks+computerScience) AS total,#__gradesform.id,studentId", "#__studentform.id=studentId AND year='$year' AND examType='$examType' ORDER BY #__gradesform.class+0, total DESC");
+	$results = getTableData("#__studentform,#__gradesform", "#__gradesform.class,name,`group`,sex,(kannadaMarks+englishMarks+hindiMarks+mathMarks+generalScienceMarks+socialStudiesMarks+computerScience) AS total,#__gradesform.id,studentId", "#__studentform.id=studentId AND year='$year' AND examType LIKE '%$examType%' ORDER BY #__gradesform.class+0, total DESC");
 	$prevClass = -1; $rank = $males = $females = 0; $groupmap = array();
 	foreach ($results as $result) {
 		if ($prevClass!=$result[0]) {
@@ -2630,7 +2710,7 @@ function reportTopStudents($currtime, $pathPrefix, $year, $examType)
 			}
 			echo "<div class=graphTitle><h3>Class ".getClassDisplayText($result[0])." Toppers</h3></div>";
 			echo "<table class=studentView>";
-			echo "<tr><th>Rank</th><th>Photo</th><th>Student Name</th><th>Group</th><th>Percentage</th><th>Details</th></tr>";
+			echo "<tr><th>Rank</th><th>Photo</th><th>Student Name</th><th>Sex</th><th>Percentage</th><th>Details</th></tr>";
 		}
 		$rank++;
 		if ($rank<=5) { // only 5 toppers shown per class
@@ -2640,13 +2720,13 @@ function reportTopStudents($currtime, $pathPrefix, $year, $examType)
 			}
 			$groupmap[$result[2]][$result[3]]++;
 			// TODO Assumption that toppers have taken all subjects
-			if ($result[0]>=6) $numSubjects = 7; // include computer science
-			else $numSubjects = 6;
+			$maxMarks = getMaxMarks($result[0], $examType);
+			$numSubjects = getNumberOfSubjects($result[0]);
 			$percentage = floor(0.5+(100*$result[4])/($numSubjects*$maxMarks));
 			$studentLink = preg_replace("/\/reports[?]?.*$/","/students/view-students?id=$result[6]",$_SERVER['REQUEST_URI'],1);
 			$itemLink = preg_replace("/\/reports[?]?.*$/","/grades/view-grades?id=$result[5]",$_SERVER['REQUEST_URI'],1);
 			echo "<tr><td style='font-size:2em'>$rank</td><td>".getPhotoCode($result[6],"style='width:64px'")."</td>";
-			echo "<td><a href='$studentLink'>$result[1]</a></td><td>$result[2]</td><td>$percentage %</td>";
+			echo "<td><a href='$studentLink'>$result[1]</a></td><td>$result[3]</td><td>$percentage %</td>";
 			echo "<td><a href='$itemLink'>Details</a></td></tr>";
 		}
 		$prevClass = $result[0];
@@ -2686,7 +2766,7 @@ studentTimePerf { font: 11px sans-serif; }
 	}
 
 	$classAvg = getTableData("#__gradesform","kannadaMarks,englishMarks,hindiMarks,mathMarks,generalScienceMarks,socialStudiesMarks,computerScience","class='$results[10]' AND year='".$results[1]."' AND examType='".$results[2]."'");
-	$maxMarks = preg_replace("/.*\((\d+) marks.*/","$1",$results[2]);
+	$maxMarks = getMaxMarks($class, $results[2]);
 	$allSubjects = array('Kannada','English','Hindi','Math','Science','Social','Computer');
 	$classGrades = array();
 	foreach ($classAvg as $avg) {

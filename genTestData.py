@@ -25,7 +25,7 @@ sex = ['Male', 'Female'];
 admissionYear = ['09-08', '09-10', '10-11', '11-12', '13-14', '14-15'];
 group = ['Azad', 'Bhagath', 'Subhash', 'Vivek'];
 examYear = ['2014-15','2013-14'];
-examType = ['Test 1 (25 marks)', 'Test 2 (25 marks)', 'Midterm Exam (100 marks)', 'Test 3 (25 marks)', 'Test 4 (25 marks)', 'Final Exam (100 marks)'];
+examType = ['Test 1 (25 marks)', 'Test 2 (25 marks)', 'Midterm Exam (50 marks)', 'Midterm Exam (100 marks)', 'Test 3 (25 marks)', 'Test 4 (25 marks)', 'Final Exam (50 marks)', 'Final Exam (100 marks)'];
 scaleRating = ['Excellent', 'Good', 'Needs to improve'];
 descText = ['Can do better.', 'Congratulations. Potential to do even better.', 'Well done.'];
 remarks = ['Can do better.', 'Need to work independently.', 'Well done. Concentrate on maths.', 'Good job in English and Kannada.', 'Need to work hard.', 'Need to work hard in Hindi. All the best.', 'Good work.', 'Congratulations. Potential to do even better.', 'Need assistance in languages. Well done in social.', 'Concentrate. Too playful.']
@@ -117,6 +117,11 @@ def generateGrades(outfile):
         if ((j==skipStudentOneYear and k==0) or classes[j]-k>10):
           if (i==0):
             print("Skipping grades for", names[j], "["+str(j+1)+"]:", examYear[k], ", all exams");
+          totalCount += 1;
+          continue;
+      
+        if classes[j]-k>7 and re.search(r'50 marks',examType[i]) \
+        or classes[j]-k<=7 and re.search(r'100 marks',examType[i]):
           totalCount += 1;
           continue;
 
