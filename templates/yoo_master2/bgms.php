@@ -229,7 +229,7 @@ function getExamOptions($order='ASC',$class=0)
 	else if ($class>=8)
 		$exams = array('Test 1 (25 marks)','Test 2 (25 marks)','Midterm Exam (100 marks)','Test 3 (25 marks)','Test 4 (25 marks)','Final Exam (100 marks)');
 	else
-		$exams = array('Test 1 (25 marks)','Test 2 (25 marks)','Midterm Exam (50 marks)','Test 3 (25 marks)','Test 4 (25 marks)','Final Exam (50 marks)');	
+		$exams = array('Test 1 (25 marks)','Test 2 (25 marks)','Midterm Exam (50 marks)','Test 3 (25 marks)','Test 4 (25 marks)','Final Exam (50 marks)');
 	if ($order=='ASC') return $exams;
 	else return array_reverse($exams);
 }
@@ -242,13 +242,18 @@ function getMaxMarks($class, $examType)
 	return $maxMarks;
 }
 
+function getSubjects($class)
+{
+	if ($class>=6) $subjects = array('Kannada','English','Hindi','Math','Science','Social','Computer');
+	else if ($class>=5) $subjects = array('Kannada','English','Hindi','Math','Science','Social');
+	else if ($class>=4) $subjects = array('Kannada','English','Hindi','Math','Science');
+	else $subjects = array('Kannada','English','Math','Science');
+	return $subjects;
+}
+
 function getNumberOfSubjects($class)
 {
-	if ($class>=6) $count = 4+1+1+1; // + Computer Science
-	else if ($class>=5) $count = 4+1+1; // + Social Studies
-	else if ($class>=4) $count = 4+1; // + Hindi 
-	else $count = 4; // Kannada, English, Maths, Science
-	return $count;
+	return count(getSubjects($class));
 }
 
 function msgPostFormSubmit($linkType)
@@ -475,7 +480,7 @@ function showSponsorList()
 
 	$user = JFactory::getUser();
 	if ($user->guest) array_pop($columnHeadings);
-	
+
 	# Find duplicates in sponsorUid
 	$dups = array(); $uids = array();
 	foreach ($sponsors as $sponsor) array_push($uids, $sponsor[1]);
@@ -538,11 +543,11 @@ function printAllGradesTable($data, $inconsistent=0, $first=0)
 {
 	if ($data['class']>=6 || $inconsistent) {
 		$numSubjects = 7;
-		$rows = array('Kannada','English','Hindi','Mathematics','General Science','Social Studies','Computer Science','Total','Physical Education','Attendance','Conduct','Skills','Remarks','Date');	
+		$rows = array('Kannada','English','Hindi','Mathematics','General Science','Social Studies','Computer Science','Total','Physical Education','Attendance','Conduct','Skills','Remarks','Date');
 	}
 	else {
 		$numSubjects = 6;
-		$rows = array('Kannada','English','Hindi','Mathematics','General Science','Social Studies','Total','Physical Education','Attendance','Conduct','Skills','Remarks','Date');	
+		$rows = array('Kannada','English','Hindi','Mathematics','General Science','Social Studies','Total','Physical Education','Attendance','Conduct','Skills','Remarks','Date');
 	}
 	if ($inconsistent) array_push($rows, 'Graded for Class');
 	$cols = array_merge(array('Subject'),getExamOptions('ASC',$data['class']));
@@ -641,7 +646,7 @@ function saveGradesData(&$data, $res, $skillsRes)
 	else $data['Date'][$examType] = $res[3];
 	$gradesLink = preg_replace("/\/grades\/.*/","/grades/view-grades?id=".$res[16],$_SERVER['REQUEST_URI']);
 	$data['link'][$examType] = $gradesLink; // we will have id per exam
-	
+
 	// Finally, save the skills
 	foreach ($skillsRes as $row) {
 		if ($row[1]==$res[16]) {
@@ -691,7 +696,7 @@ function showStudentAllGrades($id)
 
 	// To improve performance, we do a single query for skills across all years and exams
 	$skillsResults = getSkills($results);
-	
+
 	$year = ''; $data = $gradedClass = array();
 	$inconsistent = 0;
 	$firstTable = 1;
@@ -918,10 +923,10 @@ function showStudentSkills($id)
 			$j++;
 		}
 		else echo "<tr><th>".$headings[$i]."</th><td>$fieldVal</td></tr>";
-		
+
 		// Add blank row as separator
 		if ($i==5 || $i==14) echo "<tr><td colspan=3>&nbsp;</td></tr>";
-		
+
 		if ($i==count($headings)-1){ // end of processing
 			echo "<tr><td colspan=3>&nbsp;</td></tr>";
 			echo "<tr><td>&nbsp;</td><td style='border:0px'><a href='$studentGradesLink'>View all grades</a> of this student.</td></tr>";
@@ -1026,7 +1031,7 @@ function printCustomCodeSkillsForm()
 		else echo "<tr><th>".$headings[$i]."</th><td>$fieldVal</td></tr>";
 	}
 	echo "</table>";
-	
+
 	echo "<div id=gradesRefId style='display:none'>$gradesId</div>\n";
 	echo "<img src='".preg_replace("/index\.php.*/","images/blank.gif",$_SERVER['REQUEST_URI'])."' onload='onLoadSkillsForm()' />\n";
 }
@@ -1036,7 +1041,7 @@ function printCustomCodeReportsForm()
 	$options = array();
 	$results = getTableData("#__studentform", "class,id,name", "class<=10 ORDER BY class+0, name");
 	if (count($results)==0) return; // user informed via showReports()
-	
+
 	foreach ($results as $result) {
 		array_push($options, "$result[0]:$result[1]:$result[2]");
 	}
@@ -1052,7 +1057,7 @@ function printCustomCodeSponsorForm()
 	}
 	else $id = -1;
 	$showStr = '';
-	
+
 	// Don't show students who already have 3 sponsors
 	$sponsoredStudents = getTableData("#__sponsorform", "sponsoredStudents,id", "sponsoredStudents REGEXP '[1-9]'");
 	$sponsorCount = array();
@@ -1064,7 +1069,7 @@ function printCustomCodeSponsorForm()
 		}
 		if ($id==$row[1]) $showStr = $row[0];
 	}
-	
+
 	$hideStr = '';
 	foreach ($sponsorCount as $key => $value) {
 		if ($value>=3) {
@@ -1162,7 +1167,7 @@ window.addEvent('domready', function() {
 		  document.getElementById(subjects[i]).disabled = false;
     return true;
   });
-  
+
 });
 
 function onLoadGradesForm()
@@ -1196,7 +1201,7 @@ function updateSubjects()
 		elem.disabled = true;
 		elem.value = '';
 	}
-	
+
 	elem = document.getElementById('computerScience');
 	if (parseInt(classElem.value)>=6) {
 		elem.disabled = false;
@@ -1298,7 +1303,7 @@ function loadClassYearOptions()
 	var classes = ['I','II','III','IV','V','VI','VII','VIII','IX','X'];
 	allowedClasses = document.getElementById('allowedClasses').innerHTML.split(',');
 	if (allowedClasses!=0) { // restricted access
-		// Show only current class 
+		// Show only current class
 		var option = document.createElement("option");
 		option.value = currentClassElem.options[currentClassElem.selectedIndex].value;
 		option.text = classes[option.value-1];
@@ -1306,14 +1311,14 @@ function loadClassYearOptions()
 		classElem.selectedIndex = 0;
 		updateSubjects();
 		updateExamType();
-		
+
 		// Show only latest year
 		yearElem = document.getElementById('year');
 		while(yearElem.options.length > 1) yearElem.remove(1);
-		
+
 		updateSubjects();
 		updateExamType();
-		
+
 		return;
 	}
 
@@ -1343,7 +1348,7 @@ function loadStudentNames(context)
 			i--;
 		}
 	}
-		
+
 	classElem = document.getElementById('class');
 	mapElem = document.getElementById('classStudentMap');
 	if (context == 'init') {
@@ -1370,7 +1375,7 @@ function loadStudentNames(context)
 	else {
 		// when current class is changed, update class
 		loadClassYearOptions();
-		classElem.value = currentClassElem.options[currentClassElem.selectedIndex].value;		
+		classElem.value = currentClassElem.options[currentClassElem.selectedIndex].value;
 		updateSubjects();
 		updateExamType();
 	}
@@ -1694,7 +1699,7 @@ function showStudentList($who='student')
 		else $filter = "class IN ($classes)";
 		$title = 'Students';
 	}
-	
+
 	if (isset($_REQUEST['id'])) {
 		if (isset($_REQUEST['action']) && $_REQUEST['action']=='delete') deleteStudent($_REQUEST['id'],$who);
 		else showStudent($_REQUEST['id'],$who);
@@ -1825,6 +1830,7 @@ function showGradesList()
 	else {
 		$examOptStr = "'".implode("','",getExamOptions('DESC'))."'";
 		$examType = getTableData("#__gradesform","examType","1 ORDER BY FIELD(examType,$examOptStr) LIMIT 1",0);
+		$examType = preg_replace('/\s+\(.*/','',$examType);
 	}
 	
 	echo "<table class=studentPageTitle><tr>";
@@ -1838,7 +1844,7 @@ function showGradesList()
 	$classes = getUserClassPermissions();
 	if ($classes==0) $filter = '#__gradesform.class<=10';
 	else $filter = "#__gradesform.class IN ($classes)";
-	
+
 	# Get only current class, not the class where the student was in the past
 	# If there are no grades for a combination of year and examType, the student will not be displayed
 	$students = getTableData("#__studentform,#__gradesform",
@@ -1892,7 +1898,7 @@ function showGradesList()
 		}
 		else echo "<td>&nbsp;</td>";
 
-		$maxMarks = getMaxMarks($result[2], $examType);
+		$maxMarks = getMaxMarks($students[2], $examType);
 		for ($i=1; $i<count($student); $i++) { // ignore id
 			if ($i==1 || $i==2) {
 				echo "<td>".getClassDisplayText($student[$i])."</td>";
@@ -1943,7 +1949,7 @@ function showReports()
 	$user = JFactory::getUser();
 	if (!$user->get('isRoot')) array_pop($actions);
 	$reports = array_merge($graphs,$actions);
-	
+
 	if (isset($_REQUEST['reportType'])) {
 		$reportTypeKey = $_REQUEST['reportType'];
 	}
@@ -1989,7 +1995,7 @@ function showReports()
 		$studentId = $_REQUEST['studentId'];
 	}
 	else $studentId = getTableData("#__studentform","id","class='1' ORDER BY name LIMIT 1",0);;
-	
+
 	// Display form for user selection
 	echo "<table class=studentList>";
 	echo "<tr style='border:0px'><td style='border:0px'>";
@@ -1999,9 +2005,9 @@ function showReports()
 	echo "<optgroup label=Graphs>".getOptStr($graphs,true,0,$reportType)."</optgroup>";
 	if (!$user->guest) echo "<optgroup label=Actions>".getOptStr($actions,true,count($graphs),$reportType)."</optgroup>";
 	echo "</select>";
-		
+
 	echo "<select id=class style='margin-right:5px;display:none;float:left' name=class>".getOptStr($classes,true,1,$classes[$class-1])."</select>";
-	
+
 	echo "<input id=studentIdLoad type=hidden disabled=disabled value='$studentId' />";
 	echo "<select id=studentId style='margin-right:5px;display:none;float:left' name=studentId></select>"; # leave options to JS
 	$yrsArr = getYears();
@@ -2072,22 +2078,22 @@ function printPdfPageHeader($pdf, &$xoff, &$yoff, $pageWidth, $data, $firstPage=
 function saveToPdf($data, $path, $filename)
 {
 	require_once('libraries/fpdf/fpdf.php');
-	
+
 	$pdf = new FPDF('L');
 	$pdf->AddPage();
 	$pageNum = 1;
 	$pageWidth = 297; $pageHeight = 210; // A4 in mm
 	$pdf->SetDrawColor(100,100,100);
 	$pdf->SetFillColor(220,220,220);
-	
+
 	$inconsistent = 0;
 	if ($data['class']>=6 || $inconsistent) {
 		$numSubjects = 7;
-		$rows = array('Kannada','English','Hindi','Mathematics','General Science','Social Studies','Computer Science','Total','Physical Education','Attendance','Conduct','Date');	
+		$rows = array('Kannada','English','Hindi','Mathematics','General Science','Social Studies','Computer Science','Total','Physical Education','Attendance','Conduct','Date');
 	}
 	else {
 		$numSubjects = 6; // Although some subjects are not applicable for lower classes, print blank cells
-		$rows = array('Kannada','English','Hindi','Mathematics','General Science','Social Studies','Total','Physical Education','Attendance','Conduct','Date');	
+		$rows = array('Kannada','English','Hindi','Mathematics','General Science','Social Studies','Total','Physical Education','Attendance','Conduct','Date');
 	}
 	$examTypes = getExamOptions('ASC',$data['class']);
 	$examTypesStr = implode(',',$examTypes);
@@ -2116,12 +2122,12 @@ function saveToPdf($data, $path, $filename)
 		$pdf->Cell($subColWidth,5,'%',1,0,'C');
 		$pdf->Cell($subColWidth,5,'Marks',1,0,'C');
 	}
-	
+
 	$lastColWidth = $pageWidth-$xoff-10;
 	$pdf->Rect($xoff,$yoff,$lastColWidth,$headRowHeight);
 	$pdf->SetFont('Helvetica','B',14);
 	$pdf->Text($xoff+$indent,$yoff+5,$cols[count($cols)-1]);
-	
+
 	$rowHeight = 8; $yoff += 7+$rowHeight;
 	for ($i=0; $i<count($rows); $i++, $yoff+=$rowHeight) {
 		$xoff = 10;
@@ -2132,9 +2138,9 @@ function saveToPdf($data, $path, $filename)
 		$pdf->Rect($xoff,$yoff,$headColWidth,$rowHgt,$fillrect);
 		$pdf->SetFont('Helvetica','B',14);
 		$cell = $rows[$i];
-		if ($cell=='Total') $cell = 'TOTAL'; 
+		if ($cell=='Total') $cell = 'TOTAL';
 		$pdf->Text($xoff+$indent,$yoff+5,$cell);
-		$pdf->SetFont('Helvetica','',11);			
+		$pdf->SetFont('Helvetica','',11);
 		for ($j=1, $xoff+=$headColWidth; $j<count($cols); $j++, $xoff+=$examTypeColWidth) {
 			if ($j==count($cols)-1) {
 				if ($i%2!=0) continue;
@@ -2188,7 +2194,7 @@ function saveToPdf($data, $path, $filename)
 	// Although part of page header, this is included last so that
 	// comes on top of table border
 	$pdf->Image(findPhoto($data['studentId']),$pageWidth-40,40,24);
-	
+
 	// Print skills if they are present
 	foreach ($data as $key=>$val) {
 		if ($key!='Skills') continue;
@@ -2205,10 +2211,10 @@ function saveToPdf($data, $path, $filename)
 
 				$headColWidth = 60; $headRowHeight = 5; $indent = 2;
 				$pdf->Rect($xoff,$yoff,$headColWidth,$headRowHeight);
-				$pdf->SetFont('Helvetica','B',12);			
+				$pdf->SetFont('Helvetica','B',12);
 				$colWidth = ($pageWidth - $headColWidth - 20)/3;
 				$rowHeight = 10;
-				
+
 				$pdf->SetXY($xoff+$headColWidth,$yoff);
 				$pdf->Cell($colWidth,$headRowHeight,'Reading Skills',1,0,'C',true);
 				$pdf->Cell($colWidth,$headRowHeight,'Writing Skills',1,0,'C',true);
@@ -2247,7 +2253,7 @@ function saveToPdf($data, $path, $filename)
 					if ($i==2) {
 						$yoff += 2*$rowHeight;
 						$pdf->Rect($xoff,$yoff,$headColWidth,$headRowHeight);
-						$pdf->SetFont('Helvetica','B',12);		
+						$pdf->SetFont('Helvetica','B',12);
 						$pdf->SetXY($xoff+$headColWidth,$yoff);
 						$colWidth = ($pageWidth - $headColWidth - 20);
 						$pdf->Cell($colWidth,$headRowHeight,'Observations',1,0,'C',true);
@@ -2256,7 +2262,7 @@ function saveToPdf($data, $path, $filename)
 			}
 		}
 	}
-	
+
 	$absPath = JPATH_BASE.DS.$path;
 	if (!is_dir($absPath)) mkdir($absPath);
 	$pdf->Output($absPath.DS.$filename,'F');
@@ -2265,7 +2271,7 @@ function saveToPdf($data, $path, $filename)
 function generateClassReport($currtime, $pathPrefix, $class, $year)
 {
 	deleteOldReports();
-	
+
 	// Fields obtained should be in line with saveGradesData
 	$examOptStr = "'".implode("','",getExamOptions('DESC'))."'";
 	$results = getTableData("#__studentform,#__gradesform",
@@ -2276,7 +2282,7 @@ function generateClassReport($currtime, $pathPrefix, $class, $year)
 		echo "<div class=message style='margin-top:50px'>No grades have been recorded for class ".getClassDisplayText($class)." in year $year.</div>";
 		return;
 	}
-	
+
 	$skillsResults = getSkills($results);
 
 	$savePath = "data.".time();
@@ -2307,7 +2313,7 @@ function generateClassReport($currtime, $pathPrefix, $class, $year)
 		}
 		zipAllFiles($savePath, "ClassReport.".getClassDisplayText($class).".$year.zip", $files);
 	}
-	
+
 	// TODO: skipping here is useless since we have filtered by class
 	// Inconsistent data will simply be missing in individual reports
 	printSkippedRecords($skipped);
@@ -2332,7 +2338,7 @@ function generateStudentGradesReport($id, $yearReq='*')
 	}
 
 	$skillsResults = getSkills($results);
-	
+
 	$savePath = "data.".time();
 	$year = ''; $data = $gradedClass = $skipped = $files = array();
 	for ($i=0; $i<count($results); $i++) {
@@ -2364,18 +2370,18 @@ function generateStudentGradesReport($id, $yearReq='*')
 		}
 		else { // single PDF
 			$path = JURI::root();
-			if (count($skipped)==0) echo "<div class='message'>Requested report has been generated.<br>Please download the file: <a href='$path/$savePath/$filename'>$filename</a></div>";	
+			if (count($skipped)==0) echo "<div class='message'>Requested report has been generated.<br>Please download the file: <a href='$path/$savePath/$filename'>$filename</a></div>";
 			else echo "<div class='message'>Unable to generate report.<br>Please check if grades are correctly recorded.</div>";
 		}
 	}
-	
+
 	printSkippedRecords($skipped);
 }
 
 function generateSponsorReport($id)
 {
 	deleteOldReports();
-	
+
 	$sponsorInfo = getTableData("#__sponsorform","name,sponsoredStudents","id=$id",1);
 	$years = getYears();
 	$examOptStr = "'".implode("','",getExamOptions('DESC'))."'";
@@ -2386,7 +2392,7 @@ function generateSponsorReport($id)
 		echo "<div class=message style='margin-top:50px'>No grades have been recorded for students sponsored by $sponsorInfo[0] in year $years[0].</div>";
 		return;
 	}
-	
+
 	$skillsResults = getSkills($results);
 
 	$savePath = "data.".time();
@@ -2417,18 +2423,18 @@ function generateSponsorReport($id)
 		}
 		zipAllFiles($savePath, "SponsorReport.".preg_replace("/ /","",$sponsorInfo[0]).".$years[0].zip", $files);
 	}
-	
+
 	printSkippedRecords($skipped);
 }
 
 function printSkippedRecords($skipped)
 {
 	if (count($skipped)==0) return;
-	
+
 	echo "<div class=message>Skipped reporting for the following since data was not consistent:</div>";
 	echo "<ul>";
 	foreach ($skipped as $skip) {
-		echo "<li>$skip</li>";			
+		echo "<li>$skip</li>";
 	}
 	echo "</ul>";
 }
@@ -2455,7 +2461,7 @@ function zipAllFiles($path, $zipname, $files)
 		echo "<div class='message'>Unable to generate report.<br>Please check if grades are correctly recorded.</div>";
 		return;
 	}
-	
+
 	$absPath = JPATH_BASE.DS.$path;
 	$zip = new ZipArchive;
 	if ($zip->open($absPath.DS.$zipname, ZIPARCHIVE::OVERWRITE) === TRUE) {
@@ -2504,7 +2510,7 @@ function getCsvFormat($arr, $fillZeros=false)
 
 function printToFile($filename, $header, $str)
 {
-	$basePath = "/var/www/html/bgms"; // "C:\wamp2.4\www\bgms"; // /var/www /home/iedf/www/bgms
+	$basePath = "/var/www/html/bgms"; // "C:\wamp\www\bgms"; // /var/www /home/iedf/www/bgms
 	$fh = fopen("$basePath/$filename", 'w') or die("Can't open file $basePath/$filename for saving data into CSV file.");
 	fwrite($fh, "$header\n$str");
 	fclose($fh);
@@ -2551,7 +2557,7 @@ function reportStudentProfile($currtime, $pathPrefix)
 	printToFile($csvFile, "Group,Female,Male", getCsvFormat($results, true));
 	echo "<groupProfile src='$pathPrefix/$csvFile'></groupProfile>\n";
 	*/
-	
+
 	echo "<div class=graphTitle><h3>Class Profile</h3></div>";
 	$csvFile = "dataClassProfile-$currtime.csv";
 	$results = getTableData("#__studentform", "class,SUM(CASE WHEN sex='Female' THEN 1 ELSE 0 END),SUM(CASE WHEN sex='Male' THEN 1 ELSE 0 END)", "class<=10 GROUP BY class ORDER BY class+0");
@@ -2584,13 +2590,13 @@ function reportSponsorship($currtime, $pathPrefix)
 		echo "<div class=message>No sponsors have been entered into the system.</div>";
 		return;
 	}
-	
+
 	echo "<h3>Sponsorship Summary</h3>";
 	$csvFile = "dataSponsorship-$currtime.csv";
 	$results = array();
 	ksort($sponsoredCount);
 	foreach ($sponsoredCount as $key => $value) {
-		array_push($results, array("$key Sponsors",$value)); 
+		array_push($results, array("$key Sponsors",$value));
 	}
 	printToFile($csvFile, "group,count", getCsvFormat($results, false));
 	echo "<sponsorship src='$pathPrefix/$csvFile'></sponsorship>\n";
@@ -2607,7 +2613,7 @@ function reportSponsorship($currtime, $pathPrefix)
 
 	echo "<div class=graphTitle><h3>Age Profile of Students with No Sponsors</h3></div>";
 	$csvFile = "dataUnsponsoredAgeHist-$currtime.csv";
-	$results = getTableData("#__studentform", 
+	$results = getTableData("#__studentform",
 							getAgeQuery()
 							.",SUM(CASE WHEN sex='Female' AND id NOT IN ($allSponsoredStr) THEN 1 ELSE 0 END)"
 							.",SUM(CASE WHEN sex='Male' AND id NOT IN ($allSponsoredStr) THEN 1 ELSE 0 END)",
@@ -2645,7 +2651,7 @@ function reportGrades($currtime, $pathPrefix, $year, $examType)
 				else $gradeIdx = 'C/C+';
 				$class = getClassDisplayText($result[0]);
 				$classes[$class][$gradeIdx]++;
-				$groups[$result[1]][$gradeIdx]++;
+				//$groups[$result[1]][$gradeIdx]++;
 				switch ($j) {
 					case 3: $subjects['Kannada'][$gradeIdx]++; break;
 					case 4: $subjects['English'][$gradeIdx]++; break;
@@ -2686,7 +2692,7 @@ function reportGrades($currtime, $pathPrefix, $year, $examType)
 	printToFile($csvFile, "Group,A/A+,B/B+,C/C+", getCsvFormat($arr, true));
 	echo "<gradesGroup src='$pathPrefix/$csvFile'></gradesGroup>\n";
 	*/
-	
+
 	echo "<script src='$pathPrefix/media/d3/grades.js'></script>";
 
 	return;
@@ -2699,7 +2705,7 @@ function reportTopStudents($currtime, $pathPrefix, $year, $examType)
 	$csvFile = "dataTopStudents-$currtime.csv";
 	echo "<topStudents src='$pathPrefix/$csvFile'></topStudents>\n";
 	*/
-	
+
 	$results = getTableData("#__studentform,#__gradesform", "#__gradesform.class,name,`group`,sex,(kannadaMarks+englishMarks+hindiMarks+mathMarks+generalScienceMarks+socialStudiesMarks+computerScience) AS total,#__gradesform.id,studentId", "#__studentform.id=studentId AND year='$year' AND examType LIKE '%$examType%' ORDER BY #__gradesform.class+0, total DESC");
 	$prevClass = -1; $rank = $males = $females = 0; $groupmap = array();
 	foreach ($results as $result) {
@@ -2734,7 +2740,7 @@ function reportTopStudents($currtime, $pathPrefix, $year, $examType)
 	echo "</table>";
 
 	return; // skip rest of the code since group info is not shown
-	
+
 	$arr = array();
 	ksort($groupmap);
 	foreach ($groupmap as $key => $val) {
@@ -2787,15 +2793,17 @@ studentTimePerf { font: 11px sans-serif; }
 	echo "Class ".getClassDisplayText($results[10])." / $results[1] / $results[2]<br>";
 	$arr = array();
 	for ($i=0; $i<count($allSubjects) && $results[10]>=6 || $i<count($allSubjects)-1 && $results[10]<6; $i++) {
-		$studentPercent = floor(0.5+100*$results[$i+3]/$maxMarks);
-		$classPercent = floor(0.5+100*$classGrades[$allSubjects[$i]]['Avg']/$maxMarks);
-		array_push($arr, array($allSubjects[$i],$studentPercent,$classPercent));
+		if (array_key_exists($allSubjects[$i],$classGrades)) {
+			$studentPercent = floor(0.5+100*$results[$i+3]/$maxMarks);
+			$classPercent = floor(0.5+100*$classGrades[$allSubjects[$i]]['Avg']/$maxMarks);
+			array_push($arr, array($allSubjects[$i],$studentPercent,$classPercent));
+		}
 	}
 	$csvFile = "dataStudentRecentPerf-$currtime.csv";
 	printToFile($csvFile, "Subject,This Student,Class Average", getCsvFormat($arr, false));
 	echo "<studentRecentPerf src='$pathPrefix/$csvFile'></studentRecentPerf>\n";
 
-	echo "<div class=graphTitle><h3>Student's Performance Over Time</h3></div>";
+	echo "<div class=graphTitle><h3>Student's Performance Over Time [<a href='index.php/grades/view-grades?studentId=$studentId'>Details</a>]</h3></div>";
 	// Limit to recent 6 tests, consider only those where at least one subject has recorded marks
 	// TODO For a particular subject, all grades are missing
 	$results = getTableData("#__gradesform","CONCAT(year,'/',examType),kannadaMarks,englishMarks,hindiMarks,mathMarks,generalScienceMarks,socialStudiesMarks,computerScience","studentId='$studentId' AND (kannadaMarks+englishMarks+hindiMarks+mathMarks+generalScienceMarks+socialStudiesMarks+computerScience)>0 ORDER BY year DESC, FIELD(examType,$examOptStr) LIMIT 6");
@@ -2809,13 +2817,18 @@ studentTimePerf { font: 11px sans-serif; }
 		$arr[$j][0] = preg_replace("/ \(.*/","",$results[$i][0]);
 		$arr[$j][0] = preg_replace("/Test (\d)/","Test$1",$arr[$j][0]);
 		$arr[$j][0] = preg_replace("/ Exam/","",$arr[$j][0]);
-		for ($k=1; $compSciPresent && $k<count($results[$i]) || $compSciPresent==0 && $k<count($results[$i])-1; $k++) {
-			$arr[$j][$k] = floor(0.5+100*$results[$i][$k]/$maxMarks);
+		for ($k=$l=1; $compSciPresent && $k<count($results[$i]) || $compSciPresent==0 && $k<count($results[$i])-1; $k++) {
+			if ($results[$i][$k]>0) {
+				$arr[$j][$l] = floor(0.5+100*$results[$i][$k]/$maxMarks);
+				$l++;
+			}
 		}
 	}
 	$csvFile = "dataStudentTimePerf-$currtime.csv";
-	if ($compSciPresent==0) array_pop($allSubjects);
-	printToFile($csvFile, "quarter,".implode(",",$allSubjects), getCsvFormat($arr, false));
+
+	$subjects = getSubjects($class);
+	if ($compSciPresent==0) array_pop($subjects);
+	printToFile($csvFile, "quarter,".implode(",",$subjects), getCsvFormat($arr, false));
 	echo "<studentTimePerf src='$pathPrefix/$csvFile'></studentTimePerf>\n";
 
 	echo "<script src='$pathPrefix/media/d3/studentPerformance.js'></script>";
