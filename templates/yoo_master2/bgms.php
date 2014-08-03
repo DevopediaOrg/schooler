@@ -223,9 +223,11 @@ function deletePhoto($id)
 function getExamOptions($order='ASC',$class=0)
 {
 	if ($class==0)
-		$exams = array('Test 1 (25 marks)','Test 2 (25 marks)','Midterm Exam (50 marks)','Midterm Exam (100 marks)','Test 3 (25 marks)','Test 4 (25 marks)','Final Exam (50 marks)','Final Exam (100 marks)');
+		$exams = array('Test 1 (25 marks)','Test 2 (25 marks)','Midterm Exam (50 marks)','Midterm Exam (100 marks)','Test 3 (25 marks)','Test 4 (25 marks)','Test 4 (100 marks)','Final Exam (50 marks)','Final Exam (100 marks)');
 	else if ($class==-1)
 		$exams = array('Test 1','Test 2','Midterm Exam','Test 3','Test 4','Final Exam');
+	else if ($class==10)
+		$exams = array('Test 1 (25 marks)','Test 2 (25 marks)','Midterm Exam (100 marks)','Test 3 (25 marks)','Test 4 (100 marks)','Final Exam (100 marks)');
 	else if ($class>=8)
 		$exams = array('Test 1 (25 marks)','Test 2 (25 marks)','Midterm Exam (100 marks)','Test 3 (25 marks)','Test 4 (25 marks)','Final Exam (100 marks)');
 	else
@@ -236,7 +238,8 @@ function getExamOptions($order='ASC',$class=0)
 
 function getMaxMarks($class, $examType)
 {
-	if ($class>=8 && preg_match('/(Final|Midterm)/',$examType)) $maxMarks = 100;
+	if ($class==10 && preg_match('/(Test 4)/',$examType)) $maxMarks = 100;
+	else if ($class>=8 && preg_match('/(Final|Midterm)/',$examType)) $maxMarks = 100;
 	else if ($class<8 && preg_match('/(Final|Midterm)/',$examType)) $maxMarks = 50;
 	else $maxMarks = 25;
 	return $maxMarks;
@@ -1217,12 +1220,14 @@ function updateExamType(savedExamType)
 {
 	var examTypes50 = ['Test 1 (25 marks)','Test 2 (25 marks)','Midterm Exam (50 marks)','Test 3 (25 marks)','Test 4 (25 marks)','Final Exam (50 marks)'];
 	var examTypes100 = ['Test 1 (25 marks)','Test 2 (25 marks)','Midterm Exam (100 marks)','Test 3 (25 marks)','Test 4 (25 marks)','Final Exam (100 marks)'];
-
+	var examTypesClass10 = ['Test 1 (25 marks)','Test 2 (25 marks)','Midterm Exam (100 marks)','Test 3 (25 marks)','Test 4 (100 marks)','Final Exam (100 marks)'];
+	
 	classElem = document.getElementById('class');
 	examTypeElem = document.getElementById('examType');
 	if (typeof(savedExamType)==='undefined')
 		savedExamType = document.getElementById('examType').value;
-	if (parseInt(classElem.value)>=8) examTypes = examTypes100;
+	if (parseInt(classElem.value)==10) examTypes = examTypesClass10;
+	else if (parseInt(classElem.value)>=8) examTypes = examTypes100;
 	else examTypes = examTypes50;
 
 	while(examTypeElem.options.length > 0) examTypeElem.remove(0);
