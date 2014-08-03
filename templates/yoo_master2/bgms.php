@@ -658,7 +658,7 @@ function saveGradesData(&$data, $res, $skillsRes)
 	}
 	$user = JFactory::getUser();
 	if (!$user->guest) {
-		if (!isset($data['Skills'][$examType]) && preg_match("/100 marks/",$examType))
+		if (!isset($data['Skills'][$examType]) && preg_match("/(Midterm|Final)/",$examType))
 			$data['Skills'][$examType] = "<a href='".preg_replace("/\/index\.php\/.*/","/index.php/grades/add-skills?gradesId=$res[16]",$_SERVER['REQUEST_URI'])."'>Add</a>";
 	}
 }
@@ -1903,7 +1903,7 @@ function showGradesList()
 		}
 		else echo "<td>&nbsp;</td>";
 
-		$maxMarks = getMaxMarks($students[2], $examType);
+		$maxMarks = getMaxMarks($student[2], $examType);
 		for ($i=1; $i<count($student); $i++) { // ignore id
 			if ($i==1 || $i==2) {
 				echo "<td>".getClassDisplayText($student[$i])."</td>";
@@ -2155,6 +2155,10 @@ function saveToPdf($data, $path, $filename)
 			else if (!isset($data[$rows[$i]][$cols[$j]])) {
 				if ($i<=$numSubjects) $cell = array('grade'=>'','%'=>'','marks'=>'');
 				else $cell = '';
+			}
+			else if (preg_match('/(\d+ [A-Z][a-z][a-z])[a-z]*( \d\d\d\d)/',$data[$rows[$i]][$cols[$j]],$matches)) {
+				// eg. 12 July 2014 -> 12 Jul 2014
+				$cell = $matches[1].$matches[2];
 			}
 			else $cell = $data[$rows[$i]][$cols[$j]];
 
