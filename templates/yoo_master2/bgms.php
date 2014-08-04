@@ -1903,7 +1903,7 @@ function showGradesList()
 		}
 		else echo "<td>&nbsp;</td>";
 
-		$maxMarks = getMaxMarks($student[2], $examType);
+		$maxMarks = getMaxMarks($student[2], $examType); 
 		for ($i=1; $i<count($student); $i++) { // ignore id
 			if ($i==1 || $i==2) {
 				echo "<td>".getClassDisplayText($student[$i])."</td>";
