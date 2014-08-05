@@ -2292,7 +2292,7 @@ function saveToPdf($data, $path, $filename)
 						$pdf->SetFont('Helvetica','',12);
 
 						for ($j=0; $j<3; $j++) {
-							$cell = $result[3*$i+$j]." ";
+							$cell = preg_replace('/\n/',' ',$result[3*$i+$j])." ";
 							$pdf->Cell($colWidth,1.7*$rowHeight,'',1,0,'L');
 							preg_match_all("/(.{1,37}) /",$cell,$matches);
 							$k = 1;
@@ -2309,7 +2309,7 @@ function saveToPdf($data, $path, $filename)
 						$pdf->SetFont('Helvetica','B',14);
 						$pdf->Cell($headColWidth,$rowHeight,$RowHeading[$i],1,0,'L');
 						$pdf->SetFont('Helvetica','',12);
-						$cell = $result[6+$i]." ";
+						$cell = preg_replace('/\n/',' ',$result[6+$i])." ";
 						if (strlen($cell)>114) {
 							$pdf->Cell($colWidth,$rowHeight,'',1,0,'L');
 							preg_match_all("/(.{1,113}) /",$cell,$matches);
