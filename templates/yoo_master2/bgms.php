@@ -245,6 +245,14 @@ function getMaxMarks($class, $examType)
 	return $maxMarks;
 }
 
+function getKannadaMaxMarks($class, $examType)
+{
+	if ($class==10 && preg_match('/(Final|Midterm|Test 4)/',$examType)) $maxMarks = 125;
+	else if ($class==9 && preg_match('/(Final)/',$examType)) $maxMarks = 125;
+	else $maxMarks = getMaxMarks($class, $examType);
+	return $maxMarks;
+}
+
 function getSubjects($class)
 {
 	if ($class>=6) $subjects = array('Kannada','English','Hindi','Math','Science','Social','Computer');
@@ -320,8 +328,8 @@ function getClassDisplayText($myclass)
 }
 
 function deleteStudent($id, $who='student')
-{	// Do not delete the grades of this student.
-	deletePhoto($id);
+{	// Do not delete the grades or skills of this student.
+	// deletePhoto($id);
 	executeQuery("DELETE FROM #__studentform WHERE id=$id", 0); // will delete nothing if id doesn't exist
 	echo "<div class=message>Entry has been deleted.<br>";
 }
@@ -582,6 +590,7 @@ function printAllGradesTable($data, $inconsistent=0, $first=0)
 	echo "</tr>";
 
 	// Table content
+	$showFootnote = false;
 	echo "<tr><td>&nbsp;</td>".str_repeat("<td class=gradeHead>Grade</td><td class=gradeHead>%</td><td class=gradeHead>Marks</td>",count($cols)-1)."</tr>";
 	for ($i=0; $i<count($rows); $i++) {
 		if ($rows[$i]=='Total') echo "<tr><td><b>".$rows[$i]."</b></td>";
@@ -602,7 +611,12 @@ function printAllGradesTable($data, $inconsistent=0, $first=0)
 				else {
 					echo "<td>".$cell['grade']."</td>";
 					echo "<td class=marks>".$cell['%']."</td>";
-					echo "<td class=marks>".$cell['marks']."</td>";
+					if ($rows[$i]=='Kannada' && getKannadaMaxMarks($data['class'],$cols[$j])==125) {
+						echo "<td class=marks><sup>*</sup>".$cell['marks']."</td>";
+						$showFootnote = true;
+					}
+					else
+						echo "<td class=marks>".$cell['marks']."</td>";
 				}
 			}
 			else {
@@ -611,6 +625,7 @@ function printAllGradesTable($data, $inconsistent=0, $first=0)
 		}
 		echo "</tr>";
 	}
+	if ($showFootnote) echo "<tr><td colspan=19 style='border:0px;font-size:0.9em;text-align:right'><i>* Out of 125 marks.</i></td></tr>";
 	echo "</table>";
 }
 
@@ -624,16 +639,17 @@ function saveGradesData(&$data, $res, $skillsRes)
 	$class = $data['class'] = $res[17];
 	$examType = $res[2];
 	$maxMarks = preg_replace("/.*\((\d+) marks.*/","$1",$examType);
-	$numSubjects = 0;
+	$kannadaMaxMarks = getKannadaMaxMarks($class,$examType);
+	$totalBaseMarks = 0;
 	$data['Graded for Class'][$examType] = getClassDisplayText($class);
-	if (setGrade($data['Kannada'][$examType], $res[5], $maxMarks)) $numSubjects++;
-	if (setGrade($data['English'][$examType], $res[6], $maxMarks)) $numSubjects++;
-	if (setGrade($data['Hindi'][$examType], $res[7], $maxMarks)) $numSubjects++;
-	if (setGrade($data['Mathematics'][$examType], $res[8], $maxMarks)) $numSubjects++;
-	if (setGrade($data['General Science'][$examType], $res[9], $maxMarks)) $numSubjects++;
-	if (setGrade($data['Social Studies'][$examType], $res[10], $maxMarks)) $numSubjects++;
-	if (setGrade($data['Computer Science'][$examType], $res[11], $maxMarks)) $numSubjects++;
-	setGrade($data['Total'][$examType], $res[5]+$res[6]+$res[7]+$res[8]+$res[9]+$res[10]+$res[11], $numSubjects*$maxMarks);
+	if (setGrade($data['Kannada'][$examType], $res[5], $kannadaMaxMarks)) $totalBaseMarks += $kannadaMaxMarks;
+	if (setGrade($data['English'][$examType], $res[6], $maxMarks)) $totalBaseMarks += $maxMarks;
+	if (setGrade($data['Hindi'][$examType], $res[7], $maxMarks)) $totalBaseMarks += $maxMarks;
+	if (setGrade($data['Mathematics'][$examType], $res[8], $maxMarks)) $totalBaseMarks += $maxMarks;
+	if (setGrade($data['General Science'][$examType], $res[9], $maxMarks)) $totalBaseMarks += $maxMarks;
+	if (setGrade($data['Social Studies'][$examType], $res[10], $maxMarks)) $totalBaseMarks += $maxMarks;
+	if (setGrade($data['Computer Science'][$examType], $res[11], $maxMarks)) $totalBaseMarks += $maxMarks;
+	setGrade($data['Total'][$examType], $res[5]+$res[6]+$res[7]+$res[8]+$res[9]+$res[10]+$res[11], $totalBaseMarks);
 	$data['Physical Education'][$examType] = $res[12];
 	$attendanceFields = explode('/',preg_replace("/ /","",$res[14]));
 	if (count($attendanceFields)==2 && $attendanceFields[1]) {
@@ -803,7 +819,8 @@ function showStudentGrades($id)
 
 	$headings = array('Student Name','Current','This Grade For','Year','Assessment','Date','Kannada','English','Hindi','Mathematics','General Science','Social Studies','Computer Science','Physical Education','Conduct','Attendance','Remarks');
 	$maxMarks = preg_replace("/.*\((\d+) marks.*/","$1",$result[5]);
-	$totalMarks = 0; $numSubjects = 0;
+	$kannadaMaxMarks = getKannadaMaxMarks($result[3],$result[5]);
+	$totalMarks = 0; $totalBaseMarks = 0; $numSubjects = 0;
 	echo "<table class=studentView>";
 	for ($i=$j=0; $i<count($headings); $i++, $j++) {
 		$fieldVal = $result[$j+1];
@@ -824,9 +841,18 @@ function showStudentGrades($id)
 			if ($fieldVal>0) {
 				// computerScience for class 6 and above but display if marks are recorded
 				$totalMarks += $fieldVal;
-				$numSubjects++;
-				$percentage = floor(0.5+100*$fieldVal/$maxMarks);
-				echo "<tr class=marks><th>".$headings[$i]."</th>";
+				if ($i==6) {
+					$totalBaseMarks += $kannadaMaxMarks;
+					$percentage = floor(0.5+100*$fieldVal/$kannadaMaxMarks);
+					if ($kannadaMaxMarks==125) $subjectText = $headings[$i]." (125 marks)";
+					else $subjectText = $headings[$i];
+				}
+				else {
+					$totalBaseMarks += $maxMarks;
+					$percentage = floor(0.5+100*$fieldVal/$maxMarks);
+					$subjectText = $headings[$i];
+				}
+				echo "<tr class=marks><th>$subjectText</th>";
 				echo "<td style='text-align:left'>".getGrade($percentage)."</td>";
 				echo "<td>$percentage %</td>";
 				echo "<td>$fieldVal</td>";
@@ -859,8 +885,8 @@ function showStudentGrades($id)
 			echo "<tr><td style='border:0px'>&nbsp;</td><td class=gradeHead style='text-align:left'>Grade</td><td class=gradeHead>Percentage</td><td class=gradeHead>Marks</td></tr>";
 		}
 		else if ($i==12) {
-			if ($numSubjects*$maxMarks) {
-				$percentage = floor(0.5+100*$totalMarks/($numSubjects*$maxMarks)); // count only subjects taken for overall percentage
+			if ($totalBaseMarks) {
+				$percentage = floor(0.5+100*$totalMarks/$totalBaseMarks); // count only subjects taken for overall percentage
 				echo "<tr class=marks><td style='text-align:left'><b>Total</b></td><td style='text-align:left'><b>".getGrade($percentage)."</b></td><td><b>$percentage %</b></td><td><b>$totalMarks</b></td></tr>";
 			}
 			else echo "<tr class=marks><td style='text-align:left'><b>Total</b></td><td style='text-align:left'><b>&nbsp;</b></td><td><b>&nbsp;</b></td><td><b>&nbsp;</b></td></tr>";
@@ -1261,8 +1287,21 @@ function validateSocialStudiesMarks() { return validateMarks('socialStudiesMarks
 function validateComputerScienceMarks() { return validateMarks('computerScience'); }
 function validateMarks(subject)
 {
+	// class IX/Final: Kannada 125
+	// class X/(Midterm|Test 4|Final): Kannada 125
+	classElem = document.getElementById('class');
 	elem = document.getElementById('examType');
-	var maxMarks = elem.value.replace(/.*\((\d+) marks.*/g,"$1");
+	var maxMarks;
+	if (parseInt(classElem.value)==10 && 
+		elem.value.match(/(Midterm|Test 4|Final)/) &&
+		subject=='kannadaMarks')
+		maxMarks = 125;
+	else if (parseInt(classElem.value)==9 && 
+			elem.value.match(/(Final)/) &&
+			subject=='kannadaMarks')
+			maxMarks = 125;
+	else
+		maxMarks = elem.value.replace(/.*\((\d+) marks.*/g,"$1");
 	if (parseInt(document.getElementById(subject).value) > parseInt(maxMarks)) {
 		alert("INPUT ERROR. Marks must not exceed the maximum of " + maxMarks + ".");
 		return false;
@@ -1893,7 +1932,7 @@ function showGradesList()
 	}
 
 	foreach ($students as $student) {
-		$totalMarks = $numSubjects = 0;
+		$totalMarks = $totalBaseMarks = 0;
 		$studentId = $student[0];
 		$data = array();
 		echo "<tr>";
@@ -1903,7 +1942,8 @@ function showGradesList()
 		}
 		else echo "<td>&nbsp;</td>";
 
-		$maxMarks = getMaxMarks($student[2], $examType); 
+		$maxMarks = getMaxMarks($student[2], $examType);
+		$kannadaMaxMarks = getKannadaMaxMarks($student[2], $examType);
 		for ($i=1; $i<count($student); $i++) { // ignore id
 			if ($i==1 || $i==2) {
 				echo "<td>".getClassDisplayText($student[$i])."</td>";
@@ -1914,9 +1954,11 @@ function showGradesList()
 				else echo "<td><a href='$itemLink?id=$studentId'>".$student[$i]."</td>";
 			}
 			else if ($i>=5 && $i<=11) {
-				if (setGrade($data,$student[$i],$maxMarks)) {
+				if ($i==5) $max = $kannadaMaxMarks;
+				else $max = $maxMarks;
+				if (setGrade($data,$student[$i],$max)) {
 					$totalMarks += $student[$i];
-					$numSubjects++;
+					$totalBaseMarks += $max;
 					echo "<td>".$data['grade']."</td>";
 				}
 				else echo "<td>&nbsp;</td>";
@@ -1924,7 +1966,7 @@ function showGradesList()
 			else echo "<td>".$student[$i]."</td>";
 			if ($i==count($student)-1) {
 				// Total
-				if (setGrade($data,$totalMarks,$numSubjects*$maxMarks)) echo "<td>".$data['grade']."</td>";
+				if (setGrade($data,$totalMarks,$totalBaseMarks)) echo "<td>".$data['grade']."</td>";
 				else echo "<td>&nbsp;</td>";
 
 				// link to student all grades
@@ -2133,6 +2175,7 @@ function saveToPdf($data, $path, $filename)
 	$pdf->SetFont('Helvetica','B',14);
 	$pdf->Text($xoff+$indent,$yoff+5,$cols[count($cols)-1]);
 
+	$showFootnote = false;
 	$rowHeight = 8; $yoff += 7+$rowHeight;
 	for ($i=0; $i<count($rows); $i++, $yoff+=$rowHeight) {
 		$xoff = 10;
@@ -2182,7 +2225,13 @@ function saveToPdf($data, $path, $filename)
 				$pdf->SetXY($xoff,$yoff);
 				$pdf->Cell($subColWidth,$rowHeight,$cell['grade'],1,0,'L',$fillcell);
 				$pdf->Cell($subColWidth,$rowHeight,$cell['%'],1,0,'R',$fillcell);
-				$pdf->Cell($subColWidth,$rowHeight,$cell['marks'],1,0,'R',$fillcell);
+				if ($rows[$i]=='Kannada' && getKannadaMaxMarks($data['class'],$cols[$j])==125) {
+					$pdf->Cell($subColWidth,$rowHeight,'*'.$cell['marks'],1,0,'R',$fillcell);
+					$showFootnote = true;
+				}
+				else {
+					$pdf->Cell($subColWidth,$rowHeight,$cell['marks'],1,0,'R',$fillcell);
+				}
 			}
 			else {
 				$cell = preg_replace("/Needs to improve/","To improve",$cell);
@@ -2191,7 +2240,10 @@ function saveToPdf($data, $path, $filename)
 			}
 		}
 	}
-
+	if ($showFootnote) {
+		$pdf->Text($pageWidth-50, $yoff+$rowHeight/2, "* Out of 125 marks");
+	}
+		
 	$pdf->Text(10, $pageHeight-10, "GRADE");
 	$pdf->Text($pageWidth/7, $pageHeight-10, "A+ >=90%");
 	$pdf->Text(2*$pageWidth/7, $pageHeight-10, "A 75-89%");
@@ -2203,7 +2255,7 @@ function saveToPdf($data, $path, $filename)
 	// Although part of page header, this is included last so that
 	// comes on top of table border
 	$pdf->Image(findPhoto($data['studentId']),$pageWidth-40,40,24);
-
+	
 	// Print skills if they are present
 	foreach ($data as $key=>$val) {
 		if ($key!='Skills') continue;
@@ -2257,9 +2309,22 @@ function saveToPdf($data, $path, $filename)
 						$pdf->SetFont('Helvetica','B',14);
 						$pdf->Cell($headColWidth,$rowHeight,$RowHeading[$i],1,0,'L');
 						$pdf->SetFont('Helvetica','',12);
-						$pdf->Cell($colWidth,$rowHeight,$result[6+$i],1,0,'L');
+						$cell = $result[6+$i]." ";
+						if (strlen($cell)>114) {
+							$pdf->Cell($colWidth,$rowHeight,'',1,0,'L');
+							preg_match_all("/(.{1,113}) /",$cell,$matches);
+							$k = 1;
+							foreach ($matches[0] as $match) {
+								$pdf->Text($xoff+$headColWidth+$indent,$yoff+$k*5-1,$match);
+								$k++; if ($k>=3) break;
+							}
+						}
+						else {
+							$pdf->SetFont('Helvetica','',12);
+							$pdf->Cell($colWidth,$rowHeight,$cell,1,0,'L');
+						}
 					}
-					if ($i==2) {
+					if ($i==2) { // header row after languages
 						$yoff += 2*$rowHeight;
 						$pdf->Rect($xoff,$yoff,$headColWidth,$headRowHeight);
 						$pdf->SetFont('Helvetica','B',12);
@@ -2650,9 +2715,13 @@ function reportGrades($currtime, $pathPrefix, $year, $examType)
 	foreach ($allGroups as $group) $groups[$group] = array('A/A+'=>0,'B/B+'=>0,'C/C+'=>0);
 	foreach ($results as $result) {
 		$maxMarks = getMaxMarks($result[0], $examType);
+		$kannadaMaxMarks = getKannadaMaxMarks($result[0], $examType);
 		for ($j=3; $j<10; $j++) {
 			if ($result[$j]>0) { // grade is recorded for this subject
-				$percentage = floor(0.5+100*$result[$j]/$maxMarks);
+				if ($j==3)
+					$percentage = floor(0.5+100*$result[$j]/$kannadaMaxMarks);
+				else
+					$percentage = floor(0.5+100*$result[$j]/$maxMarks);
 				$grade = getGrade($percentage);
 				$grades[$grade]++;
 				if ($grade=='A' || $grade=='A+') $gradeIdx = 'A/A+';
@@ -2715,7 +2784,9 @@ function reportTopStudents($currtime, $pathPrefix, $year, $examType)
 	echo "<topStudents src='$pathPrefix/$csvFile'></topStudents>\n";
 	*/
 
-	$results = getTableData("#__studentform,#__gradesform", "#__gradesform.class,name,`group`,sex,(kannadaMarks+englishMarks+hindiMarks+mathMarks+generalScienceMarks+socialStudiesMarks+computerScience) AS total,#__gradesform.id,studentId", "#__studentform.id=studentId AND year='$year' AND examType LIKE '%$examType%' ORDER BY #__gradesform.class+0, total DESC");
+	//SELECT ek5d2_gradesform.class,name,`group`,sex,(kannadaMarks+englishMarks+hindiMarks+mathMarks+generalScienceMarks+socialStudiesMarks+computerScience) AS total,kannadaMarks,englishMarks,hindiMarks,mathMarks,generalScienceMarks,socialStudiesMarks,computerScience,ek5d2_gradesform.id,studentId FROM ek5d2_studentform,ek5d2_gradesform  WHERE ek5d2_studentform.id=studentId AND year='2013-14' AND examType LIKE '%Final%' ORDER BY ek5d2_gradesform.class+0, total DESC;
+	
+	$results = getTableData("#__studentform,#__gradesform", "#__gradesform.class,name,`group`,sex,(kannadaMarks+englishMarks+hindiMarks+mathMarks+generalScienceMarks+socialStudiesMarks+computerScience) AS total,kannadaMarks,englishMarks,hindiMarks,mathMarks,generalScienceMarks,socialStudiesMarks,computerScience,#__gradesform.id,studentId", "#__studentform.id=studentId AND year='$year' AND examType LIKE '%$examType%' ORDER BY #__gradesform.class+0, total DESC");
 	$prevClass = -1; $rank = $males = $females = 0; $groupmap = array();
 	foreach ($results as $result) {
 		if ($prevClass!=$result[0]) {
@@ -2729,18 +2800,24 @@ function reportTopStudents($currtime, $pathPrefix, $year, $examType)
 		}
 		$rank++;
 		if ($rank<=5) { // only 5 toppers shown per class
+			// TODO Assumption that toppers have taken all applicable subjects
 			if (!isset($groupmap[$result[2]])) {
 				$groupmap[$result[2]]['Male']=0;
 				$groupmap[$result[2]]['Female']=0;
 			}
 			$groupmap[$result[2]][$result[3]]++;
-			// TODO Assumption that toppers have taken all subjects
 			$maxMarks = getMaxMarks($result[0], $examType);
-			$numSubjects = getNumberOfSubjects($result[0]);
-			$percentage = floor(0.5+(100*$result[4])/($numSubjects*$maxMarks));
-			$studentLink = preg_replace("/\/reports[?]?.*$/","/students/view-students?id=$result[6]",$_SERVER['REQUEST_URI'],1);
-			$itemLink = preg_replace("/\/reports[?]?.*$/","/grades/view-grades?id=$result[5]",$_SERVER['REQUEST_URI'],1);
-			echo "<tr><td style='font-size:2em'>$rank</td><td>".getPhotoCode($result[6],"style='width:64px'")."</td>";
+			$kannadaMaxMarks = getKannadaMaxMarks($result[0], $examType);
+			$totalBaseMarks = 0;
+			for ($j=5; $j<12; $j++) {
+				if ($j==5) $max = $kannadaMaxMarks;
+				else $max = $maxMarks;
+				if ($result[$j]>0) $totalBaseMarks += $max;
+			}
+			$percentage = floor(0.5+(100*$result[4])/$totalBaseMarks);
+			$studentLink = preg_replace("/\/reports[?]?.*$/","/students/view-students?id=$result[13]",$_SERVER['REQUEST_URI'],1);
+			$itemLink = preg_replace("/\/reports[?]?.*$/","/grades/view-grades?id=$result[12]",$_SERVER['REQUEST_URI'],1);
+			echo "<tr><td style='font-size:2em'>$rank</td><td>".getPhotoCode($result[13],"style='width:64px'")."</td>";
 			echo "<td><a href='$studentLink'>$result[1]</a></td><td>$result[3]</td><td>$percentage %</td>";
 			echo "<td><a href='$itemLink'>Details</a></td></tr>";
 		}
@@ -2782,6 +2859,7 @@ studentTimePerf { font: 11px sans-serif; }
 
 	$classAvg = getTableData("#__gradesform","kannadaMarks,englishMarks,hindiMarks,mathMarks,generalScienceMarks,socialStudiesMarks,computerScience","class='$results[10]' AND year='".$results[1]."' AND examType='".$results[2]."'");
 	$maxMarks = getMaxMarks($class, $results[2]);
+	$kannadaMaxMarks = getKannadaMaxMarks($results[10], $results[2]);
 	$allSubjects = array('Kannada','English','Hindi','Math','Science','Social','Computer');
 	$classGrades = array();
 	foreach ($classAvg as $avg) {
@@ -2803,8 +2881,10 @@ studentTimePerf { font: 11px sans-serif; }
 	$arr = array();
 	for ($i=0; $i<count($allSubjects) && $results[10]>=6 || $i<count($allSubjects)-1 && $results[10]<6; $i++) {
 		if (array_key_exists($allSubjects[$i],$classGrades)) {
-			$studentPercent = floor(0.5+100*$results[$i+3]/$maxMarks);
-			$classPercent = floor(0.5+100*$classGrades[$allSubjects[$i]]['Avg']/$maxMarks);
+			if ($i==0) $max = $kannadaMaxMarks;
+			else $max = $maxMarks;
+			$studentPercent = floor(0.5+100*$results[$i+3]/$max);
+			$classPercent = floor(0.5+100*$classGrades[$allSubjects[$i]]['Avg']/$max);
 			array_push($arr, array($allSubjects[$i],$studentPercent,$classPercent));
 		}
 	}
@@ -2815,7 +2895,7 @@ studentTimePerf { font: 11px sans-serif; }
 	echo "<div class=graphTitle><h3>Student's Performance Over Time [<a href='index.php/grades/view-grades?studentId=$studentId'>Details</a>]</h3></div>";
 	// Limit to recent 6 tests, consider only those where at least one subject has recorded marks
 	// TODO For a particular subject, all grades are missing
-	$results = getTableData("#__gradesform","CONCAT(year,'/',examType),kannadaMarks,englishMarks,hindiMarks,mathMarks,generalScienceMarks,socialStudiesMarks,computerScience","studentId='$studentId' AND (kannadaMarks+englishMarks+hindiMarks+mathMarks+generalScienceMarks+socialStudiesMarks+computerScience)>0 ORDER BY year DESC, FIELD(examType,$examOptStr) LIMIT 6");
+	$results = getTableData("#__gradesform","CONCAT(year,'/',examType),kannadaMarks,englishMarks,hindiMarks,mathMarks,generalScienceMarks,socialStudiesMarks,computerScience,#__gradesform.class","studentId='$studentId' AND (kannadaMarks+englishMarks+hindiMarks+mathMarks+generalScienceMarks+socialStudiesMarks+computerScience)>0 ORDER BY year DESC, FIELD(examType,$examOptStr) LIMIT 6");
 	$arr = array();
 	$compSciPresent = 0;
 	for ($i=count($results)-1; $i>=0; $i--) {
@@ -2823,12 +2903,15 @@ studentTimePerf { font: 11px sans-serif; }
 	}
 	for ($i=count($results)-1, $j=0; $i>=0; $i--, $j++) {
 		$maxMarks = preg_replace("/.*\((\d+) marks.*/","$1",$results[$i][0]);
+		$kannadaMaxMarks = getKannadaMaxMarks($results[$i][8], $results[$i][0]);
 		$arr[$j][0] = preg_replace("/ \(.*/","",$results[$i][0]);
 		$arr[$j][0] = preg_replace("/Test (\d)/","Test$1",$arr[$j][0]);
 		$arr[$j][0] = preg_replace("/ Exam/","",$arr[$j][0]);
 		for ($k=$l=1; $compSciPresent && $k<count($results[$i]) || $compSciPresent==0 && $k<count($results[$i])-1; $k++) {
 			if ($results[$i][$k]>0) {
-				$arr[$j][$l] = floor(0.5+100*$results[$i][$k]/$maxMarks);
+				if ($k==1) $max = $kannadaMaxMarks;
+				else $max = $maxMarks;
+				$arr[$j][$l] = floor(0.5+100*$results[$i][$k]/$max);
 				$l++;
 			}
 		}
