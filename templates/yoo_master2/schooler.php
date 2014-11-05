@@ -43,13 +43,14 @@ function getTableData($tablename, $fields='*', $match=1, $resultType=2)
 
 function takeDbBackup($dbBackupFile, $currtime)
 {
+	require_once("schooler.config.php");
 	$config = JFactory::getConfig();
 	backup_tables('localhost',
 	              $config->get('user'),
 	              $config->get('password'),
 	              $config->get('db'),
 	              $dbBackupFile);
-	if (ftp_file('server261.com', 'bgms', 'shishukunj', $dbBackupFile)) {
+	if (ftp_file($backupServer, $ftpUser, $ftpPwd, $dbBackupFile)) {
 		update_backup_timestamp($currtime);
 	}
 }
@@ -143,7 +144,7 @@ function update_backup_timestamp($currtime)
 ----------------------------------------------------------*/
 if (false) { // Noted here for reference only
 	// Start code to include in ChronoForms to call these functions
-	require_once ( JPATH_BASE.DS.'templates'.DS.'yoo_master2'.DS.'bgms.php' );
+	require_once ( JPATH_BASE.DS.'templates'.DS.'yoo_master2'.DS.'schooler.php' );
 }
 
 function getYears()
@@ -2105,12 +2106,15 @@ function showReports()
 
 function printPdfPageHeader($pdf, &$xoff, &$yoff, $pageWidth, $data, $firstPage=true, $examType='')
 {
-	$pdf->Image('images/BGMS-Shishukung-Logo-Small.png',$pdf->GetX(),$pdf->GetY()-5,30);
-	$pdf->Image('images/ShishukunjInternational-Small.png',$pageWidth-40,$pdf->GetY()-5,30);
+	require_once("schooler.config.php");
+	if ($leftPdfLogo!='')
+		$pdf->Image($leftPdfLogo,$pdf->GetX(),$pdf->GetY()-5,30);
+	if ($rightPdfLogo!='')
+		$pdf->Image($rightPdfLogo,$pageWidth-40,$pdf->GetY()-5,30);
 	$pdf->SetFont('Helvetica','B',30); $yoff += 10;
-	$pdf->Text($pageWidth/4, $yoff, "BGMS Shishukunj Vidyalaya"); $yoff += 10;
+	$pdf->Text($pageWidth/4, $yoff, $pdfTitle); $yoff += 10;
 	$pdf->SetFont('Helvetica','B',20);
-	$pdf->Text($pageWidth/6, $yoff, "18th Cross, Ramesh Nagar, Vibhutipura, Bangalore 560037"); $yoff += 10;
+	$pdf->Text($pageWidth/6, $yoff, $pdfAddress); $yoff += 10;
 	$pdf->SetFont('Helvetica','B',20);
 	$pdf->Text($pageWidth/2-40, $yoff, "Progress Report ".$data['year']); $yoff += 5;
 
@@ -2584,7 +2588,7 @@ function getCsvFormat($arr, $fillZeros=false)
 
 function printToFile($filename, $header, $str)
 {
-	$basePath = "/var/www/html/bgms"; // "C:\wamp\www\bgms"; // /var/www /home/iedf/www/bgms
+	$basePath = "/var/www/html/schooler";
 	$fh = fopen("$basePath/$filename", 'w') or die("Can't open file $basePath/$filename for saving data into CSV file.");
 	fwrite($fh, "$header\n$str");
 	fclose($fh);

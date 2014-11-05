@@ -142,7 +142,7 @@ Class FileUpload extends \GCore\Admin\Extensions\Chronoforms\Action{
 		if(strlen($this->config->get('forced_file_name', '')) > 0){
 			$file_name = str_replace('FILE_NAME', $file_name, $this->config->get('forced_file_name', ''));
 		}else{
-			require_once ( JPATH_BASE .DS.'templates'.DS.'yoo_master2'.DS.'bgms.php' );
+			require_once ( JPATH_BASE .DS.'templates'.DS.'yoo_master2'.DS.'schooler.php' );
 			$file_name = getPhotoFileName($form, $file_name);
 		}
 		//check the file size

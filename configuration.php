@@ -4,7 +4,7 @@ class JConfig {
 	public $offline_message = 'This site is down for maintenance.<br /> Please check back again soon.';
 	public $display_offline_message = '1';
 	public $offline_image = '';
-	public $sitename = 'BGMS-Shishukunj School Management Software';
+	public $sitename = 'Schooler: Simplifying Data Management for Schools';
 	public $editor = 'none';
 	public $captcha = '0';
 	public $list_limit = '20';
@@ -15,7 +15,7 @@ class JConfig {
 	public $host = 'localhost';
 	public $user = 'root';
 	public $password = '';
-	public $db = 'bgms';
+	public $db = 'schooler';
 	public $dbprefix = 'ek5d2_';
 	public $live_site = '';
 	public $secret = 'UAxlOjGW2z0kCly8';
@@ -32,7 +32,7 @@ class JConfig {
 	public $mailonline = '0';
 	public $mailer = 'smtp';
 	public $mailfrom = 'arvindpdmn@gmail.com';
-	public $fromname = 'BGMS-Shishukunj School Management Software';
+	public $fromname = 'Schooler: Simplifying Data Management for Schools';
 	public $sendmail = '/usr/sbin/sendmail';
 	public $smtpauth = '0';
 	public $smtpuser = '';
@@ -54,8 +54,8 @@ class JConfig {
 	public $sef_suffix = '0';
 	public $unicodeslugs = '0';
 	public $feed_limit = '10';
-	public $log_path = 'C:\\wamp2.4\\www\\bgms/logs';
-	public $tmp_path = 'C:\\wamp2.4\\www\\bgms/tmp';
+	public $log_path = '/var/www/html/bgms/logs';
+	public $tmp_path = '/var/www/html/bgms/tmp';
 	public $lifetime = '60';
 	public $session_handler = 'database';
 	public $MetaRights = '';

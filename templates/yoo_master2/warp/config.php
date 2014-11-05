@@ -38,6 +38,6 @@ return array(
         'subnav' => 'Warp\Menu\Subnav'
     ),
 
-    'branding' => '' //'Powered by <a href="http://www.yootheme.com">Warp Theme Framework</a>'
+    'branding' => '&copy; 2014. <a href="http://iedf.in">Indian Engineering Design Forum</a>.'
 
 );
