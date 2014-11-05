@@ -1,16 +1,80 @@
-# README #
+# Overview #
 
-## Overview ##
+*Schooler* is an open-source software that simplifies data management for schools. Data includes information on students and their assessment grades. *Schooler* has graphing capability by which basic data analytics is possible. It is possible to export the grades as PDF reports. Software is implemented as a web application.
 
-Schooler is an open-source software that simplies data management for schools. Data includes information on students and their assessment grades. Schooler has graphing capability by which basic data analytics is possible. It is possible to export the grades as PDF reports.
+# Installation #
+## Ubuntu ##
+* On Ubuntu, a web server is available by default at `/var/www`.
+* [Download Schooler](https://bitbucket.org/arvindpdmn/schooler/downloads)  as a zip file and unpack the contents into `/var/www/html/schooler`. For the rest of this guide, files and folders are w.r.t. `/var/www/html/schooler`.
+* Configure access to MySQL DB by editing these lines in file `configuration.php` (change `root` to username applicable to your MySQL server and supply the password):
+```
+	public $user = 'root';
+	public $password = '';
+```
+* Import DB by running the following command (change `root` to username applicable to your MySQL server):
+```
+	mysql -u root < schooler.sql
+```
+* Grant write permissions to all users to specific folders as noted below:
+```
+	chmod -R a+w cache/ tmp/ logs/
+	chmod -R a+w components/com_chronoforms5/chronoforms/uploads/studentForm/
+```
+* That's it! You may now access *Schooler* from any web browser by entering the URL `http://localhost/schooler`. To access the application by any other name of your choice, you may rename `schooler` sub-folder.
 
-## Installation ##
+## Windows ##
+* To run this software, a web server must be running. [WampServer](www.wampserver.com/en/) is recommended as the web server. Install this first. For the rest of this guide, we assume that WampServer is installed at `c:\wamp`
+* [Download Schooler](https://bitbucket.org/arvindpdmn/schooler/downloads)  as a zip file and unpack the contents into `c:\wamp\www\schooler`. For the rest of this guide, files and folders are w.r.t. `c:\wamp\www\schooler`.
+* Edit the file `configuration.php` as follows (change `root` to username applicable to your MySQL server and supply the password):
+```
+	public $user = 'root';
+	public $password = '';
+	public $log_path = 'c:\\wamp\\www\\schooler\\logs';
+	public $log_path = 'c:\\wamp\\www\\schooler\\tmp';
+```
+* Import DB from file `schooler.sql` into your MySQL.
+* Edit the file `templates\yoo_master2\schooler.php` as follows:
+```
+	$basePath = "c:\\wamp\\www\\schooler";
+```
+* Grant write permissions to all users to specific folders noted below:
+```
+cache
+tmp
+logs
+components\com_chronoforms5\chronoforms\uploads\studentForm
+```
+* That's it! You may now access *Schooler* from any web browser by entering the URL as `http://localhost/schooler`. To access the application by any other name of your choice, you may rename `schooler` sub-folder.
 
-### Data Backup ###
+# Joomla! Admin Password #
+Administrator can access the Joomla! administrator interface at `http://localhost/schooler/administrator` with username `webadmin` and password `admin123`.
 
-### Creating User Accounts ###
+# Creating User Accounts #
+* From Joomla! administrator interface, go to `[Users . User Manager . Add New User]`. Enter relevant details in tab `Account Details` (Figure 1). Choose a non-obvious password for each account to keep the system secure.![fig1.png](https://bitbucket.org/repo/pMzyyE/images/3234526951-fig1.png)
+* Go to tab `Assigned User Groups` (Figure 2). By default, `Registered` item will be checked. Do not change this. When creating accounts for teachers, also check particular classes to which the teacher are allowed to enter and modify data.![fig2.png](https://bitbucket.org/repo/pMzyyE/images/3953217511-fig2.png)
 
-## Developer Notes ##
+# App Configuration #
+* App can be configured by editing the file `templates/yoo_master2/schooler.config.php`.
+* To change the header image appearing on every web page, you can replace the file `images/header.png` with any other image of your choice. The name of the image should be the same. For best results, it should be of dimensions 930 x 172 pixels.
 
-### Technologies ###
+# Data Backup #
+* Backup procedure has been written in files `templates/yoo_master2/warp.php` and `templates/yoo_master2/schooler.php`. However, this backup functionality is not used since initial access can be very slow and frustrate the user. Backup code has been commented.
+* On Ubuntu, a simple script can be written and installed as a cron job to take regular backups. This is left to the administrator.
+* On Windows, it is recommended to take backup using a third-party free tool named [MySQLBackupFTP](http://mysqlbackupftp.com). FTP login and password can be configured in `c:\wamp\bin\mysql\mysql{version-number}\.my.cnf` where {version-number} will correspond to your installation.
+* No backup is taken of the code. Only data is backed up.
 
+# Developer Notes #
+* DB is named `schooler`.
+* DB structure without application data is found at `schooler.sql`.
+* Test data can be generated by running Python script `genTestData.py`. Generated file `testData.sql` can then be imported into the DB using phpMyAdmin. Do not do this on a live site since this will overwrite application data.
+* Most of the customized code is in `templates/yoo_master2/schooler.php`.
+* In Joomla! administrator interface, you may be prompted to upgrade Joomla! installation. Do not perform this upgrade since this will overwrite all code changes done on top of Joomla!.
+* Currently, the system has defined two academic years: '2014-15', '2013-14'. In future, this will need to be updated. Please update `getYears()` function in `templates/yoo_master2/schooler.php`. Also update, form definition within Joomla! administrator interface by accessing the menu `[Components.ChronoForms5]` and updating `gradesForm`. In the  form, go to `Designer` tab and edit the `Year` field.
+* To promote all students to the next higher class, access is restricted. Only the administrator can do this, since this is a critical update that will modify all student data.
+* Sponsor data is disabled in all browser access. Students who have completed Class X are named as `Graduates`. However, graduates are not shown in browser views. Sponsors and graduates can be enabled, if required.
+
+# Technologies #
+* Joomla! is used as the content management system (CMS) for this web application. Version used is 3.2.3.
+* Joomla! template used is Master2 from YOOThemes.
+* Main data entered into the system fall into three types: student data, grades data, sponsor data. For each data entry, there is a corresponding input form. Free third-party component named Chronoforms, version 5, RC5, has been used for form creation, processing data and saving it to the database.
+* Server-side programming is in PHP. Database used in MySQL. App has been tested on Apache server.
