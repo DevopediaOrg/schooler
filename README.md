@@ -1,6 +1,6 @@
 # Overview #
 
-*Schooler* is an open-source software that simplifies data management for schools. Data includes information on students and their assessment grades. *Schooler* has graphing capability by which basic data analytics is possible. It is possible to export the grades as PDF reports. Software is implemented as a web application.
+*Schooler* is an open-source software that simplifies data management for schools. Data includes information on students and their assessment grades. *Schooler* has graphing capability by which basic data analytics is possible. It is possible to export the grades as PDF reports. Software is implemented as a web application.![schoolerScreenshot.png](https://bitbucket.org/repo/pMzyyE/images/1792185879-schoolerScreenshot.png)
 
 # Installation #
 ## Ubuntu ##
