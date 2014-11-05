@@ -22,6 +22,7 @@ $pdfAddress = '';
 //=======================================================
 // MySQL Data Backup
 //-------------------------------------------------------
+// CAUTION: Currently commented out in templates/yoo_master2/warp.php
 // This should be a remote FTP server
 // No backup will be done if this is blank
 $backupServer = '';
