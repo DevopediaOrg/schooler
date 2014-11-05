@@ -47,7 +47,7 @@ components\com_chronoforms5\chronoforms\uploads\studentForm
 * That's it! You may now access *Schooler* from any web browser by entering the URL as `http://localhost/schooler`. To access the application by any other name of your choice, you may rename `schooler` sub-folder.
 
 # Joomla! Admin Password #
-Administrator can access the Joomla! administrator interface at `http://localhost/schooler/administrator` with username `webadmin` and password `admin123`.
+* Administrator can access the Joomla! administrator interface at `http://localhost/schooler/administrator` with username `webadmin` and password `admin123`.
 
 # Creating User Accounts #
 * From Joomla! administrator interface, go to `[Users . User Manager . Add New User]`. Enter relevant details in tab `Account Details` (Figure 1). Choose a non-obvious password for each account to keep the system secure.![fig1.png](https://bitbucket.org/repo/pMzyyE/images/3234526951-fig1.png)
@@ -78,3 +78,7 @@ Administrator can access the Joomla! administrator interface at `http://localhos
 * Joomla! template used is Master2 from YOOThemes.
 * Main data entered into the system fall into three types: student data, grades data, sponsor data. For each data entry, there is a corresponding input form. Free third-party component named Chronoforms, version 5, RC5, has been used for form creation, processing data and saving it to the database.
 * Server-side programming is in PHP. Database used in MySQL. App has been tested on Apache server.
+
+# Licensing #
+* Please refer to the file named `UNLICENSE` for details.
+
