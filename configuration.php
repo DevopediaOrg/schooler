@@ -54,8 +54,8 @@ class JConfig {
 	public $sef_suffix = '0';
 	public $unicodeslugs = '0';
 	public $feed_limit = '10';
-	public $log_path = '/var/www/html/bgms/logs';
-	public $tmp_path = '/var/www/html/bgms/tmp';
+	public $log_path = '/var/www/html/schooler/logs';
+	public $tmp_path = '/var/www/html/schooler/tmp';
 	public $lifetime = '60';
 	public $session_handler = 'database';
 	public $MetaRights = '';
