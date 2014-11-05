@@ -1247,7 +1247,7 @@ function updateExamType(savedExamType)
 	var examTypes50 = ['Test 1 (25 marks)','Test 2 (25 marks)','Midterm Exam (50 marks)','Test 3 (25 marks)','Test 4 (25 marks)','Final Exam (50 marks)'];
 	var examTypes100 = ['Test 1 (25 marks)','Test 2 (25 marks)','Midterm Exam (100 marks)','Test 3 (25 marks)','Test 4 (25 marks)','Final Exam (100 marks)'];
 	var examTypesClass10 = ['Test 1 (25 marks)','Test 2 (25 marks)','Midterm Exam (100 marks)','Test 3 (25 marks)','Test 4 (100 marks)','Final Exam (100 marks)'];
-	
+
 	classElem = document.getElementById('class');
 	examTypeElem = document.getElementById('examType');
 	if (typeof(savedExamType)==='undefined')
@@ -1292,11 +1292,11 @@ function validateMarks(subject)
 	classElem = document.getElementById('class');
 	elem = document.getElementById('examType');
 	var maxMarks;
-	if (parseInt(classElem.value)==10 && 
+	if (parseInt(classElem.value)==10 &&
 		elem.value.match(/(Midterm|Test 4|Final)/) &&
 		subject=='kannadaMarks')
 		maxMarks = 125;
-	else if (parseInt(classElem.value)==9 && 
+	else if (parseInt(classElem.value)==9 &&
 			elem.value.match(/(Final)/) &&
 			subject=='kannadaMarks')
 			maxMarks = 125;
@@ -1876,7 +1876,7 @@ function showGradesList()
 		$examType = getTableData("#__gradesform","examType","1 ORDER BY FIELD(examType,$examOptStr) LIMIT 1",0);
 		$examType = preg_replace('/\s+\(.*/','',$examType);
 	}
-	
+
 	echo "<table class=studentPageTitle><tr>";
 	echo "<td><h2>Viewing Grades</h2></td>";
 	echo "</tr></table>";
@@ -2199,7 +2199,7 @@ function saveToPdf($data, $path, $filename)
 				if ($i<=$numSubjects) $cell = array('grade'=>'','%'=>'','marks'=>'');
 				else $cell = '';
 			}
-			else if (preg_match('/(\d+ [A-Z][a-z][a-z])[a-z]*( \d\d\d\d)/',$data[$rows[$i]][$cols[$j]],$matches)) {
+			else if ($rows[$i]=='Date' && preg_match('/(\d+ [A-Z][a-z][a-z])[a-z]*( \d\d\d\d)/',$data[$rows[$i]][$cols[$j]],$matches)) {
 				// eg. 12 July 2014 -> 12 Jul 2014
 				$cell = $matches[1].$matches[2];
 			}
@@ -2243,7 +2243,7 @@ function saveToPdf($data, $path, $filename)
 	if ($showFootnote) {
 		$pdf->Text($pageWidth-50, $yoff+$rowHeight/2, "* Out of 125 marks");
 	}
-		
+
 	$pdf->Text(10, $pageHeight-10, "GRADE");
 	$pdf->Text($pageWidth/7, $pageHeight-10, "A+ >=90%");
 	$pdf->Text(2*$pageWidth/7, $pageHeight-10, "A 75-89%");
@@ -2255,7 +2255,7 @@ function saveToPdf($data, $path, $filename)
 	// Although part of page header, this is included last so that
 	// comes on top of table border
 	$pdf->Image(findPhoto($data['studentId']),$pageWidth-40,40,24);
-	
+
 	// Print skills if they are present
 	foreach ($data as $key=>$val) {
 		if ($key!='Skills') continue;
@@ -2785,7 +2785,7 @@ function reportTopStudents($currtime, $pathPrefix, $year, $examType)
 	*/
 
 	//SELECT ek5d2_gradesform.class,name,`group`,sex,(kannadaMarks+englishMarks+hindiMarks+mathMarks+generalScienceMarks+socialStudiesMarks+computerScience) AS total,kannadaMarks,englishMarks,hindiMarks,mathMarks,generalScienceMarks,socialStudiesMarks,computerScience,ek5d2_gradesform.id,studentId FROM ek5d2_studentform,ek5d2_gradesform  WHERE ek5d2_studentform.id=studentId AND year='2013-14' AND examType LIKE '%Final%' ORDER BY ek5d2_gradesform.class+0, total DESC;
-	
+
 	$results = getTableData("#__studentform,#__gradesform", "#__gradesform.class,name,`group`,sex,(kannadaMarks+englishMarks+hindiMarks+mathMarks+generalScienceMarks+socialStudiesMarks+computerScience) AS total,kannadaMarks,englishMarks,hindiMarks,mathMarks,generalScienceMarks,socialStudiesMarks,computerScience,#__gradesform.id,studentId", "#__studentform.id=studentId AND year='$year' AND examType LIKE '%$examType%' ORDER BY #__gradesform.class+0, total DESC");
 	$prevClass = -1; $rank = $males = $females = 0; $groupmap = array();
 	foreach ($results as $result) {
