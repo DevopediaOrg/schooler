@@ -23,7 +23,7 @@
 * That's it! You may now access *Schooler* from any web browser by entering the URL `http://localhost/schooler`. To access the application by any other name of your choice, you may rename `schooler` sub-folder.
 
 ## Windows ##
-* To run this software, a web server must be running. [WampServer](www.wampserver.com/en/) is recommended as the web server. Install this first. For the rest of this guide, we assume that WampServer is installed at `c:\wamp`
+* To run this software, a web server must be running. [WampServer](http://www.wampserver.com/en/) is recommended as the web server. Install this first. For the rest of this guide, we assume that WampServer is installed at `c:\wamp`
 * [Download Schooler](https://bitbucket.org/arvindpdmn/schooler/downloads)  as a zip file and unpack the contents into `c:\wamp\www\schooler`. For the rest of this guide, files and folders are w.r.t. `c:\wamp\www\schooler`.
 * Edit the file `configuration.php` as follows (change `root` to username applicable to your MySQL server and supply the password):
 ```
@@ -81,4 +81,3 @@ components\com_chronoforms5\chronoforms\uploads\studentForm
 
 # Licensing #
 * Please refer to the file named `UNLICENSE` for details.
-
