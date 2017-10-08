@@ -1,6 +1,7 @@
 # Overview #
 
-*Schooler* is an open-source software that simplifies data management for schools. Data includes information on students and their assessment grades. *Schooler* has graphing capability by which basic data analytics is possible. It is possible to export the grades as PDF reports. Software is implemented as a web application.![schoolerScreenshot.png](https://bitbucket.org/repo/pMzyyE/images/1792185879-schoolerScreenshot.png)
+*Schooler* is an open-source software that simplifies data management for schools. Data includes information on students and their assessment grades. *Schooler* has graphing capability by which basic data analytics is possible. It is possible to export the grades as PDF reports. Software is implemented as a web application.
+![homepage.jpg](images/screenshots/homepage.jpg)
 
 # Installation #
 ## Ubuntu ##
@@ -50,8 +51,10 @@ components\com_chronoforms5\chronoforms\uploads\studentForm
 * Administrator can access the Joomla! administrator interface at `http://localhost/schooler/administrator` with username `webadmin` and password `admin123`.
 
 # Creating User Accounts #
-* From Joomla! administrator interface, go to `[Users . User Manager . Add New User]`. Enter relevant details in tab `Account Details` (Figure 1). Choose a non-obvious password for each account to keep the system secure.![fig1.png](https://bitbucket.org/repo/pMzyyE/images/3234526951-fig1.png)
-* Go to tab `Assigned User Groups` (Figure 2). By default, `Registered` item will be checked. Do not change this. When creating accounts for teachers, also check particular classes to which the teacher are allowed to enter and modify data.![fig2.png](https://bitbucket.org/repo/pMzyyE/images/3953217511-fig2.png)
+* From Joomla! administrator interface, go to `[Users . User Manager . Add New User]`. Enter relevant details in tab `Account Details`. Choose a non-obvious password for each account to keep the system secure.
+![addNewUser.jpg](images/screenshots/addNewUser.jpg)
+* Go to tab `Assigned User Groups`. By default, `Registered` item will be checked. Do not change this. When creating accounts for teachers, also check particular classes to which the teacher is allowed to enter and modify data.
+![assignUserGroup.jpg](images/screenshots/assignUserGroup.jpg)
 
 # App Configuration #
 * App can be configured by editing the file `templates/yoo_master2/schooler.config.php`.
